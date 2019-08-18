@@ -19,13 +19,13 @@
  *
  */
 
-#ifndef TCFXLIB_FILE_H
-#define TCFXLIB_FILE_H
+#ifndef TCFXLIB_FILE_HPP
+#define TCFXLIB_FILE_HPP
 #pragma once
 
 #include <cstring>
 
-#include "std.h"
+#include "std.hpp"
 
 /**
  * TCFX_AssFile structure
@@ -77,4 +77,4 @@ private:
     void process_file(const char *ass_file, const char *ass_header = nullptr);
 };
 
-#endif    /* TCFXLIB_FILE_H */
+#endif    /* TCFXLIB_FILE_HPP */

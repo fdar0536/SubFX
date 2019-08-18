@@ -19,7 +19,7 @@
  *
  */
 
-#include "pix.h"
+#include "pix.hpp"
 #include <algorithm>
 
 using namespace std;

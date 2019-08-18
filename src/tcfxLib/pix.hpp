@@ -19,12 +19,12 @@
  *
  */
 
-#ifndef TCFXLIB_PIX_H
-#define TCFXLIB_PIX_H
+#ifndef TCFXLIB_PIX_HPP
+#define TCFXLIB_PIX_HPP
 #pragma once
 
 #include <stdint.h>
-#include "std.h"
+#include "std.hpp"
 
 #define MATH_PI 3.14159265358979323846264338327950288
 
@@ -419,4 +419,4 @@ private:
     TCFX_pPix scale_filter_internal(const TCFX_pPix pPixSrc, double offset_x, double offset_y, TCFX_pPix pPixDst);
 };
 
-#endif    /* TCFXLIB_PIX_H */
+#endif    /* TCFXLIB_PIX_HPP */

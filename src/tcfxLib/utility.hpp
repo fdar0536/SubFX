@@ -19,12 +19,12 @@
  *
  */
 
-#ifndef TCFXLIB_UTILITY_H
-#define TCFXLIB_UTILITY_H
+#ifndef TCFXLIB_UTILITY_HPP
+#define TCFXLIB_UTILITY_HPP
 #pragma once
 
-#include "text.h"
-#include "pix.h"
+#include "text.hpp"
+#include "pix.hpp"
 
 /**
  * TCFX_String structure is an auto length increase string.
@@ -218,4 +218,4 @@ private:
 
 };
 
-#endif    /* TCFXLIB_UTILITY_H */
+#endif    /* TCFXLIB_UTILITY_HPP */

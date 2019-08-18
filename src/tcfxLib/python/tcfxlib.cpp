@@ -19,11 +19,11 @@
  *
  */
 
-#include "../file.h"
-#include "../pix.h"
-#include "../text.h"
-#include "../image.h"
-#include "../utility.h"
+#include "../file.hpp"
+#include "../pix.hpp"
+#include "../text.hpp"
+#include "../image.hpp"
+#include "../utility.hpp"
 
 const char *tcfxlib_get_version()
 {
@@ -43,7 +43,7 @@ BOOST_PYTHON_MODULE(tcfxLib)
     /*      python_function_name cpp_function_name                                 actual_python_function */
     py::def("tcfxLibGetVersion", tcfxlib_get_version);                             //tcfxLibGetVersion()
     
-    /* in pix.h */
+    /* in pix.hpp */
     py::class_<pix>("Pix")
     .def("PixPoints",            &pix::pix_points)                                 //PixPoints(PIX)
     .def("BlankPix",             &pix::create_blank_pix)                           //BlankPix(width, height, rgba)
@@ -70,7 +70,7 @@ BOOST_PYTHON_MODULE(tcfxLib)
     .def("ConvertBigPix",        &pix::convert_big_pix)                            //ConvertBigPix(BIG_PIX)
     ;
 
-    /* in file.h */
+    /* in file.hpp */
     py::class_<file>("File", py::init<const char *, py::optional<const char *>>()) //file(ass_file, ass_header)
     .def("WriteAssFile",         &file::write_ass_file)                            //WriteAssFile(ASS_BUF)
     .def("reset",                &file::reset, file_reset_overloads())             //reset(ass_file, ass_header)
@@ -78,7 +78,7 @@ BOOST_PYTHON_MODULE(tcfxLib)
     .def("isAppend",             &file::is_append)                                 //isAppend()
     ;
 
-    /* in text.h */
+    /* in text.hpp */
     py::class_<text>("Text", py::init<const char *,
                                       int,
                                       int,
@@ -96,13 +96,13 @@ BOOST_PYTHON_MODULE(tcfxLib)
     .def("isSuccess",            &text::is_success)                                 //isSuccess()
     ;
 
-    /* in image.h */
+    /* in image.hpp */
     py::class_<image>("Image") //image()
     .def("ImagePix",             &image::get_pix_from_image, ImagePix_overloads())  //ImagePix(filename, width = 0, height = 0)
     .def("SavePix",              &image::save_pix_to_image, SavePix_overloads())    //SavePix(filename, PIX, width = 0, height = 0)
     ;
 
-    /* in utility.h */
+    /* in utility.hpp */
     py::class_<utility>("Utility")
     .def("TextOutlineDraw",      &utility::get_text_outline_as_string)               //TextOutlineDraw(pyFont, text, x, y)
     .def("TextOutlineDraw",      &utility::get_text_outline_as_string_2)             //TextOutlineDraw(font_file, face_id, font_size, text, x, y)

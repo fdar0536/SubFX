@@ -19,15 +19,15 @@
  *
  */
 
-#ifndef TCFXLIB_TEXT_H
-#define TCFXLIB_TEXT_H
+#ifndef TCFXLIB_TEXT_HPP
+#define TCFXLIB_TEXT_HPP
 #pragma once
 
 #include <string>
 #include <cstdint>
 #include <cstdlib>
 #include "boost/locale.hpp"
-#include "pix.h"
+#include "pix.hpp"
 extern "C"
 {
 #include "freetype2/ft2build.h"
@@ -37,10 +37,6 @@ extern "C"
 #include "freetype2/freetype/ftimage.h"
 #include "freetype2/freetype/fttypes.h"
 };
-
-#ifdef _WIN32
-#pragma comment(lib, "../FreeType/freetype.lib")
-#endif
 
 #define FALSE 0
 #define TRUE 1
@@ -255,4 +251,4 @@ private:
 
 };
 
-#endif    /* TCFXLIB_TEXT_H */
+#endif    /* TCFXLIB_TEXT_HPP */

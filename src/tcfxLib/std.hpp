@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef TCFXLIB_STD_H
-#define TCFXLIB_STD_H
+#ifndef TCFXLIB_STD_HPP
+#define TCFXLIB_STD_HPP
 #pragma once
 
 #include "boost/python.hpp"
@@ -53,5 +53,5 @@ protected:
     bool success;
 };
 
-#endif    /* TCFXLIB_STD_H */
+#endif    /* TCFXLIB_STD_HPP */
 

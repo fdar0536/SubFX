@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <cwchar>
-#include "utility.h"
+#include "utility.hpp"
 
 using namespace std;
 

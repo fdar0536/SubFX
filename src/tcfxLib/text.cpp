@@ -20,7 +20,7 @@
  */
 
 #include <algorithm>
-#include "text.h"
+#include "text.hpp"
 
 using namespace std;
 

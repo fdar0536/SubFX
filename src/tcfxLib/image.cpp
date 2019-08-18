@@ -23,7 +23,7 @@
 #pragma warning(disable: 4996)
 #endif    /* _MSC_VER */
 
-#include "image.h"
+#include "image.hpp"
 
 TCFX_PyPix image::get_pix_from_image(const char *filename, int dst_width, int dst_height)
 {

@@ -19,20 +19,15 @@
  *
  */
 
-#ifndef TCFXLIB_IMAGE_H
-#define TCFXLIB_IMAGE_H
+#ifndef TCFXLIB_IMAGE_HPP
+#define TCFXLIB_IMAGE_HPP
 #pragma once
 
-#include "pix.h"
+#include "pix.hpp"
 extern "C"
 {
 #include "png.h"
 }
-
-#ifdef _WIN32
-#pragma comment(lib, "../libpng/zlib.lib")
-#pragma comment(lib, "../libpng/libpng.lib")
-#endif
 
 #define PNG_SIG_BYTES 8
 
@@ -67,4 +62,4 @@ private:
     pix Pix;
 };
 
-#endif    /* TCFXLIB_IMAGE_H */
+#endif    /* TCFXLIB_IMAGE_HPP */
