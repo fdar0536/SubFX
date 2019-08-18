@@ -1,14 +1,14 @@
 add_library(tcfxLib SHARED
-        std.h
-        pix.h
+        std.hpp
+        pix.hpp
         pix.cpp
-        file.h
+        file.hpp
         file.cpp
-        text.h
+        text.hpp
         text.cpp
-        image.h
+        image.hpp
         image.cpp
-        utility.h
+        utility.hpp
         utility.cpp
         python/tcfxlib.cpp)
 
