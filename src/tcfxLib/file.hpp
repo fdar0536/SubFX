@@ -27,13 +27,6 @@
 
 #include "std.hpp"
 
-/**
- * TCFX_AssFile structure
- */
-typedef struct _tcfx_ass_file {
-    FILE *fp;
-} TCFX_AssFile, *TCFX_pAssFile;
-
 class file : public common
 {
 public:
@@ -70,7 +63,7 @@ protected:
 
 private:
 
-    TCFX_pAssFile pAssFile;
+    FILE *pAssFile;
 
     bool append;
 

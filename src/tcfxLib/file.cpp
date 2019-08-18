@@ -26,7 +26,6 @@
 #endif    /* _MSC_VER */
 
 file::file(const char *ass_file, const char *ass_header) :
-    pAssFile(new TCFX_AssFile),
     append(false)
 {
     common();
@@ -35,9 +34,7 @@ file::file(const char *ass_file, const char *ass_header) :
 
 file::~file()
 {
-    fclose(pAssFile->fp);
-    delete pAssFile;
-    pAssFile = nullptr;
+    fclose(pAssFile);
 }
 
 //WriteAssFile(pyAssFile, ASS_BUF)
@@ -58,18 +55,15 @@ bool file::write_ass_file(py::list &ASS_BUF)
     }
 
     convert_ass_list_to_string(ASS_BUF, &assString, &size);
-    fwrite(assString, sizeof(char), size, pAssFile->fp);
+    fwrite(assString, sizeof(char), size, pAssFile);
     delete[] assString;
     return true;
 }
 
 void file::reset(const char *ass_file, const char *ass_header)
 {
-    fclose(pAssFile->fp);
-    delete pAssFile;
-    pAssFile = nullptr;
+    fclose(pAssFile);
 
-    pAssFile = new TCFX_AssFile;
     success = false;
     append = false;
 
@@ -136,17 +130,15 @@ void file::process_file(const char *ass_file, const char *ass_header)
 {
     if (ass_header != nullptr)
     {
-        pAssFile->fp = fopen(ass_file, "wb");
-        if (!pAssFile->fp)
+        pAssFile = fopen(ass_file, "wb");
+        if (!pAssFile)
         {
-            delete pAssFile;
-            pAssFile = nullptr;
             success = false;
             PyErr_SetString(PyExc_RuntimeError, "CreateAssFile error, failed to create the file!\n");
         }
         else
         {
-            fwrite(ass_header, sizeof(char), strlen(ass_header), pAssFile->fp);
+            fwrite(ass_header, sizeof(char), strlen(ass_header), pAssFile);
             success = true;
         }
     }
@@ -155,17 +147,13 @@ void file::process_file(const char *ass_file, const char *ass_header)
         if (!check_if_file_exists(ass_file))
         {
             PyErr_SetString(PyExc_RuntimeError, "AppendAssFile error, failed to open the file!\n");
-            delete pAssFile;
-            pAssFile = nullptr;
             success = false;
         }
         else
         {
-            pAssFile->fp = fopen(ass_file, "ab");
-            if (!pAssFile->fp)
+            pAssFile = fopen(ass_file, "ab");
+            if (!pAssFile)
             {
-                delete pAssFile;
-                pAssFile = nullptr;
                 success = false;
                 PyErr_SetString(PyExc_RuntimeError, "AppendAssFile error, failed to open the file!\n");
             }
