@@ -16,4 +16,4 @@ Now is under development.
 
 ## Licence
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html), like the original [TCAX](https://github.com/milkyjing/TCAX).
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
