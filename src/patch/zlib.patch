@@ -1,0 +1,154 @@
+diff -Naur a/adler32.c b/adler32.c
+--- a/adler32.c
++++ b/adler32.c
+@@ -7,6 +7,10 @@
+ 
+ #include "zutil.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ local uLong adler32_combine_ OF((uLong adler1, uLong adler2, z_off64_t len2));
+ 
+ #define BASE 65521U     /* largest prime smaller than 65536 */
+diff -Naur a/compress.c b/compress.c
+--- a/compress.c
++++ b/compress.c
+@@ -8,6 +8,10 @@
+ #define ZLIB_INTERNAL
+ #include "zlib.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ /* ===========================================================================
+      Compresses the source buffer into the destination buffer. The level
+    parameter has the same meaning as in deflateInit.  sourceLen is the byte
+diff -Naur a/crc32.c b/crc32.c
+--- a/crc32.c
++++ b/crc32.c
+@@ -30,6 +30,10 @@
+ 
+ #include "zutil.h"      /* for STDC and FAR definitions */
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ /* Definitions for doing the crc four data bytes at a time. */
+ #if !defined(NOBYFOUR) && defined(Z_U4)
+ #  define BYFOUR
+diff -Naur a/deflate.c b/deflate.c
+--- a/deflate.c
++++ b/deflate.c
+@@ -51,6 +51,10 @@
+ 
+ #include "deflate.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ const char deflate_copyright[] =
+    " deflate 1.2.11 Copyright 1995-2017 Jean-loup Gailly and Mark Adler ";
+ /*
+diff -Naur a/infback.c b/infback.c
+--- a/infback.c
++++ b/infback.c
+@@ -15,6 +15,10 @@
+ #include "inflate.h"
+ #include "inffast.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ /* function prototypes */
+ local void fixedtables OF((struct inflate_state FAR *state));
+ 
+diff -Naur a/inffast.c b/inffast.c
+--- a/inffast.c
++++ b/inffast.c
+@@ -8,6 +8,10 @@
+ #include "inflate.h"
+ #include "inffast.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ #ifdef ASMINF
+ #  pragma message("Assembler code may have bugs -- use at your own risk")
+ #else
+diff -Naur a/inflate.c b/inflate.c
+--- a/inflate.c
++++ b/inflate.c
+@@ -85,6 +85,10 @@
+ #include "inflate.h"
+ #include "inffast.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ #ifdef MAKEFIXED
+ #  ifndef BUILDFIXED
+ #    define BUILDFIXED
+diff -Naur a/inftrees.c b/inftrees.c
+--- a/inftrees.c
++++ b/inftrees.c
+@@ -6,6 +6,10 @@
+ #include "zutil.h"
+ #include "inftrees.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ #define MAXBITS 15
+ 
+ const char inflate_copyright[] =
+diff -Naur a/trees.c b/trees.c
+--- a/trees.c
++++ b/trees.c
+@@ -40,6 +40,10 @@
+ #  include <ctype.h>
+ #endif
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ /* ===========================================================================
+  * Constants
+  */
+diff -Naur a/uncompr.c b/uncompr.c
+--- a/uncompr.c
++++ b/uncompr.c
+@@ -8,6 +8,10 @@
+ #define ZLIB_INTERNAL
+ #include "zlib.h"
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ /* ===========================================================================
+      Decompresses the source buffer into the destination buffer.  *sourceLen is
+    the byte length of the source buffer. Upon entry, *destLen is the total size
+diff -Naur a/zutil.c b/zutil.c
+--- a/zutil.c
++++ b/zutil.c
+@@ -10,6 +10,10 @@
+ #  include "gzguts.h"
+ #endif
+ 
++#ifdef _MSC_VER
++#pragma warning(disable: 5045)
++#endif    /* _MSC_VER */
++
+ z_const char * const z_errmsg[10] = {
+     (z_const char *)"need dictionary",     /* Z_NEED_DICT       2  */
+     (z_const char *)"stream end",          /* Z_STREAM_END      1  */
