@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  *  Copyright (C) 2009-2011 milkyjing <milkyjing@gmail.com>
  *                2019 fdar0536
  *
