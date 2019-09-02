@@ -170,11 +170,6 @@ FontHandle::FontHandle(string& family, bool bold, bool italic, bool underline,
 
     fonthack_scale = size / ((ascent + descent) / (double)PANGO_SCALE * downscale);
     
-    /* for reference
-    pango_font_metrics_unref (metrics);
-    pango_attr_list_unref(attr);
-    pango_font_description_free(font_desc);
-    */
     pango_font_metrics_unref(metrics);
     pango_attr_list_unref(attr);
     pango_font_description_free(font_desc);
