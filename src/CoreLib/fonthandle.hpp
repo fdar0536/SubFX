@@ -41,9 +41,9 @@ private:
 
     HFONT font;
     
-	HGDIOBJ old_font;
+    HGDIOBJ old_font;
 
-	int hspace;
+    int hspace;
 
     int upscale;
 #else
