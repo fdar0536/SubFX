@@ -206,7 +206,7 @@ void AssParser::parseLine(string &line)
                     style->fontname = match[2];
                     style->fontsize = lexical_cast<int>(match[3]);
 
-                    // match[4~7] is not here
+                    // match[4~7] are not here
 
                     // boost will throw error when the number is negative.
                     string tmpString = match[8];
