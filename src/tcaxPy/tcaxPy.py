@@ -1,212 +1,34 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+
 
 ########################################## Declaration ######################################################
 
 # Declaration:
-# Copyright (c) 2008 - 2012 milkyjing (milkyjing@gmail.com).
-# All rights reserved.
+# tcaxPy.pyc's source code
+# Copyright (c) 2008 - 2012 milkyjing (milkyjing@gmail.com). All rights reserved.
+# Please visit tcax.rhacg.com to get the latest information
+# Version: ver0.7.3.5 build20100109
+# Revision: ver0.7.5.0 build20100912
+# Revision: ver0.7.8.1 build20110703
+# Revision: ver0.7.9.0 build20110721
+# Revision: ver0.7.9.2 build20110812
+# Revision: ver0.7.9.3 build20110813
+# Revision: ver0.7.9.8 build20110901
+# Revision: ver0.7.9.9 build20111222
+# Revision: ver0.8.0.0 build20120722
 
 ######################################### Modules ###########################################################
 
 from math    import *
 from random  import *
-from tcfxLib import *
+from tcaxLib import *
 import sys
 
 ######################################### Global Constant ###################################################
 
-tcfxPy_Version       = '0.1.0.0'
+tcaxPy_Version       = '0.8.0.0'
 
-Main_Style           = 'TCMS'	# 主Style名称 SubL函数默认使用的Style
-Pix_Style            = 'TCPS'	# 粒子特效的Style名称
-
-val_AssHeader        = 0	# Ass文件头部信息 用于tcfxPy_User函数
-val_OutFile          = 1	# 输出的文件名 不含拓展名 用于tcfxPy_User函数
-
-# tcc info
-val_FontFileName     = 2	# 特效使用的字体
-val_FaceID           = 3	# 字体名称ID
-val_FontSize         = 4	# 字体大小
-val_ResolutionX      = 5	# 水平分辨率
-val_ResolutionY      = 6	# 垂直分辨率
-val_FXFPS            = 7	# 特效的帧率
-val_Alignment        = 8	# 对齐方式
-val_OffsetX          = 9	# 水平偏移量
-val_OffsetY          = 10	# 垂直偏移量
-val_Spacing          = 11	# 字体间距
-val_SpaceScale       = 12	# 空格跨度百分比
-val_FontFaceName     = 13	# 特效使用的字体Face名
-val_Bord             = 14	# 字体边框厚度
-val_Shad             = 15	# 字体阴影宽度
-val_1C               = 16	# 字体主颜色
-val_2C               = 17	# 字体辅助颜色
-val_3C               = 18	# 字体边框颜色
-val_4C               = 19	# 字体阴影颜色
-val_1A               = 20	# 字体主透明度
-val_2A               = 21	# 字体辅助透明度
-val_3A               = 22	# 字体边框透明度
-val_4A               = 23	# 字体阴影透明度
-val_Blur             = 24	# 模糊值
-
-# syl info
-val_nLines           = 25	# SYL文件的卡拉OK歌词句子总数
-val_SylLine          = 26	# 第i句卡拉OK歌词
-val_BegTime          = 27	# 第i句卡拉OK歌词的起始时间
-val_EndTime          = 28	# 第i句卡拉OK歌词的结束时间
-val_nTexts           = 29	# 第i句卡拉OK歌词包含的字符数
-val_KarTime          = 30	# 第i句卡拉OK歌词的第j个字符的Karaoke时间
-val_KarTimeDiff      = 31	# 到第i句卡拉OK歌词的第j个字符之前的Karaoke时间总和
-val_Text             = 32	# 第i句卡拉OK歌词的第j个字符
-
-# tm info (horizontal)
-val_Ascender         = 33	# 字体上行高度
-val_Descender        = 34	# 字体下行高度 通常为负数
-val_TextWidth        = 35	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeight       = 36	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerning      = 37	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0
-val_TextAdvance      = 38	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiff  = 39	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLength       = 40	# 第i句卡拉OK歌词的文字总长度
-val_TextInitX        = 41	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitY        = 42	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingY     = 43	# 第i句卡拉OK歌词的j个字符的Y轴bearing
-
-# tm info horizontal
-val_TextWidthH       = 35	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeightH      = 36	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerningH     = 37	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0
-val_TextAdvanceH     = 38	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiffH = 39	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLengthH      = 40	# 第i句卡拉OK歌词的文字总长度
-val_TextInitXH       = 41	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitYH       = 42	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingYH    = 43	# 第i句卡拉OK歌词的j个字符的Y轴bearing
-
-# tm info vertical
-val_TextWidthV       = 44	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeightV      = 45	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerningV     = 46	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0 (暂时不支持vertical版本的kerning，其值全部为0)
-val_TextAdvanceV     = 47	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiffV = 48	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLengthV      = 49	# 第i句卡拉OK歌词的文字总长度
-val_TextInitXV       = 50	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitYV       = 51	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingXV    = 52	# 第i句卡拉OK歌词的j个字符的X轴bearing
-
-######################################### Data Management Function ##########################################
-
-def GetValueIDsInfo():
-    val_info = '''
-
-tcfxPy_Version       = '0.8.0.0'
-
-Main_Style           = 'TCMS'	# 主Style名称 SubL函数默认使用的Style
-Pix_Style            = 'TCPS'	# 粒子特效的Style名称
-
-val_AssHeader        = 0	# Ass文件头部信息 用于tcfxPy_User函数
-val_OutFile          = 1	# 输出的文件名 不含拓展名 用于tcfxPy_User函数
-
-# tcc info
-val_FontFileName     = 2	# 特效使用的字体
-val_FaceID           = 3	# 字体名称ID
-val_FontSize         = 4	# 字体大小
-val_ResolutionX      = 5	# 水平分辨率
-val_ResolutionY      = 6	# 垂直分辨率
-val_FXFPS            = 7	# 特效的帧率
-val_Alignment        = 8	# 对齐方式
-val_OffsetX          = 9	# 水平偏移量
-val_OffsetY          = 10	# 垂直偏移量
-val_Spacing          = 11	# 字体间距
-val_SpaceScale       = 12	# 空格跨度百分比
-val_FontFaceName     = 13	# 特效使用的字体Face名
-val_Bord             = 14	# 字体边框厚度
-val_Shad             = 15	# 字体阴影宽度
-val_1C               = 16	# 字体主颜色
-val_2C               = 17	# 字体辅助颜色
-val_3C               = 18	# 字体边框颜色
-val_4C               = 19	# 字体阴影颜色
-val_1A               = 20	# 字体主透明度
-val_2A               = 21	# 字体辅助透明度
-val_3A               = 22	# 字体边框透明度
-val_4A               = 23	# 字体阴影透明度
-val_Blur             = 24	# 模糊值
-
-# syl info
-val_nLines           = 25	# SYL文件的卡拉OK歌词句子总数
-val_SylLine          = 26	# 第i句卡拉OK歌词
-val_BegTime          = 27	# 第i句卡拉OK歌词的起始时间
-val_EndTime          = 28	# 第i句卡拉OK歌词的结束时间
-val_nTexts           = 29	# 第i句卡拉OK歌词包含的字符数
-val_KarTime          = 30	# 第i句卡拉OK歌词的第j个字符的Karaoke时间
-val_KarTimeDiff      = 31	# 到第i句卡拉OK歌词的第j个字符之前的Karaoke时间总和
-val_Text             = 32	# 第i句卡拉OK歌词的第j个字符
-
-# tm info (horizontal)
-val_Ascender         = 33	# 字体上行高度
-val_Descender        = 34	# 字体下行高度 通常为负数
-val_TextWidth        = 35	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeight       = 36	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerning      = 37	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0
-val_TextAdvance      = 38	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiff  = 39	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLength       = 40	# 第i句卡拉OK歌词的文字总长度
-val_TextInitX        = 41	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitY        = 42	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingY     = 43	# 第i句卡拉OK歌词的j个字符的Y轴bearing
-
-# tm info horizontal
-val_TextWidthH       = 35	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeightH      = 36	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerningH     = 37	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0
-val_TextAdvanceH     = 38	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiffH = 39	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLengthH      = 40	# 第i句卡拉OK歌词的文字总长度
-val_TextInitXH       = 41	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitYH       = 42	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingYH    = 43	# 第i句卡拉OK歌词的j个字符的Y轴bearing
-
-# tm info vertical
-val_TextWidthV       = 44	# 第i句卡拉OK歌词的j个字符的宽度
-val_TextHeightV      = 45	# 第i句卡拉OK歌词的j个字符的高度
-val_TextKerningV     = 46	# 第i句卡拉OK歌词的j个字符与之前一个字符的kerning 一句歌词第一个字符的kerning为0 (暂时不支持vertical版本的kerning，其值全部为0)
-val_TextAdvanceV     = 47	# 第i句卡拉OK歌词的j个字符的水平步距
-val_TextAdvanceDiffV = 48	# 从初始位置到第i句卡拉OK歌词的j个字符的水平步距
-val_TextLengthV      = 49	# 第i句卡拉OK歌词的文字总长度
-val_TextInitXV       = 50	# 第i句卡拉OK歌词的j个字符的左上角X轴坐标
-val_TextInitYV       = 51	# 第i句卡拉OK歌词的j个字符的左上角Y轴坐标
-val_TextBearingXV    = 52	# 第i句卡拉OK歌词的j个字符的X轴bearing
-
-'''
-    return val_info
-
-def tcfxPy_InitData(data):
-    global __tcfx_data
-    __tcfx_data = data
-    tcfxPy_UtilInitGlobal()
-
-def GetData():
-    return __tcfx_data
-
-def GetVal(item):
-    return __tcfx_data[item]
-
-def getval_kartxt(i):
-    return __tcfx_data[val_SylLine][i].split(',,')[-1]
-
-### Utility ###
-
-def tcfxPy_UtilInitGlobal():
-    global __util_temp
-    __util_temp = [None]
-
-def IsLineChanged(i):
-    if i != __util_temp[0]:
-        __util_temp[0] = i
-        return True
-    else:
-        return False
-
-def UseSitePackages():      # invoke this function right after importing tcfxPy module if you want to use Python 3rd party packages
+def UseSitePackages():      # invoke this function right after importing tcaxPy module if you want to use Python 3rd party packages
     if (sys.platform == "win32"):
         sys.path.append(sys.prefix)
         sys.path.append(sys.prefix + '\\DLLs')
@@ -218,40 +40,6 @@ def UseSitePackages():      # invoke this function right after importing tcfxPy 
         sys.path.append(sys.prefix + '/lib/python3.7/site-packages')
 
 ########################################## Main FX Function #################################################
-def getpos(i,j,an):
-    #__tcfx_data = GetData()
-    if an == 1:
-    	initPosX =  __tcfx_data[9]
-    	initPosY = __tcfx_data[6] - __tcfx_data[10] - __tcfx_data[36][i][j]
-    elif an == 2:
-    	initPosX = (__tcfx_data[5] - __tcfx_data[40][i]) / 2 + __tcfx_data[9]
-    	initPosY =  __tcfx_data[6] - __tcfx_data[10] - __tcfx_data[36][i][j]
-    elif an == 3:
-    	initPosX = __tcfx_data[5] - __tcfx_data[40][i] - __tcfx_data[9]
-    	initPosY = __tcfx_data[6] - __tcfx_data[10] - __tcfx_data[36][i][j]
-    elif an == 4:
-    	initPosX =  __tcfx_data[9]
-    	initPosY = __tcfx_data[6]/2 + __tcfx_data[10]
-    elif an == 5:
-    	initPosX = (__tcfx_data[5] - __tcfx_data[40][i]) / 2 + __tcfx_data[9]
-    	initPosY = __tcfx_data[6]/2 + __tcfx_data[10]
-    elif an == 6:
-    	initPosX = __tcfx_data[5] - __tcfx_data[40][i] - __tcfx_data[9]
-    	initPosY = __tcfx_data[6]/2 + __tcfx_data[10]
-    elif an == 7:
-    	initPosX =  __tcfx_data[9]
-    	initPosY = __tcfx_data[10] + __tcfx_data[36][i][j]
-    elif an == 8:
-    	initPosX = (__tcfx_data[5] - __tcfx_data[40][i]) / 2 + __tcfx_data[9]
-    	initPosY =  __tcfx_data[10] + __tcfx_data[4]
-    elif an == 9:
-    	initPosX = (__tcfx_data[5] - __tcfx_data[40][i]) / 2 + __tcfx_data[9]
-    	initPosY =  __tcfx_data[10] + __tcfx_data[36][i][j]
-
-    posX = initPosX + __tcfx_data[39][i][j] + __tcfx_data[38][i][j] / 2
-    posY = initPosY
-
-    return (posX,posY)
 
 def SubL(Start = 0, End = 0, Layer = 0, Style = 'TCMS'):
     return 'Dialogue: {0},{1},{2},{3},NTP,0000,0000,0000,,'.format(int(Layer), FmtTime(Start), FmtTime(End), Style)
@@ -642,7 +430,7 @@ def iclip2(Scale, Draw):    # deprecated
 #--------------------------------------------- Utility Function -------------------------------------------#
 
 def GetVersion():
-    print('tcfxLib version: ' + tcfxLibGetVersion() + '\ntcfxPy version: ' + tcfxPy_Version)
+    print('tcaxLib version: ' + tcaxLibGetVersion() + '\ntcaxPy version: ' + tcaxPy_Version)
 
 def GetHelp():
     print(GetValueIDsInfo())
@@ -680,7 +468,7 @@ def MakePath(FolderIndex = 0, ImageIndex = 0, MainFolder = 'src',
     
     return img_path
 
-def tcfxLog(info):
+def tcaxLog(info):
     if (sys.platform == 'win32'):
         s = str(info) + '\r\n'
     else:
@@ -693,16 +481,16 @@ def tcfxLog(info):
 
 def Progress(i, j, file_id = 1, file_num = 1):
     total = 0
-    for l in range(__tcfx_data[val_nLines]):
-        total += __tcfx_data[val_nTexts][l]
+    for l in range(__tcax_data[val_nLines]):
+        total += __tcax_data[val_nTexts][l]
     completed = 0
     for l in range(i):
-        completed += __tcfx_data[val_nTexts][l]
+        completed += __tcax_data[val_nTexts][l]
     completed += j + 1
-    Utility().ShowProgress(total, completed, file_id - 1, file_num)
+    utility().ShowProgress(total, completed, file_id - 1, file_num)
 
 def progress(completed, total):
-    Utility().ShowProgress(total, completed, 0, 1)
+    ShowProgress(total, completed, 0, 1)
 
 #--------------------------------------------- Advanced Function -------------------------------------------#
 
@@ -723,14 +511,14 @@ def AdvInt(a):       # 高级取整函数 AdvancedIntegrate
         return int(a)
 
 def DeFmtTime(TIME):       # 重新数字化已被格式化的时间 TIME = '0:00:00.00'
-    return int(TIME[0:1]) * 60 * 60 * 100 + int(TIME[2:4]) * 60 * 100 + int(TIME[5:7]) * 100 + int(TIME[8:10])
+    return int(TIME[0:1]) * 60 * 60 * 1000 + int(TIME[2:4]) * 60 * 1000 + int(TIME[5:7]) * 1000 + int(TIME[8:10] * 10)
 
 def FmtTime(t):       # 格式化时间
     t = int(t)
-    hour = int(t / 360000)
-    minute = int((t / 6000) % 60)
-    second = int((t / 100) % 60)
-    semiSecond = int(t % 100)
+    hour = int((t / 3600000) % 10)
+    minute = int((t % 3600000) / 60000)
+    second = int((t % 60000) / 1000)
+    semiSecond = int((t % 1000) / 10)
     return '{0}:{1:02d}:{2:02d}.{3:02d}'.format(hour, minute, second, semiSecond)
 
 def PixPt():       # 返回一个像素点 PixelPoint, deprecated, use DrawPoint instead
