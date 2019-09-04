@@ -2,16 +2,14 @@
 
 A Python scripting tool for creating karaoke subtitle effects.
 
-It's base on [TCAX](https://github.com/milkyjing/TCAX).
-
 Now is under development.
 
 ## Dependency
 
 - C++14
 - [Boost C++ Libraries](https://www.boost.org)
-- [libpng](http://www.libpng.org/pub/png/libpng.html)
-- [FreeType](httpsfreetype.org)
+- [ICU](http://site.icu-project.org)
+- [pybind11](https://github.com/pybind/pybind11)
 - [Python3](https://www.python.org) or later
 
 ## Licence
