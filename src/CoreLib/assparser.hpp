@@ -1,8 +1,6 @@
 #ifndef ASSPARSER_HPP
 #define ASSPARSER_HPP
 
-#define PYTHON_BIND 1
-
 #ifdef _MSC_VER
 #pragma once
 #endif    /* _MSC_VER */
@@ -22,13 +20,13 @@ public:
     
     AssParser(const string &fileName);
 
-    ~AssParser();
+    shared_ptr<AssMeta> meta() const;
 
-    AssMeta *meta() const;
+    map<string, shared_ptr<AssStyle>> styles() const;
 
-    map<string, AssStyle *> styles() const;
+    vector<shared_ptr<AssDialog>> dialogs() const;
 
-    vector<AssDialog *> dialogs() const;
+    void upgradeDialogs();
 
 private:
     
@@ -47,11 +45,29 @@ private:
 
     void parseLine(string &);
 
-    AssMeta *metaData;
+    shared_ptr<AssMeta> metaData;
 
-    map<string, AssStyle *> styleData;
+    map<string, shared_ptr<AssStyle>> styleData;
 
-    vector<AssDialog *> dialogData;
+    bool dialogParsed;
+
+    vector<shared_ptr<AssDialog>> dialogData;
+
+    void parseDialogs();
+
+    typedef struct _TEXT_SIZE
+    {
+        double width;
+        double height;
+        double ascent;
+        double descent;
+        double internal_leading;
+        double external_leading;
+    } TEXT_SIZE;
+
+    TEXT_SIZE *textSize(string &text, shared_ptr<AssStyle> &style);
+
+    uint32_t utf8StringLen(string &);
 };
 
 #endif // ASSPARSER_HPP

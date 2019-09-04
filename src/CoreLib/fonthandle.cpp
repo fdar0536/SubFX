@@ -14,9 +14,9 @@
 
 using namespace std;
 
-FontHandle::FontHandle(string& family, bool bold, bool italic, bool underline,
+FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     bool strikeout, int size,
-    int xscale, int yscale, int hspace) :
+    double xscale, double yscale, double hspace) :
 #ifdef _WIN32
     dc(nullptr),
     font(nullptr),

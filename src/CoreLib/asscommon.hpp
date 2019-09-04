@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <cstdint>
 
@@ -23,8 +24,8 @@ public:
     AssMeta() :
     wrap_style(0),
     scaled_border_and_shadow(true),
-    play_res_x(0),
-    play_res_y(0)
+    play_res_x(640),
+    play_res_y(360)
     {}
 
     uint8_t wrap_style;
@@ -37,32 +38,32 @@ class AssStyle
 {
 public:
     AssStyle() :
-    fontname(""),
-    fontsize(0),
+    fontname("Arial"),
+    fontsize(20),
     bold(ASS_FALSE),
     italic(ASS_FALSE),
     underline(ASS_FALSE),
     strikeout(ASS_FALSE),
-    scale_x(0.f),
-    scale_y(0.f),
+    scale_x(100.f),
+    scale_y(100.f),
     spaceing(0.f),
     angle(0.f),
-    bolder_style(0),
+    bolder_style(1),
     outline(0.f),
     shadow(0.f),
-    alignment(0),
+    alignment(2),
     margin_l(0.f),
     margin_r(0.f),
-    margin_v(0.f),
+    margin_v(20.f),
     encoding(0),
-    color1(""),
-    alpha1(""),
-    color2(""),
-    alpha2(""),
-    color3(""),
-    alpha3(""),
-    color4(""),
-    alpha4("")
+    color1("&HFFFFFF&"),
+    alpha1("&H00&"),
+    color2("&H000000&"),
+    alpha2("&H00&"),
+    color3("&HFFFFFF&"),
+    alpha3("&H00&"),
+    color4("&HFFFFFF&"),
+    alpha4("&H00&")
     {}
 
     string fontname;
@@ -100,7 +101,7 @@ public:
     start_time(0),
     end_time(0),
     text(""),
-    i(-1),
+    i(0),
     duration(0),
     mid_time(0),
     width(0.f),
@@ -122,7 +123,7 @@ public:
     uint64_t start_time;
     uint64_t end_time;
     string text;
-    int i;
+    uint32_t i;
     uint64_t duration;
     uint64_t mid_time;
     double width;
@@ -201,7 +202,7 @@ class AssDialog : public AssSymbol
 {
 public:
     AssDialog() :
-    styleref(new AssStyle()),
+    styleref(make_shared<AssStyle>()),
     text_stripped(""),
     comment(false),
     layer(0),
@@ -212,36 +213,12 @@ public:
     margin_v(0.f),
     effect(""),
     leadin(0.f),
-    leadout(0.f),
-    textChuncked(new AssTextChunked())
+    leadout(0.f)
     {
         AssSymbol();
     }
 
-    ~AssDialog()
-    {
-        delete styleref;
-        styleref = nullptr;
-        delete textChuncked;
-        textChuncked = nullptr;
-
-        for (auto i = syls.begin(); i != syls.end(); ++i)
-        {
-            delete *i;
-        }
-
-        for (auto i = words.begin(); i != words.end(); ++i)
-        {
-            delete *i;
-        }
-
-        for (auto i = chars.begin(); i != chars.end(); ++i)
-        {
-            delete *i;
-        }
-    }
-
-    AssStyle *styleref;
+    shared_ptr<AssStyle> styleref;
     string text_stripped;
     bool comment;
     uint32_t layer;
@@ -253,10 +230,10 @@ public:
     string effect;
     double leadin;
     double leadout;
-    AssTextChunked *textChuncked;
-    vector<AssSyl *> syls;
-    vector<AssWord *> words;
-    vector<AssChar *> chars;
+    vector<shared_ptr<AssTextChunked>> textChunked;
+    vector<shared_ptr<AssSyl>> syls;
+    vector<shared_ptr<AssWord>> words;
+    vector<shared_ptr<AssChar>> chars;
 };
 
 #endif // ASSCOMMON_HPP

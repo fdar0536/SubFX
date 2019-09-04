@@ -20,12 +20,12 @@
 
 using namespace std;
 
-class FontHandle : public CoreMath
+class FontHandle : protected CoreMath
 {
 public:
     FontHandle(string &family, bool bold, bool italic, bool underline,
                bool strikeout, int size,
-               int xscale = 1, int yscale = 1, int hspace = 0);
+               double xscale = 1, double yscale = 1, double hspace = 0);
     
     ~FontHandle();
 
@@ -43,7 +43,7 @@ private:
     
     HGDIOBJ old_font;
 
-    int hspace;
+    double hspace;
 
     int upscale;
 #else
@@ -56,9 +56,9 @@ private:
     double fonthack_scale;
 #endif
 
-    int xscale;
+    double xscale;
 
-    int yscale;
+    double yscale;
 
     double downscale;
 };

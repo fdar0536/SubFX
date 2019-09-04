@@ -14,6 +14,8 @@ PANGO = $(shell pkgconf -cflags pangocairo)
 PANGO_LD = $(shell pkgconf --libs pangocairo)
 PYTHON = $(shell pkgconf -cflags python3)
 PYTHON_LD = $(shell pkgconf --libs python3)
+ICU_LD = $(shell pkgconf --libs icu-io)
+BOOST_LD = -lboost_regex
 
 OBJS = math.o common.o corelib.o fonthandle.o \
 		ass.o file.o assparser.o assparserpy.o
@@ -23,7 +25,7 @@ JSONS = corelib.o.json common.o.json math.o.json \
 		assparser.o.json assparserpy.o.json
 
 CoreLib.so: $(OBJS)
-	$(CXX) $(CXXFLAG) $(PANGO_LD) $(PYTHON_LD) $(LD) -o CoreLib.so $(OBJS)
+	$(CXX) $(CXXFLAG) $(PANGO_LD) $(PYTHON_LD) $(ICU_LD) $(BOOST_LD) $(LD) -o CoreLib.so $(OBJS)
 	mv CoreLib.so test
 
 compile_commands: $(JSONS)
@@ -66,10 +68,10 @@ file.o.json: file.cpp
 	$(CLANG) -MJ file.o.json $(CXXFLAG) -c file.cpp
 
 assparser.o: assparser.cpp
-	$(CXX) $(CXXFLAG) -c assparser.cpp
+	$(CXX) $(CXXFLAG) $(PANGO) -c assparser.cpp
 
 assparser.o.json: assparser.cpp
-	$(CLANG) -MJ assparser.o.json $(CXXFLAG) -c assparser.cpp
+	$(CLANG) -MJ assparser.o.json $(CXXFLAG) $(PANGO) -c assparser.cpp
 
 assparserpy.o: python/assparserpy.cpp
 	$(CXX) $(CXXFLAG) -c python/assparserpy.cpp
@@ -93,8 +95,8 @@ test: CoreLib.so
 test.o: test/test.cpp
 	$(CXX) $(CXXFLAG) -c test/test.cpp
 
-testCpp: test.o ass.o assparser.o
-	$(CXX) $(CXXFLAG) -Wl,--unresolved-symbols=report-all -o testCpp test.o ass.o assparser.o
+testCpp: test.o ass.o assparser.o fonthandle.o common.o math.o
+	$(CXX) $(CXXFLAG) $(PANGO_LD) $(ICU_LD) $(BOOST_LD) -Wl,--unresolved-symbols=report-all -o testCpp test.o ass.o assparser.o fonthandle.o common.o math.o
 
 test_cpp: testCpp
 	./testCpp
