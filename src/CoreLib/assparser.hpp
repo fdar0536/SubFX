@@ -68,6 +68,9 @@ private:
     TEXT_SIZE *textSize(string &text, shared_ptr<AssStyle> &style);
 
     uint32_t utf8StringLen(string &);
+
+    // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
+    vector<string> utf8StringSplit(string &);
 };
 
 #endif // ASSPARSER_HPP

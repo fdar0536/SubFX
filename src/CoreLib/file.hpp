@@ -15,12 +15,14 @@ class CoreFile
 {
 public:
 
+    // constructor may throw invalid_argument
     CoreFile(const string &fileName, const string &assHeader = string());
 
     ~CoreFile();
 
     void writeAssFile(vector<string> &assBuf);
 
+    // reset may throw invalid_argument
     void reset(const string &fileName, const string &assHeader);
 
     bool isAppend();

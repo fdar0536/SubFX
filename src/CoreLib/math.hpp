@@ -18,9 +18,11 @@ class CoreMath : public CoreCommon
 public:
      CoreMath();
 
+     // arc_curve may throw invalid_argument
      vector<pair<double, double>> arc_curve(double x, double y,
                                     double cx, double cy, double angle);
      
+     // bezier may throw invalid_argument
      tuple<double, double, double> bezier(double pct,
                     vector<tuple<double, double, double>> &pts, bool is3D = false);
      
@@ -30,6 +32,7 @@ public:
      // Degree between two 3d vectors
      double distance(double x, double y, double z = 0.f);
 
+     // line_intersect may throw invalid_argument
      pair<double, double> line_intersect(double x0, double y0,
                                          double x1, double y1,
                                          double x2, double y2,
@@ -41,6 +44,7 @@ public:
                                          double x2, double y2, double z2);
      
      // Generates a random number in given range with specific item distance
+     // it may throw invalid_argument
      double randomsteps(double min, double max, double step);
 
      // Rounds number
@@ -51,6 +55,7 @@ public:
                                            double z, double length);
      
      // Trim number in range
+     // it may throw invalid_argument
      double trim(double x, double min, double max);
 
      pair<double, double> ellipse(double x, double y,
@@ -59,6 +64,7 @@ public:
      
      double randomway();
 
+     // rotate may throw invalid_argument
      tuple<double, double, double> rotate(tuple<double, double, double> p,
                                           string axis,
                                           double angle);

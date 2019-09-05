@@ -500,6 +500,7 @@ void AssParser::parseDialogs()
         while (boost::u32regex_search(tmpString, match, u32reg))
         {
             shared_ptr<AssTextChunked> textChunked(make_shared<AssTextChunked>());
+
             if (match.prefix() != "")
             {
                 textChunked->tags = "";
@@ -684,9 +685,337 @@ void AssParser::parseDialogs()
                         cur_y += syl->height;
                     } //end for index
                 }
-            }
+                // end if (dialog->styleref->alignment > 6 || 
+                //         dialog->styleref->alignment < 4)
+            } // end if (dialog->syls.at(0)->width != 0.f)
         } // end if (dialog->syls.size() > 0)
+        
+        // Add dialog words
+        u32reg = boost::make_u32regex("(\\s*)(\\S+)(\\s*)");
+        dialog->words.reserve(50);
+        tmpString = dialog->text_stripped;
+        uint32_t wordIndex(0);
+        while(boost::u32regex_search(tmpString, match, u32reg))
+        {
+            shared_ptr<AssWord> word(make_shared<AssWord>());
+            
+            word->text = match[2];
+            try
+            {
+                textsize = textSize(word->text, dialog->styleref);
+            }
+            catch (...)
+            {
+                dialog->words.clear();
+                throw runtime_error("Error when paring words.");
+            }
+            
+            tmpString = match[1];
+            word->prespace = utf8StringLen(tmpString);
+
+            tmpString = match[3];
+            word->postspace = utf8StringLen(tmpString);
+
+            word->i = wordIndex;
+            word->start_time = dialog->start_time;
+            word->mid_time = dialog->mid_time;
+            word->end_time = dialog->end_time;
+            word->duration = dialog->duration;
+
+            word->width = textsize->width;
+            word->height = textsize->height;
+            word->ascent = textsize->ascent;
+            word->descent = textsize->descent;
+            word->internal_leading = textsize->internal_leading;
+            word->external_leading = textsize->external_leading;
+
+            delete textsize;
+            textsize = nullptr;
+            dialog->words.push_back(word);
+            tmpString = match.suffix();
+            ++wordIndex;
+        } //end while(boost::u32regex_search(tmpString, match, u32reg))
+
+        // Calculate word positions with all words data already available
+        if (dialog->words.size() > 0)
+        {
+            if (dialog->words.at(0)->width != 0.f)
+            {
+                if (dialog->styleref->alignment > 6 ||
+                    dialog->styleref->alignment < 4)
+                {
+                    double cur_x(dialog->left);
+                    for (size_t index = 0; index < dialog->words.size(); ++index)
+                    {
+                        shared_ptr<AssWord> word(dialog->words.at(index));
+
+                        // Horizontal position
+                        cur_x += (word->prespace * space_width);
+                        word->left = cur_x;
+                        word->center = word->left + (word->width / 2.f);
+                        word->right = word->left + word->width;
+
+                        if (((dialog->styleref->alignment - 1) % 3) == 0)
+                        {
+                            word->x = word->left;
+                        }
+                        else
+                        {
+                            if (((dialog->styleref->alignment - 2) % 3) == 0)
+                            {
+                                word->x = word->center;
+                            }
+                            else
+                            {
+                                word->x = word->right;
+                            }
+                        }
+
+                        cur_x += (word->width + (word->postspace * space_width));
+
+                        // Vertical position
+                        word->top = dialog->top;
+                        word->middle = dialog->middle;
+                        word->bottom = dialog->bottom;
+                        word->y = dialog->y;
+                    } //end for index
+                }
+                else
+                {
+                    double max_width(0.f), sum_height(0.f);
+                    for (size_t index = 0; index < dialog->words.size(); ++index)
+                    {
+                        shared_ptr<AssWord> word(dialog->words.at(index));
+                        max_width = max(max_width, word->width);
+                        sum_height += word->height;
+                    } //end for index;
+
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.f));
+                    double x_fix(0.f);
+                    for (size_t index = 0; index < dialog->words.size(); ++index)
+                    {
+                        shared_ptr<AssWord> word(dialog->words.at(index));
+
+                        // Horizontal position
+                        x_fix = ((max_width - word->width)/ 2.f);
+                        if (dialog->styleref->alignment == 4)
+                        {
+                            word->left = dialog->left + x_fix;
+                            word->center = word->left + (word->width / 2.f);
+                            word->right = word->left + word->width;
+                            word->x = word->left;
+                        }
+                        else if (dialog->styleref->alignment == 5)
+                        {
+                            word->left = static_cast<double>(metaData->play_res_x >> 1) - (word->width / 2.f);
+                            word->center = word->left + (word->width / 2.f);
+                            word->right = word->left + word->width;
+                            word->x = word->center;
+                        }
+                        else // dialog->styleref->alignment == 6
+                        {
+                            word->left = dialog->right - word->width - x_fix;
+                            word->center = word->left + (word->width / 2.f);
+                            word->right = word->left + word->width;
+                            word->x = word->right;
+                        }
+
+                        // Vertical position
+                        word->top = cur_y;
+                        word->middle = word->top + (word->height / 2.f);
+                        word->bottom = word->top + word->height;
+                        cur_y += word->height;
+                    } // end for index
+                }
+                // end if (dialog->styleref->alignment > 6 ||
+                //         dialog->styleref->alignment < 4)
+            } //end if (dialog->words.at(0)->width != 0.f)
+        } // end if (dialog->words.size() > 0)
+
+        // Add dialog characters
+        dialog->chars.reserve(50);
+        vector<string> charText(utf8StringSplit(dialog->text_stripped));
+        for (size_t cIndex = 0; cIndex < charText.size(); ++cIndex)
+        {
+            shared_ptr<AssChar> assChar(make_shared<AssChar>());
+            assChar->i = cIndex;
+            assChar->start_time = dialog->start_time;
+            assChar->mid_time = dialog->mid_time;
+            assChar->end_time = dialog->end_time;
+            assChar->duration = dialog->duration;
+            assChar->text = charText.at(cIndex);
+
+            uint32_t charIndex(0);
+            for (size_t index = 0; index < dialog->syls.size(); ++index)
+            {
+                shared_ptr<AssSyl> syl(dialog->syls.at(index));
+                uint32_t maxLoop(syl->prespace + utf8StringLen(syl->text) + syl->postspace);
+                for (size_t sIndex = 0; sIndex < maxLoop; ++sIndex)
+                {
+                    if (charIndex == assChar->i)
+                    {
+                        assChar->syl_i = syl->i;
+                        assChar->start_time = syl->start_time;
+                        assChar->mid_time = syl->mid_time;
+                        assChar->end_time = syl->end_time;
+                        assChar->duration = syl->duration;
+                        goto syl_reference_found;
+                    }
+                    ++charIndex;
+                } // end for sIndex
+            } // end for index
+
+syl_reference_found:
+            charIndex = 0;
+            for (size_t index = 0; index < dialog->words.size(); ++index)
+            {
+                shared_ptr<AssWord> word(dialog->words.at(index));
+                uint32_t maxLoop(word->prespace + utf8StringLen(word->text) + word->postspace);
+                for (size_t wIndex = 0; wIndex < maxLoop; ++wIndex)
+                {
+                    if (charIndex == assChar->i)
+                    {
+                        assChar->word_i = word->i;
+                        goto word_reference_found;
+                    }
+                    ++charIndex;
+                } // end for wIndex;
+            } // end for index
+
+word_reference_found:
+            try
+            {
+                textsize = textSize(assChar->text, dialog->styleref);
+            }
+            catch (...)
+            {
+                dialog->chars.clear();
+                throw runtime_error("Error when parsing chars.");
+            }
+
+            assChar->width = textsize->width;
+            assChar->height = textsize->height;
+            assChar->ascent = textsize->ascent;
+            assChar->descent = textsize->descent;
+            assChar->internal_leading = textsize->internal_leading;
+            assChar->external_leading = textsize->external_leading;
+
+            delete textsize;
+            textsize = nullptr;
+            dialog->chars.push_back(assChar);
+        } //end for cIndex
+
+        // Calculate character positions with all characters data already available
+        if (dialog->chars.size() > 0)
+        {
+            if (dialog->chars.at(0)->width != 0)
+            {
+                if (dialog->styleref->alignment > 6 || dialog->styleref->alignment < 4)
+                {
+                    double cur_x(dialog->left);
+                    for (size_t index = 0; index < dialog->chars.size(); ++index)
+                    {
+                        shared_ptr<AssChar> assChar(dialog->chars.at(index));
+
+                        // Horizontal position
+                        assChar->left = cur_x;
+                        assChar->center = assChar->left + (assChar->width / 2.f);
+                        assChar->right = assChar->left + assChar->width;
+
+                        if (((dialog->styleref->alignment - 1) % 3) == 0)
+                        {
+                            assChar->x = assChar->left;
+                        }
+                        else
+                        {
+                            if (((dialog->styleref->alignment - 2) % 3) == 0)
+                            {
+                                assChar->x = assChar->center;
+                            }
+                            else
+                            {
+                                assChar->x = assChar->right;
+                            }
+                        }
+
+                        cur_x += assChar->width;
+
+                        // Vertical position
+                        assChar->top = dialog->top;
+                        assChar->middle = dialog->middle;
+                        assChar->bottom = dialog->bottom;
+                        assChar->y = dialog->y;
+                    } // end for index
+                }
+                else
+                {
+                    double max_width(0.f), sum_height(0.f);
+                    for (size_t index = 0; index < dialog->chars.size(); ++index)
+                    {
+                        shared_ptr<AssChar> assChar(dialog->chars.at(index));
+                        max_width = max(max_width, assChar->width);
+                        sum_height += assChar->height;
+                    } // end for index
+
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.f));
+                    double x_fix(0.f);
+                    for (size_t index = 0; index < dialog->chars.size(); ++index)
+                    {
+                        shared_ptr<AssChar> assChar(dialog->chars.at(index));
+                        
+                        // Horizontal position
+                        x_fix = ((max_width - assChar->width) / 2);
+                        if (dialog->styleref->alignment == 4)
+                        {
+                            assChar->left = dialog->left + x_fix;
+                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->right = assChar->left + assChar->width;
+                            assChar->x = assChar->left;
+                        }
+                        else if (dialog->styleref->alignment == 5)
+                        {
+                            assChar->left = static_cast<double>(metaData->play_res_x >> 1) - (assChar->width / 2.f);
+                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->right = assChar->left + assChar->width;
+                            assChar->x = assChar->center;
+                        }
+                        else // dialog->styleref->alignment == 6
+                        {
+                            assChar->left = dialog->right - assChar->width - x_fix;
+                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->right = assChar->left + assChar->width;
+                            assChar->y = assChar->right;
+                        }
+
+                        // Vertical position
+                        assChar->top = cur_y;
+                        assChar->middle = assChar->top + (assChar->height /2.f);
+                        assChar->bottom = assChar->top + assChar->height;
+                        assChar->y = assChar->middle;
+                        cur_y += assChar->height;
+                    } // end for index
+                }
+                // end if (dialog->styleref->alignment > 6 ||
+                //         dialog->styleref->alignment < 4)
+            } //end if (dialog->chars.at(0)->width != 0)
+        } //end if (dialog->chars.size() > 0)
     } //end for i
+
+    // sort dialogs
+    sort(dialogData.begin(), dialogData.end(),
+        [](const shared_ptr<AssDialog> &a, const shared_ptr<AssDialog> &b)
+        {
+            return (a->start_time <= b->start_time);
+        }
+    );
+
+    size_t last(dialogData.size() - 1);
+    for (size_t i = 0; i < dialogData.size(); ++i)
+    {
+        shared_ptr<AssDialog> dialog(dialogData.at(i));
+        dialog->leadin = (i == 0 ? 1000.1f : (dialog->start_time - dialogData.at(i - 1)->end_time));
+        dialog->leadout = (i == last ? 1000.1f : (dialogData.at(i + 1)->start_time - dialog->end_time));
+    }
 
     dialogParsed = true;
 }
@@ -706,6 +1035,7 @@ AssParser::TEXT_SIZE *AssParser::textSize(string &text, shared_ptr<AssStyle> &st
 
     map<string, double> tmpMap;
     TEXT_SIZE *ret(new TEXT_SIZE);
+
     tmpMap = font.text_extents(text);
     ret->width = tmpMap["width"];
     ret->height = tmpMap["height"];
@@ -727,4 +1057,28 @@ uint32_t AssParser::utf8StringLen(string &input)
     }
 
     return len;
+}
+
+vector<string> AssParser::utf8StringSplit(string &input)
+{
+    vector<string> ret;
+    ret.reserve(20);
+
+    for(size_t i = 0; i < input.length();)
+    {
+        size_t len = 1;
+        if(((uint8_t)input.at(i) & 0xf8) == 0xf0)
+            len = 4;
+        else if(((uint8_t)input.at(i) & 0xf0) == 0xe0)
+            len = 3;
+        else if(((uint8_t)input.at(i) & 0xe0) == 0xc0)
+            len = 2;
+        if((i + len) > input.length())
+            len = 1;
+
+        ret.push_back(input.substr(i, len));
+        i += len;
+    }
+
+    return ret;
 }

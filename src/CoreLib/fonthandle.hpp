@@ -23,16 +23,25 @@ using namespace std;
 class FontHandle : protected CoreMath
 {
 public:
+
+    // constructor may throw
+    // 1. invalid_argument
+    // 2. runtime_error
     FontHandle(string &family, bool bold, bool italic, bool underline,
                bool strikeout, int size,
                double xscale = 1, double yscale = 1, double hspace = 0);
     
     ~FontHandle();
 
+    // metrics may throw runtime_error
     map<string, double> metrics();
 
+    // text_extents may throw runtime_error
     map<string, double> text_extents(string &text);
 
+    // text_to_shape may throw
+    // 1. invalid_argument
+    // 2. runtome_error
     string text_to_shape(string &text);
 
 private:

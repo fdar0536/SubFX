@@ -3,6 +3,7 @@
 #include <iterator>
 #include <algorithm>
 #include <sstream>
+#include <new>
 
 #ifdef _WIN32
 #include <cstring>
@@ -193,12 +194,8 @@ FontHandle::~FontHandle()
 map<string, double> FontHandle::metrics()
 {
 #ifdef _WIN32
-    TEXTMETRICW *fontMetrics(nullptr);
-    try
-    {
-        fontMetrics = new TEXTMETRICW;
-    }
-    catch (...)
+    TEXTMETRICW  *fontMetrics(new (nothrow) TEXTMETRICW);
+    if (!fontMetrics)
     {
         throw runtime_error("CANNOT create TEXTMETRICW");
     }
@@ -253,12 +250,8 @@ map<string, double> FontHandle::text_extents(string &text)
     wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen = wcslen(textDst.c_str());
 
-    SIZE *size(nullptr);
-    try
-    {
-        size = new SIZE;
-    }
-    catch (...)
+    SIZE *size(new (nothrow) SIZE);
+    if !(size)
     {
         throw runtime_error("CANNOT allocate SIZE");
     }
@@ -276,12 +269,8 @@ map<string, double> FontHandle::text_extents(string &text)
     delete size;
 #else
     pango_layout_set_text(layout, text.c_str(), -1);
-    PangoRectangle *rect(nullptr);
-    try
-    {
-        rect = new PangoRectangle;
-    }
-    catch(...)
+    PangoRectangle *rect(new (nothrow) PangoRectangle);
+    if (!rect)
     {
         throw runtime_error("CANNOT create PangoRectangle");
     }
@@ -310,21 +299,14 @@ string FontHandle::text_to_shape(string &text)
     INT *charWidths(nullptr);
     if (hspace != 0)
     {
-        try
-        {
-            charWidths = new INT[textLen];
-        }
-        catch (...)
+        charWidths = new (nothrow) INT[textLen];
+        if (!charWidths)
         {
             throw runtime_error("CANNOT allocate INT array");
         }
 
-        SIZE *size(nullptr);
-        try
-        {
-            size = new SIZE;
-        }
-        catch (...)
+        SIZE *size(new (nothrow) SIZE);
+        if (!size)
         {
             delete[] charWidths;
             throw runtime_error("CANNOT allocate SIZE");
@@ -389,12 +371,8 @@ string FontHandle::text_to_shape(string &text)
         return string();
     }
 
-    POINT *points(nullptr);
-    try
-    {
-        points = new POINT[points_n];
-    }
-    catch (...)
+    POINT *points(new (nothrow) POINT[points_n]);
+    if (!points)
     {
         if (!charWidths)
         {
@@ -403,17 +381,14 @@ string FontHandle::text_to_shape(string &text)
         throw runtime_error("Fail to allocate POINT array");
     }
 
-    BYTE *types(nullptr);
-    try
-    {
-        types = new BYTE[points_n];
-    }
-    catch (...)
+    BYTE *types(new (nothrow) BYTE[points_n]);
+    if (!types)
     {
         if (!charWidths)
         {
             delete[] charWidths;
         }
+        
         throw runtime_error("Fail to allocate BYTE array");
     }
 

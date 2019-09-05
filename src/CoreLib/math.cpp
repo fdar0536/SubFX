@@ -95,7 +95,7 @@ vector<pair<double, double>> CoreMath::arc_curve(double x, double y,
     }
 
     return curves;
-}
+} // end CoreMath::arc_curve
 
 tuple<double, double, double> CoreMath::bezier(double pct,
                         vector<tuple<double, double, double>> &pts,
