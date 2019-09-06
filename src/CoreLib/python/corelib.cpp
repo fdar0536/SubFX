@@ -1,10 +1,12 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "pybind11/attr.h"
+#include "pybind11/functional.h"
 
 #include "assparserpy.hpp"
 #include "../fonthandle.hpp"
 #include "../file.hpp"
+#include "../shape.hpp"
 
 namespace py = pybind11;
 
@@ -96,6 +98,28 @@ PYBIND11_MODULE(CoreLib, m)
     .def("rotate", &CoreMath::rotate,
     "rotated_point = rotate(point, axis, angle)\n"
     "Allows to rotate a point in 3D room.\n");
+
+    /* in shape.hpp */
+    py::class_<CoreShape>(m, "CoreShape")
+
+    .def(py::init<>())
+    
+    .def("filter", &CoreShape::filter,
+    "new_shape = filter(shape, flt)\n"
+    "Filters points of shape shape by function flt and returns a new one.\n"
+    "filter receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
+    "example:\n"
+    "import CoreLib\n"
+    "shape = CoreLib.CoreShape()\n"
+    "\n"
+    "def flt(x, y, pointType):\n"
+    "    if pointType == \"m\":\n"
+    "        return [x + 5, y + 2]\n"
+    "\n"
+    "    return [x + 2, y + 5]\n"
+    "\n"
+    "test = \"m 1 2 l 3 4 5 6 b 7 8 9 10 11 12 13 14 c\"\n"
+    "print(shape.filter(test, flt))\n");
 
     /* in ass.hpp */
     py::class_<CoreAss>(m, "CoreAss")

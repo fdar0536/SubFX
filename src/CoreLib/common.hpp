@@ -10,6 +10,8 @@
 
 #define FP_PRECISION 3 // Floating point precision by numbers behind point (for shape points)
 
+#define UNUSED(x) static_cast<void>(x)
+
 using namespace std;
 
 class CoreCommon
