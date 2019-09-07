@@ -9,6 +9,7 @@
 #include <utility>
 
 #define FP_PRECISION 3 // Floating point precision by numbers behind point (for shape points)
+#define SUPERSAMPLING 8 // Anti-aliasing precision for shape to pixels conversion
 
 #define UNUSED(x) static_cast<void>(x)
 

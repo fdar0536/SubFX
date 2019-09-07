@@ -98,10 +98,10 @@ utf8.o.json: utf8.cpp
 
 # shape
 shape.o: shape.cpp
-	$(CXX) $(CXXFLAG) -c shape.cpp
+	$(CXX) $(CXXFLAG) -msse2 -c shape.cpp
 
 shape.o.json: shape.cpp
-	$(CLANG) -MJ shape.o.json $(CXXFLAG) -c shape.cpp
+	$(CLANG) -MJ shape.o.json $(CXXFLAG) -msse2 -c shape.cpp
 
 # clean up
 .phony clean:
@@ -117,10 +117,10 @@ test: CoreLib.so
 	python test/test.py
 
 test.o: test/test.cpp
-	$(CXX) $(CXXFLAG) -c test/test.cpp
+	$(CXX) $(CXXFLAG) $(PANGO) -c test/test.cpp
 
-testCpp: test.o common.o math.o shape.o utf8.o
-	$(CXX) $(CXXFLAG) -Wl,--unresolved-symbols=report-all -o testCpp common.o math.o shape.o utf8.o test.o
+testCpp: test.o common.o math.o shape.o ass.o fonthandle.o
+	$(CXX) $(CXXFLAG) $(PANGO_LD) -Wl,--unresolved-symbols=report-all -o testCpp common.o math.o shape.o test.o fonthandle.o ass.o
 
 test_cpp: testCpp
 	./testCpp

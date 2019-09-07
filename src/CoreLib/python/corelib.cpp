@@ -103,11 +103,16 @@ PYBIND11_MODULE(CoreLib, m)
     py::class_<CoreShape>(m, "CoreShape")
 
     .def(py::init<>())
+
+    .def("bounding", &CoreShape::bounding,
+    "tuple(x0, y0, x1, y1) = bounding(shape)\n"
+    "Calculates the bounding box of shape shape.\n"
+    "x0|y0 is the upper-left and x1|y1 the lower-right corner of the rectangle.\n")
     
     .def("filter", &CoreShape::filter,
     "new_shape = filter(shape, flt)\n"
     "Filters points of shape shape by function flt and returns a new one.\n"
-    "filter receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
+    "flt receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
     "example:\n"
     "import CoreLib\n"
     "shape = CoreLib.CoreShape()\n"
@@ -119,7 +124,25 @@ PYBIND11_MODULE(CoreLib, m)
     "    return [x + 2, y + 5]\n"
     "\n"
     "test = \"m 1 2 l 3 4 5 6 b 7 8 9 10 11 12 13 14 c\"\n"
-    "print(shape.filter(test, flt))\n");
+    "print(shape.filter(test, flt))\n")
+
+    .def("flatten", &CoreShape::flatten,
+    "flattened_shape = flatten(shape)\n"
+    "Converts all 3rd order bezier curves in shape shape to lines,\n"
+    "creating a new shape.\n")
+    
+    .def("move", &CoreShape::move,
+    "new_shape = move(shape, x, y)\n"
+    "Shifts points of shape shape horizontally by x and vertically by y,\n"
+    "creating a new shape.\n")
+    
+    .def("to_pixels", &CoreShape::to_pixels,
+    "pixels = to_pixels(shape)\n"
+    "Renders shape shape and returns pixels.\n"
+    "pixels is a list of dictionaries, each one with following fields:\n"
+    "x: horizontal position\n"
+    "y: vertical position\n"
+    "alpha: opacity\n");
 
     /* in ass.hpp */
     py::class_<CoreAss>(m, "CoreAss")
