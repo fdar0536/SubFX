@@ -103,25 +103,42 @@ tuple<uint8_t, uint8_t, uint8_t, uint8_t> CoreAss::stringToColorAlpha(string &in
 
 string CoreAss::colorAlphaToString(vector<uint8_t> &input)
 {
-    if (input.size() != 1 && input.size() != 3)
+    if (input.size() != 1 &&
+        input.size() != 3 &&
+        input.size() != 4)
     {
         throw invalid_argument("Invalid input!");
     }
 
     char buf[500];
-    if (input.size() == 3)
+    switch (input.size())
+    {
+    case 1:
+    {
+        // alpha only &HAA&
+        sprintf(buf, "&H%02X&", input.at(0));
+        break;
+    }
+    case 3:
     {
         // rgb &HBBGGRR&
         sprintf(buf, "&H%02X%02X%02X&",
                 input.at(2),
                 input.at(1),
                 input.at(0));
+        break;
     }
-    else
+    default:
     {
-        // alpha only &HAA&
-        sprintf(buf, "&H%02X&", input.at(0));
+        // rgba &HAABBGGRR
+        sprintf(buf, "&H%02X%02X%02X%02X",
+                input.at(3),
+                input.at(2),
+                input.at(1),
+                input.at(0));
+        break;
     }
+    } // end switch
 
     return string(buf);
 }

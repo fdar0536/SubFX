@@ -8,10 +8,14 @@
 #include <vector>
 #include <stdexcept>
 #include <fstream>
+#include <map>
+
+#include "asscommon.hpp"
+#include "ass.hpp"
 
 using namespace std;
 
-class CoreFile
+class CoreFile : protected CoreAss
 {
 public:
 
@@ -21,6 +25,10 @@ public:
     ~CoreFile();
 
     void writeAssFile(vector<string> &assBuf);
+
+    void writeAssFile(shared_ptr<AssMeta> &meta,
+                      map<string, shared_ptr<AssStyle>> &styles,
+                      vector<string> &assBuf);
 
     // reset may throw invalid_argument
     void reset(const string &fileName, const string &assHeader);
@@ -34,6 +42,12 @@ private:
     string assHeader;
 
     fstream file;
+
+    void writeAssMeta(shared_ptr<AssMeta> &meta);
+
+    void writeAssStyle(map<string, shared_ptr<AssStyle>> &styles);
+
+    void writeAssEvent(vector<string> &assBuf);
 };
 
 #endif // FILE_HPP

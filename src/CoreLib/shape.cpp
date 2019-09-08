@@ -188,8 +188,7 @@ string CoreShape::flatten(string &shape)
 
                 number = sm[2];
                 sscanf(number.c_str(), "%lf", &y0);
-                output += (number + " ");
-                output += "l ";
+                output += (number + " l ");
                 tmpString = sm.suffix();
                 number.clear();
                 status = get_data;
@@ -320,7 +319,7 @@ vector<map<string, double>> CoreShape::to_pixels(string &shape)
             if (opacity > 0.f)
             {
                 map<string, double> pixel;
-                pixel["alpha"] = opacity * (downscale * downscale);
+                pixel["alpha"] = (uint8_t)(255 - (opacity * (downscale * downscale)));
                 pixel["x"] = (x - shift_x) * downscale;
                 pixel["y"] = (y - shift_y) * downscale;
                 pixels.push_back(pixel);

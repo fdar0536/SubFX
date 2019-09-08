@@ -30,15 +30,13 @@ AssParser::AssParser(const string &fileName) :
     CoreAss();
     CoreUtf8();
     fstream assFile;
-    try
-    {
-        assFile.open(fileName, fstream::in);
-    }
-    catch (...)
+
+    assFile.open(fileName, fstream::in);
+    if (assFile.fail())
     {
         throw invalid_argument("CANNOT open file");
     }
-
+    
     dialogData.reserve(1000);
     string tmpString;
     while(!safeGetline(assFile, tmpString).eof())
@@ -97,6 +95,11 @@ void AssParser::upgradeDialogs()
     }
 
     parseDialogs();
+}
+
+bool AssParser::dialogIsUpgraded() const
+{
+    return dialogParsed;
 }
 
 // private member function
@@ -631,7 +634,7 @@ void AssParser::parseDialogs()
                             }
                         }
 
-                        cur_x += (syl->postspace * space_width);
+                        cur_x += (syl->width + (syl->postspace * space_width));
 
                         // Vertical position
                         syl->top = dialog->top;

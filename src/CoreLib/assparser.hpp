@@ -29,6 +29,8 @@ public:
 
     void upgradeDialogs();
 
+    bool dialogIsUpgraded() const;
+
 private:
     
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

@@ -6,13 +6,48 @@
 #endif    /* _MSC_VER */
 
 #include "../assparser.hpp"
+#include "pybind11/pybind11.h"
 
 using namespace std;
+
+namespace py = pybind11;
 
 class AssParserPy
 {
 public:
-    AssParserPy();
+    
+    // constructor may throw invalid_argument
+    AssParserPy(string &fileName);
+
+    py::dict meta() const;
+
+    py::dict styles() const;
+
+    py::list dialogs() const;
+
+    void upgradeDialogs();
+
+    shared_ptr<AssMeta> getMetaPtr() const;
+
+    map<string, shared_ptr<AssStyle>> getStyleData() const;
+
+private:
+
+    shared_ptr<AssParser> parser;
+
+    void initData();
+
+    void setUpMeta();
+    py::dict metaData;
+
+    void setUpStyles();
+    py::dict styleData;
+
+    void setUpDialogs();
+    bool dialogParsed;
+    py::list dialogData;
+
+    void getDialogsData();
 };
 
 #endif // ASSPARSERPY_HPP

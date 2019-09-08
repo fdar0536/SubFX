@@ -24,7 +24,7 @@ OBJS = math.o common.o corelib.o fonthandle.o \
 JSONS = corelib.o.json common.o.json math.o.json \
 		fonthandle.o.json ass.o.json file.o.json \
 		assparser.o.json assparserpy.o.json utf8.o.json \
-		shape.o.json
+		shape.o.json test.o.json
 
 CoreLib.so: $(OBJS)
 	$(CXX) $(CXXFLAG) $(PANGO_LD) $(PYTHON_LD) $(ICU_LD) $(BOOST_LD) $(LD) -o CoreLib.so $(OBJS)
@@ -84,10 +84,10 @@ assparser.o.json: assparser.cpp
 
 # assparserpy
 assparserpy.o: python/assparserpy.cpp
-	$(CXX) $(CXXFLAG) -c python/assparserpy.cpp
+	$(CXX) $(CXXFLAG) $(PYTHON) -c python/assparserpy.cpp
 
 assparserpy.o.json: python/assparserpy.cpp
-	$(CLANG) -MJ assparserpy.o.json $(CXXFLAG) -c python/assparserpy.cpp
+	$(CLANG) -MJ assparserpy.o.json $(CXXFLAG) $(PYTHON) -c python/assparserpy.cpp
 
 # utf8
 utf8.o: utf8.cpp
@@ -117,10 +117,13 @@ test: CoreLib.so
 	python test/test.py
 
 test.o: test/test.cpp
-	$(CXX) $(CXXFLAG) $(PANGO) -c test/test.cpp
+	$(CXX) $(CXXFLAG) $(PANGO) $(PYTHON) -c test/test.cpp
 
-testCpp: test.o common.o math.o shape.o ass.o fonthandle.o
-	$(CXX) $(CXXFLAG) $(PANGO_LD) -Wl,--unresolved-symbols=report-all -o testCpp common.o math.o shape.o test.o fonthandle.o ass.o
+test.o.json: test/test.cpp
+	$(CLANG) -MJ test.o.json $(CXXFLAG) $(PYTHON) -c test/test.cpp
+
+testCpp: test.o common.o math.o ass.o fonthandle.o assparser.o assparserpy.o utf8.o file.o
+	$(CXX) $(CXXFLAG) $(PANGO_LD) $(BOOST_LD) $(ICU_LD) $(PYTHON_LD) -Wl,--unresolved-symbols=report-all -o testCpp common.o math.o test.o fonthandle.o ass.o assparserpy.o assparser.o utf8.o file.o
 
 test_cpp: testCpp
 	./testCpp
