@@ -1,4 +1,4 @@
-# TCFX
+# SubFX
 
 A Python scripting tool for creating karaoke subtitle effects.
 
@@ -11,6 +11,12 @@ Now is under development.
 - [ICU](http://site.icu-project.org)
 - [pybind11](https://github.com/pybind/pybind11)
 - [Python3](https://www.python.org) or later
+
+## TODO
+
+- [ ] Nicer name
+- [ ] Nice frontend
+- [ ] Document
 
 ## Licence
 
