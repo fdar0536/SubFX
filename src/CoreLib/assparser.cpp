@@ -23,9 +23,11 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
 AssParser::AssParser(const string &fileName) :
+    section(Idle),
     metaData(make_shared<AssMeta>()),
     styleData(map<string, shared_ptr<AssStyle>>()),
-    dialogParsed(false)
+    dialogParsed(false),
+    dialogData(vector<shared_ptr<AssDialog>>())
 {
     CoreAss();
     CoreUtf8();

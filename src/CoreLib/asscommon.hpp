@@ -213,7 +213,11 @@ public:
     margin_v(0.f),
     effect(""),
     leadin(0.f),
-    leadout(0.f)
+    leadout(0.f),
+    textChunked(vector<shared_ptr<AssTextChunked>>()),
+    syls(vector<shared_ptr<AssSyl>>()),
+    words(vector<shared_ptr<AssWord>>()),
+    chars(vector<shared_ptr<AssChar>>())
     {
         AssSymbol();
     }

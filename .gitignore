@@ -1,0 +1,11 @@
+src/build
+src/build/*
+src/*.o
+src/test
+src/test/*
+src/.vscode 
+src/.vscode/*
+src/testCpp
+src/*.user
+build*
+build*/*

@@ -6,7 +6,11 @@
 #include <cstdio>
 #include <cmath>
 
+#include "config.h"
+
+#ifdef ENABLE_SSE2
 #include <emmintrin.h> // SSE2
+#endif
 
 #include "shape.hpp"
 
@@ -342,7 +346,7 @@ vector<double> CoreShape::curve4_subdivide(double x0, double y0,
     ret.reserve(16);
     ret.push_back(x0);
     ret.push_back(y0);
-
+#ifdef ENABLE_SSE2
     double point0[] = {x0, y0};
     double point1[] = {x1, y1};
     double point2[] = {x2, y2};
@@ -408,6 +412,41 @@ vector<double> CoreShape::curve4_subdivide(double x0, double y0,
 
     ret.push_back(x3);
     ret.push_back(y3);
+#else // pure c++
+    double x01 = (x0 + x1) * pct;
+    double y01 = (y0 + y1) * pct;
+    ret.push_back(x01);
+    ret.push_back(y01);
+    
+    double x12 = (x1 + x2) * pct;
+    double y12 = (y1 + y2) * pct;
+    double x23 = (x2 + x3) * pct;
+    double y23 = (y2 + y3) * pct;
+    
+    double x012 = (x01 + x12) * pct;
+    double y012 = (y01 + y12) * pct;
+    ret.push_back(x012);
+    ret.push_back(y012);
+    
+    double x123 = (x12 + x23) * pct;
+    double y123 = (y12 + y23) * pct;
+    
+    double x0123 = (x012 + x123) * pct;
+    double y0123 = (y012 + y123) * pct;
+    ret.push_back(x0123);
+    ret.push_back(y0123);
+    ret.push_back(x0123);
+    ret.push_back(y0123);
+    
+    ret.push_back(x123);
+    ret.push_back(y123);
+    
+    ret.push_back(x23);
+    ret.push_back(y23);
+    
+    ret.push_back(x3);
+    ret.push_back(y3);
+#endif
     return ret;
 }
 
