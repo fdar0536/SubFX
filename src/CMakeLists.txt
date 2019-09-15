@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(SubFX VERSION 0.1 LANGUAGES CXX)
+project(SubFX LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
+set(SUBFX_VERSION R0.1)
 
 if (UNIX)
     add_compile_options(-Wall -Werror -Wextra)
@@ -34,7 +35,13 @@ endif (UNIX)
 find_package(ICU 64.2 REQUIRED COMPONENTS uc)
 
 option(ENABLE_SSE2 "Enable SSE2 SIMD" ON)
+
+include(CoreLib/CMakeLists.txt)
+
 configure_file(config.h.in config.h @ONLY)
 include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 
-add_subdirectory(CoreLib)
+# frontend
+if (enable_python)
+    include(SubFX/CMakeLists.txt)
+endif (enable_python)

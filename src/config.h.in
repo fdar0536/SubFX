@@ -1,1 +1,2 @@
+#define SUBFX_VERSION "@SUBFX_VERSION@"
 #cmakedefine ENABLE_SSE2

@@ -6,14 +6,14 @@ if (UNIX)
 endif (UNIX)
 
 add_library(CoreLib SHARED
-    ass.cpp
-    assparser.cpp
-    common.cpp
-    file.cpp
-    fonthandle.cpp
-    math.cpp
-    shape.cpp
-    utf8.cpp
+    CoreLib/ass.cpp
+    CoreLib/assparser.cpp
+    CoreLib/common.cpp
+    CoreLib/file.cpp
+    CoreLib/fonthandle.cpp
+    CoreLib/math.cpp
+    CoreLib/shape.cpp
+    CoreLib/utf8.cpp
 )
 
 if (ENABLE_SSE2)
@@ -42,8 +42,9 @@ endif (WIN32)
 target_link_libraries(CoreLib ${CoreLib_libs})
 target_include_directories(CoreLib PUBLIC ${CoreLib_includes})
 
+# python
 option(enable_python "Enable python binding" ON)
 
 if (enable_python)
-    add_subdirectory(python)
+    include(CoreLib/python/CMakeLists.txt)
 endif (enable_python)

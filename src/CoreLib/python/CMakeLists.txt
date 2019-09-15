@@ -1,7 +1,7 @@
 find_package(pybind11 2.3.0 REQUIRED)
 add_library(CoreLibPy SHARED
-    assparserpy.cpp
-    corelibpy.cpp
+    CoreLib/python/assparserpy.cpp
+    CoreLib/python/corelibpy.cpp
 )
 
 add_dependencies(CoreLibPy CoreLib)
