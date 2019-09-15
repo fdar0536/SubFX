@@ -6,11 +6,14 @@ Now is under development.
 
 ## Dependency
 
+### CoreLib
 - C++14
 - [Boost C++ Libraries](https://www.boost.org)
-- [ICU](http://site.icu-project.org)
-- [pybind11](https://github.com/pybind/pybind11)
-- [Python3](https://www.python.org) or later
+  - Regex with [ICU](http://site.icu-project.org)
+  - Locale (Windows only)
+- [Pango](https://pango.gnome.org) (Non-Windows only)
+- [pybind11](https://github.com/pybind/pybind11) (Optional)
+- [Python3](https://www.python.org) or later (Optional)
 
 ## TODO
 
