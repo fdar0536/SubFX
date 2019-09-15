@@ -12,9 +12,9 @@ namespace py = pybind11;
 
 using namespace std;
 
-PYBIND11_MODULE(CoreLib, m)
+PYBIND11_MODULE(CoreLibPy, m)
 {
-    m.doc() = "This is core library for TCFX, a modified version of Yutils.";
+    m.doc() = "This is core library for SubFX, a modified version of Yutils.";
 
     /* in math.hpp */
     py::class_<CoreMath>(m, "CoreMath")

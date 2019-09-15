@@ -1,44 +1,20 @@
 if (UNIX)
     include(FindPkgConfig)
-    pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
+    pkg_check_modules(PANGOCAIRO REQUIRED pangocairo>=1.44.6)
     LIST(APPEND CoreLib_includes ${PANGOCAIRO_INCLUDE_DIRS})
     LIST(APPEND CoreLib_libs ${PANGOCAIRO_LIBRARIES})
 endif (UNIX)
 
-option(enable_python "Enable python binding" ON)
-
-if (enable_python)
-    find_package(pybind11 REQUIRED)
-    add_library(CoreLib SHARED
-        ass.cpp
-        assparser.cpp
-        common.cpp
-        file.cpp
-        fonthandle.cpp
-        math.cpp
-        shape.cpp
-        utf8.cpp
-        python/assparserpy.cpp
-        python/corelib.cpp
-    )
-    
-    #python
-    LIST(APPEND CoreLib_includes ${PYTHON_INCLUDE_DIRS})
-    LIST(APPEND CoreLib_includes ${pybind11_INCLUDE_DIRS})
-    LIST(APPEND CoreLib_libs ${PYTHON_LIBRARIES})
-    
-else ()
-    add_library(CoreLib SHARED
-        ass.cpp
-        assparser.cpp
-        common.cpp
-        file.cpp
-        fonthandle.cpp
-        math.cpp
-        shape.cpp
-        utf8.cpp
-    )
-endif (enable_python)
+add_library(CoreLib SHARED
+    ass.cpp
+    assparser.cpp
+    common.cpp
+    file.cpp
+    fonthandle.cpp
+    math.cpp
+    shape.cpp
+    utf8.cpp
+)
 
 if (ENABLE_SSE2)
     if (UNIX)
@@ -65,8 +41,9 @@ endif (WIN32)
 
 target_link_libraries(CoreLib ${CoreLib_libs})
 target_include_directories(CoreLib PUBLIC ${CoreLib_includes})
-set_target_properties(CoreLib PROPERTIES PREFIX "")
 
-if (WIN32)
-    set_target_properties(CoreLib PROPERTIES SUFFIX ".pyd")
-endif (WIN32)
+option(enable_python "Enable python binding" ON)
+
+if (enable_python)
+    add_subdirectory(python)
+endif (enable_python)
