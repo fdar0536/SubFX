@@ -1,12 +1,8 @@
-#include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "pybind11/attr.h"
 #include "pybind11/functional.h"
 
 #include "assparserpy.hpp"
-#include "../fonthandle.hpp"
-#include "../file.hpp"
-#include "../shape.hpp"
 
 namespace py = pybind11;
 
