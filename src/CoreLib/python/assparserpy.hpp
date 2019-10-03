@@ -34,6 +34,8 @@ public:
 
     map<string, shared_ptr<AssStyle>> getStyleData() const;
 
+    vector<shared_ptr<AssDialog>> getDialogsData() const;
+
 private:
 
     shared_ptr<AssParser> parser;
