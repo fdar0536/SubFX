@@ -10,6 +10,7 @@ Now is under development.
 - C++14
 - [Boost C++ Libraries](https://www.boost.org)
   - Regex with [ICU](http://site.icu-project.org)
+  - Math (Headers only)
   - Locale (Windows only)
 - [Pango](https://pango.gnome.org) (Non-Windows only)
 - [pybind11](https://github.com/pybind/pybind11) (Optional)
