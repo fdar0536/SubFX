@@ -251,7 +251,7 @@ map<string, double> FontHandle::text_extents(string &text)
     size_t textLen = wcslen(textDst.c_str());
 
     SIZE *size(new (nothrow) SIZE);
-    if !(size)
+    if (!(size))
     {
         throw runtime_error("CANNOT allocate SIZE");
     }

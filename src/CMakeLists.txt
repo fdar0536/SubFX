@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.14)
 
 project(SubFX LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
@@ -22,17 +22,17 @@ else () # Windows
         
         add_link_options(-Wl,--unresolved-symbols=report-all)
     else () # msvc or icc
-        add_compile_options(/W4 /WX)
+        add_compile_options(/W4)
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 
 if (UNIX)
     find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
+    find_package(ICU 64.2 REQUIRED COMPONENTS uc)
 else () # windows
     find_package(Boost 1.69.0 REQUIRED COMPONENTS regex locale)
+    find_package(ICU 64.2 REQUIRED COMPONENTS uc in)
 endif (UNIX)
-
-find_package(ICU 64.2 REQUIRED COMPONENTS uc)
 
 option(ENABLE_SSE2 "Enable SSE2 SIMD" ON)
 

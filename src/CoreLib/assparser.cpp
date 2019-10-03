@@ -10,6 +10,13 @@
 #include <cstdio>
 #include <cinttypes>
 
+#ifndef SCNd8
+#define SCNd8 "hhd"
+#endif
+#ifndef SCNu8
+#define SCNu8 "hhu"
+#endif
+
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 #include "boost/regex/icu.hpp"
