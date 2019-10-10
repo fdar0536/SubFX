@@ -18,6 +18,7 @@ using json = nlohmann::json;
 ConfigParser::ConfigParser(string &jsonFileName) :
     subName(""),
     logFile(""),
+    outputFile(""),
     configDatas(vector<shared_ptr<ConfigData>>()),
     success(false),
     lastError("")
@@ -43,6 +44,11 @@ string ConfigParser::getSubName() const
 string ConfigParser::getLogFileName() const
 {
     return logFile;
+}
+
+string ConfigParser::getOutputFileName() const
+{
+    return outputFile;
 }
 
 vector<shared_ptr<ConfigData>> ConfigParser::getConfigDatas() const
@@ -84,6 +90,8 @@ void ConfigParser::parseConfig(string &jsonFileName)
     {
         logFile = "stdout";
     }
+    
+    GetCofigItem(outputFile, config, "outputFile")
     
     json scripts;
     GetCofigItem(scripts, config, "scripts")

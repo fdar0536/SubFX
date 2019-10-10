@@ -38,8 +38,6 @@ class ConfigParser
 {
 public:
     
-    ConfigParser(string &jsonFileName);
-    
     bool isSuccess() const;
     
     string getLastError() const;
@@ -48,9 +46,27 @@ public:
     
     string getLogFileName() const;
     
+    string getOutputFileName() const;
+    
     vector<shared_ptr<ConfigData>> getConfigDatas() const;
     
 protected:
+    
+    ConfigParser(string &jsonFileName);
+    
+    string subName;
+    
+    string logFile;
+    
+    string outputFile;
+    
+    vector<shared_ptr<ConfigData>> configDatas;
+    
+    bool success;
+    
+    string lastError;
+    
+private:
     
     void parseConfig(string &jsonFileName);
     
@@ -71,15 +87,6 @@ protected:
         return true;
     }
     
-    string subName;
-    
-    string logFile;
-    
-    vector<shared_ptr<ConfigData>> configDatas;
-    
-    bool success;
-    
-    string lastError;
 };
 
 #endif // CONFIGPARSER_HPP
