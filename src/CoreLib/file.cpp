@@ -97,8 +97,12 @@ void CoreFile::writeAssMeta(shared_ptr<AssMeta> &meta)
     file << "ScriptType: v4.00+" << endl;
     file << "WrapStyle: " << meta->wrap_style << endl;
     file << "ScaledBorderAndShadow: " << (meta->scaled_border_and_shadow ? "yes" : "no") << endl;
-
-    if (meta->play_res_x >= 1000 || meta->play_res_y >= 1000)
+    
+    if (meta->colorMatrix != "")
+    {
+        file << "YCbCr Matrix: " << meta->colorMatrix << endl;
+    }
+    else if (meta->play_res_x >= 1000 || meta->play_res_y >= 1000)
     {
         file << "YCbCr Matrix: TV.709" << endl;
     }

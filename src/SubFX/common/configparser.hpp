@@ -44,6 +44,10 @@ public:
     
     string getLastError() const;
     
+    string getSubName() const;
+    
+    string getLogFileName() const;
+    
     vector<shared_ptr<ConfigData>> getConfigDatas() const;
     
 private:

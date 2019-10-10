@@ -35,6 +35,16 @@ string ConfigParser::getLastError() const
     return lastError;
 }
 
+string ConfigParser::getSubName() const
+{
+    return subName;
+}
+
+string ConfigParser::getLogFileName() const
+{
+    return logFile;
+}
+
 vector<shared_ptr<ConfigData>> ConfigParser::getConfigDatas() const
 {
     return configDatas;

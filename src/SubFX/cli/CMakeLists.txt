@@ -2,6 +2,7 @@ add_executable(SubFXCLI
     main.cpp
     launcher.cpp
     ../common/configparser.cpp
+    ../common/subfxinit.cpp
 )
 
 add_dependencies(SubFXCLI CoreLibPy)

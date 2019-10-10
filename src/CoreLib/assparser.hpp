@@ -20,17 +20,17 @@ class AssParser : protected CoreAss, protected CoreUtf8
 public:
     
     AssParser(const string &fileName);
-
+    
     shared_ptr<AssMeta> meta() const;
-
+    
     map<string, shared_ptr<AssStyle>> styles() const;
-
+    
     vector<shared_ptr<AssDialog>> dialogs() const;
-
+    
     void upgradeDialogs();
-
+    
     bool dialogIsUpgraded() const;
-
+    
 private:
     
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

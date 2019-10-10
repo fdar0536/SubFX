@@ -25,13 +25,15 @@ public:
     wrap_style(0),
     scaled_border_and_shadow(true),
     play_res_x(640),
-    play_res_y(360)
+    play_res_y(360),
+    colorMatrix("")
     {}
 
     uint8_t wrap_style;
     bool scaled_border_and_shadow;
     uint16_t play_res_x;
     uint16_t play_res_y;
+    string colorMatrix;
 };
 
 class AssStyle

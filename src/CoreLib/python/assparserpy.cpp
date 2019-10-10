@@ -50,7 +50,7 @@ map<string, shared_ptr<AssStyle>> AssParserPy::getStyleData() const
     return parser->styles();
 }
 
-vector<shared_ptr<AssDialog>> AssParserPy::getDialogsData() const
+vector<shared_ptr<AssDialog>> AssParserPy::getDialogs() const
 {
     return parser->dialogs();
 }

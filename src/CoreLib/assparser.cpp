@@ -208,6 +208,11 @@ void AssParser::parseLine(string &line)
                                         "\"Script info\" -> \"PlayResY\"");
             }
         }
+        else if (regex_match(line, boost::regex("^YCbCr Matrix: (.*)")))
+        {
+            string res(line.substr(23));
+            metaData->colorMatrix = res;
+        }
         break;
     }
     case V4_Styles:
