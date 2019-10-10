@@ -31,11 +31,17 @@ public:
     
     bool dialogIsUpgraded() const;
     
+    bool isSylAvailable() const;
+    
+    bool isWordAvailable() const;
+    
+    bool isCharAvailable() const;
+    
 private:
     
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
     istream &safeGetline(istream &is, string &t);
-
+    
     typedef enum _PARSER_SECTION
     {
         Idle,
@@ -43,21 +49,27 @@ private:
         V4_Styles,
         Events
     } PARSER_SECTION;
-
+    
     PARSER_SECTION section;
-
+    
     void parseLine(string &);
-
+    
     shared_ptr<AssMeta> metaData;
-
+    
     map<string, shared_ptr<AssStyle>> styleData;
-
+    
     bool dialogParsed;
-
+    
     vector<shared_ptr<AssDialog>> dialogData;
-
+    
+    bool sylReady;
+    
+    bool wordReady;
+    
+    bool charReady;
+    
     void parseDialogs();
-
+    
     typedef struct _TEXT_SIZE
     {
         double width;
@@ -67,7 +79,7 @@ private:
         double internal_leading;
         double external_leading;
     } TEXT_SIZE;
-
+    
     TEXT_SIZE *textSize(string &text, shared_ptr<AssStyle> &style);
 };
 

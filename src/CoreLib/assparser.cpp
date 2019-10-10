@@ -34,7 +34,10 @@ AssParser::AssParser(const string &fileName) :
     metaData(make_shared<AssMeta>()),
     styleData(map<string, shared_ptr<AssStyle>>()),
     dialogParsed(false),
-    dialogData(vector<shared_ptr<AssDialog>>())
+    dialogData(vector<shared_ptr<AssDialog>>()),
+    sylReady(false),
+    wordReady(false),
+    charReady(false)
 {
     CoreAss();
     CoreUtf8();
@@ -109,6 +112,21 @@ void AssParser::upgradeDialogs()
 bool AssParser::dialogIsUpgraded() const
 {
     return dialogParsed;
+}
+
+bool AssParser::isSylAvailable() const
+{
+    return sylReady;
+}
+
+bool AssParser::isWordAvailable() const
+{
+    return wordReady;
+}
+
+bool AssParser::isCharAvailable() const
+{
+    return charReady;
 }
 
 // private member function
@@ -1034,7 +1052,27 @@ word_reference_found:
         dialog->leadin = (i == 0 ? 1000.1f : (dialog->start_time - dialogData.at(i - 1)->end_time));
         dialog->leadout = (i == last ? 1000.1f : (dialogData.at(i + 1)->start_time - dialog->end_time));
     }
-
+    
+    // here maybe have a better solution
+    for (size_t i = 0; i < dialogData.size(); ++i)
+    {
+        auto dialog(dialogData.at(i));
+        if (dialog->syls.size())
+        {
+            sylReady = true;
+        }
+        
+        if (dialog->words.size())
+        {
+            wordReady = true;
+        }
+        
+        if (dialog->chars.size())
+        {
+            charReady = true;
+        }
+    }
+    
     dialogParsed = true;
 }
 
