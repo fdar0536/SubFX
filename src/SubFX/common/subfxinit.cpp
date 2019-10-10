@@ -3,39 +3,39 @@
 using namespace std;
 
 SubFXInit::SubFXInit(string &jsonFileName) :
-    configParser(make_shared<ConfigParser>(jsonFileName)),
-    isSylReady(false),
-    isWordReady(false),
-    isCharReady(false),
-    lastError(""),
-    success(false),
+    ConfigParser(jsonFileName),
     assParser(nullptr)
 {
     init();
 }
 
+bool SubFXInit::isSylAvailable() const
+{
+    return assParser->isSylAvailable();
+}
+
+bool SubFXInit::isWordAvailable() const
+{
+    return assParser->isWordAvailable();
+}
+
+bool SubFXInit::isCharAvailable() const
+{
+    return assParser->isCharAvailable();
+}
+
 // private member function
 void SubFXInit::init()
 {
-    if (configParser == nullptr)
+    if (!success)
     {
-        lastError = "Fail to allocate memory";
-        success = false;
-        return;
-    }
-    
-    if (!configParser->isSuccess())
-    {
-        lastError = configParser->getLastError();
-        success = false;
         return;
     }
     
     try
     {
-        assParser = make_shared<AssParserPy>(configParser->getSubName());
+        assParser = make_shared<AssParserPy>(subName);
         assParser->upgradeDialogs();
-        isSylReady = (assParser->getDialogs());
     }
     catch (invalid_argument &e)
     {
@@ -49,5 +49,4 @@ void SubFXInit::init()
         success = false;
         return;
     }
-    
 }

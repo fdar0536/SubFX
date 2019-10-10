@@ -55,6 +55,21 @@ vector<shared_ptr<AssDialog>> AssParserPy::getDialogs() const
     return parser->dialogs();
 }
 
+bool AssParserPy::isSylAvailable() const
+{
+    return parser->isSylAvailable();
+}
+
+bool AssParserPy::isWordAvailable() const
+{
+    return parser->isWordAvailable();
+}
+
+bool AssParserPy::isCharAvailable() const
+{
+    return parser->isCharAvailable();
+}
+
 // private member function
 void AssParserPy::initData()
 {

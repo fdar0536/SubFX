@@ -21,37 +21,43 @@ public:
     
     // constructor may throw invalid_argument
     AssParserPy(string &fileName);
-
+    
     py::dict meta() const;
-
+    
     py::dict styles() const;
-
+    
     py::list dialogs() const;
-
+    
     void upgradeDialogs();
-
+    
     shared_ptr<AssMeta> getMetaPtr() const;
-
+    
     map<string, shared_ptr<AssStyle>> getStyleData() const;
-
+    
     vector<shared_ptr<AssDialog>> getDialogs() const;
-
+    
+    bool isSylAvailable() const;
+    
+    bool isWordAvailable() const;
+    
+    bool isCharAvailable() const;
+    
 private:
-
+    
     shared_ptr<AssParser> parser;
-
+    
     void initData();
-
+    
     void setUpMeta();
     py::dict metaData;
-
+    
     void setUpStyles();
     py::dict styleData;
-
+    
     void setUpDialogs();
     bool dialogParsed;
     py::list dialogData;
-
+    
     void getDialogsData();
 };
 #ifdef __GNUC__

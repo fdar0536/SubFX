@@ -50,7 +50,7 @@ public:
     
     vector<shared_ptr<ConfigData>> getConfigDatas() const;
     
-private:
+protected:
     
     void parseConfig(string &jsonFileName);
     
