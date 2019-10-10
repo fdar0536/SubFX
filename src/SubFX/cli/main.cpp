@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "../common/subfxinit.hpp"
+#include "../common/subfxassinit.hpp"
 #include "config.h"
 
 using namespace std;
@@ -24,21 +24,21 @@ int main(int argc, char **argv)
     }
     
     string jsonFileName(argv[1]);
-    SubFXInit *config = new (nothrow) SubFXInit(jsonFileName);
-    if (!config)
+    SubFXAssInit *assConfig = new (nothrow) SubFXAssInit(jsonFileName);
+    if (!assConfig)
     {
         cerr << "Fail to allocate memory" << endl;
         return 1;
     }
     
-    if (!config->isSuccess())
+    if (!assConfig->isSuccess())
     {
-        cerr << config->getLastError() << endl;
-        delete config;
+        cerr << assConfig->getLastError() << endl;
+        delete assConfig;
         return 1;
     }
     
-    delete config;
+    delete assConfig;
     return 0;
 }
 

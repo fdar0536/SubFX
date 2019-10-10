@@ -1,7 +1,7 @@
 add_executable(SubFXCLI
     main.cpp
     ../common/configparser.cpp
-    ../common/subfxinit.cpp
+    ../common/subfxassinit.cpp
 )
 
 add_dependencies(SubFXCLI CoreLibPy)

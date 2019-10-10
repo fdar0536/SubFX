@@ -1,31 +1,31 @@
-#include "subfxinit.hpp"
+#include "subfxassinit.hpp"
 
 using namespace std;
 
-SubFXInit::SubFXInit(string &jsonFileName) :
+SubFXAssInit::SubFXAssInit(string &jsonFileName) :
     ConfigParser(jsonFileName),
     assParser(nullptr)
 {
     init();
 }
 
-bool SubFXInit::isSylAvailable() const
+bool SubFXAssInit::isSylAvailable() const
 {
     return assParser->isSylAvailable();
 }
 
-bool SubFXInit::isWordAvailable() const
+bool SubFXAssInit::isWordAvailable() const
 {
     return assParser->isWordAvailable();
 }
 
-bool SubFXInit::isCharAvailable() const
+bool SubFXAssInit::isCharAvailable() const
 {
     return assParser->isCharAvailable();
 }
 
 // private member function
-void SubFXInit::init()
+void SubFXAssInit::init()
 {
     if (!success)
     {

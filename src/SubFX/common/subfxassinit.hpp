@@ -1,16 +1,16 @@
-#ifndef SUBFXINIT_HPP
-#define SUBFXINIT_HPP
+#ifndef SUBFXASSINIT_HPP
+#define SUBFXASSINIT_HPP
 
 #include "../../CoreLib/python/assparserpy.hpp"
 #include "configparser.hpp"
 
 using namespace std;
 
-class SubFXInit : public ConfigParser
+class SubFXAssInit : public ConfigParser
 {
 public:
     
-    SubFXInit(string &jsonFileName);
+    SubFXAssInit(string &jsonFileName);
     
     bool isSylAvailable() const;
     
@@ -26,4 +26,4 @@ private:
     
 };
 
-#endif // SUBFXINIT_HPP
+#endif // SUBFXASSINIT_HPP
