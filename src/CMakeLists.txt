@@ -9,8 +9,6 @@ if (UNIX)
     
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
-    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        add_compile_options(-fvisibility=hidden)
     endif ()
     
     add_link_options(-Wl,--unresolved-symbols=report-all)
