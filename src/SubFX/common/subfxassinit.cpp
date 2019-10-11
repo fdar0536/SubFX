@@ -54,13 +54,6 @@ void SubFXAssInit::init()
         success = false;
         return;
     }
-    /*
-    catch (...)
-    {
-        lastError = "Unknown error";
-        success = false;
-        return;
-    }
-    */
+    
     success = true;
 }

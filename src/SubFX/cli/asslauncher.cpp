@@ -50,12 +50,9 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
                             shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
-    //string scriptName(config->scriptName.substr(0,
-      //                                    config->scriptName.length() - 3));
     py::object mainObj;
     try
     {
-        //mainObj = py::module::import(scriptName.c_str()).attr("TCFXMain");
         py::object imp = py::module::import("importlib.util");
         py::object spec = imp.attr("spec_from_file_location")("main",
                                                     config->scriptName);
