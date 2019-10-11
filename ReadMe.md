@@ -22,7 +22,7 @@ Now is under development.
 #### Common
 
 - C++14
-- [CoreLib](###CoreLib) with Python
+- [CoreLib] with Python
 - [nlohmann's json](https://github.com/nlohmann/json)
 
 #### CLI
