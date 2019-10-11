@@ -1,4 +1,5 @@
 #include <fstream>
+#include <regex>
 #include <map>
 
 #include "configparser.hpp"
@@ -109,6 +110,7 @@ void ConfigParser::parseConfig(string &jsonFileName)
     modeMap["syl"] = SubMode::syls;
     modeMap["char"] = SubMode::chars;
     string modeRes("");
+    regex pyScript("^.*\\.py$");
     for (size_t i = 0; i < scripts.size(); ++i)
     {
         shared_ptr<ConfigData> configData = make_shared<ConfigData>();
@@ -120,6 +122,13 @@ void ConfigParser::parseConfig(string &jsonFileName)
         }
         
         GetCofigItem(configData->scriptName, scripts.at(i), "script")
+        if (!regex_match(configData->scriptName, pyScript))
+        {
+            lastError = "Invalid python script name: " + configData->scriptName;
+            success = false;
+            return;
+        }
+        
         GetCofigItem(modeRes, scripts.at(i), "mode")
         if (modeRes != "line" &&
             modeRes != "word" &&
@@ -144,6 +153,15 @@ void ConfigParser::parseConfig(string &jsonFileName)
         }
         
         GetCofigItem(configData->endLine, scripts.at(i), "endLine")
+        if (configData->endLine >= 0 &&
+            configData->startLine > configData->endLine)
+        {
+            success = false;
+            lastError = "\"startLine\" is GREATER THAN \"endLine\".";
+            configDatas.clear();
+            return;
+        }
+        
         configDatas.push_back(configData);
     }
     

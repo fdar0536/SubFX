@@ -24,6 +24,11 @@ bool SubFXAssInit::isCharAvailable() const
     return assParser->isCharAvailable();
 }
 
+shared_ptr<AssParserPy> SubFXAssInit::getParser() const
+{
+    return assParser;
+}
+
 // private member function
 void SubFXAssInit::init()
 {
@@ -49,4 +54,12 @@ void SubFXAssInit::init()
         success = false;
         return;
     }
+    catch (...)
+    {
+        lastError = "Unknown error";
+        success = false;
+        return;
+    }
+    
+    success = true;
 }

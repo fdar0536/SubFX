@@ -1,5 +1,7 @@
 add_executable(SubFXCLI
     main.cpp
+    launcher.cpp
+    asslauncher.cpp
     ../common/configparser.cpp
     ../common/subfxassinit.cpp
 )

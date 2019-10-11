@@ -9,4 +9,5 @@ src/testCpp
 src/*.user
 build*
 build*/*
-test.json
+*.json
+*.ass

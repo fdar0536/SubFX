@@ -9,6 +9,8 @@ if (UNIX)
     
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        add_compile_options(-fvisibility=hidden)
     endif ()
     
     add_link_options(-Wl,--unresolved-symbols=report-all)
@@ -28,7 +30,7 @@ endif (UNIX) # end if (UNIX)
 
 if (UNIX)
     find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
-    find_package(ICU 64.2 REQUIRED COMPONENTS uc)
+    find_package(ICU 64.2 REQUIRED COMPONENTS uc i18n)
 else () # windows
     find_package(Boost 1.69.0 REQUIRED COMPONENTS regex locale)
     find_package(ICU 64.2 REQUIRED COMPONENTS uc in)

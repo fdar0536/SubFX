@@ -12,9 +12,6 @@ using namespace std;
 
 namespace py = pybind11;
 
-#ifdef __GNUC__
-#pragma GCC visibility push(hidden)
-#endif
 class AssParserPy
 {
 public:
@@ -60,8 +57,5 @@ private:
     
     void getDialogsData();
 };
-#ifdef __GNUC__
-#pragma GCC visibility pop
-#endif
 
 #endif // ASSPARSERPY_HPP

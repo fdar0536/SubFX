@@ -2,10 +2,12 @@
 
 #include <cstring>
 
-#include "../common/subfxassinit.hpp"
+#include "pybind11/embed.h"
+#include "asslauncher.hpp"
 #include "config.h"
 
 using namespace std;
+namespace py = pybind11;
 
 void printHelp(char **argv);
 
@@ -23,6 +25,8 @@ int main(int argc, char **argv)
         return 0;
     }
     
+    py::scoped_interpreter guard{};
+    
     string jsonFileName(argv[1]);
     SubFXAssInit *assConfig = new (nothrow) SubFXAssInit(jsonFileName);
     if (!assConfig)
@@ -38,6 +42,31 @@ int main(int argc, char **argv)
         return 1;
     }
     
+    AssLauncher *assLauncher = new (nothrow) AssLauncher(assConfig);
+    if (!assLauncher)
+    {
+        cerr << "Fail to allocate memory" << endl;
+        return 1;
+    }
+    
+    if (!assLauncher->isSuccess())
+    {
+        cerr << assLauncher->getLastError() << endl;
+        delete assLauncher;
+        delete assConfig;
+        return 1;
+    }
+    
+    assLauncher->exec(assConfig);
+    if (!assLauncher->isSuccess())
+    {
+        cerr << assLauncher->getLastError() << endl;
+        delete assLauncher;
+        delete assConfig;
+        return 1;
+    }
+    
+    delete assLauncher;
     delete assConfig;
     return 0;
 }

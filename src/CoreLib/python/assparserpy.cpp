@@ -1,8 +1,13 @@
 #include "assparserpy.hpp"
 #include "pybind11/pybind11.h"
 
+namespace py = pybind11;
+
 AssParserPy::AssParserPy(string &fileName) :
-    dialogParsed(false)
+    metaData(py::dict()),
+    styleData(py::dict()),
+    dialogParsed(false),
+    dialogData(py::list())
 {
     parser = make_shared<AssParser>(fileName);
     if (parser == nullptr)
@@ -87,7 +92,8 @@ void AssParserPy::setUpMeta()
     newData["scaled_border_and_shadow"] = meta->scaled_border_and_shadow;
     newData["play_res_x"] = meta->play_res_x;
     newData["play_res_y"] = meta->play_res_y;
-
+    newData["colorMatrix"] = meta->colorMatrix;
+    
     metaData = newData;
 }
 

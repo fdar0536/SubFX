@@ -18,6 +18,8 @@ public:
     
     bool isCharAvailable() const;
     
+    shared_ptr<AssParserPy> getParser() const;
+    
 private:
     
     void init();
