@@ -21,12 +21,14 @@
 
 from math    import *
 from random  import *
-from tcaxLib import *
+from CoreLibPy import *
 import sys
 
 ######################################### Global Constant ###################################################
 
 tcaxPy_Version       = '0.8.0.0'
+
+######################################### Data Management Function ##########################################
 
 def UseSitePackages():      # invoke this function right after importing tcaxPy module if you want to use Python 3rd party packages
     if (sys.platform == "win32"):
@@ -40,15 +42,14 @@ def UseSitePackages():      # invoke this function right after importing tcaxPy 
         sys.path.append(sys.prefix + '/lib/python3.7/site-packages')
 
 ########################################## Main FX Function #################################################
-
 def SubL(Start = 0, End = 0, Layer = 0, Style = 'TCMS'):
     return 'Dialogue: {0},{1},{2},{3},NTP,0000,0000,0000,,'.format(int(Layer), FmtTime(Start), FmtTime(End), Style)
 
 def ass_main(ASS_BUF, SubDlg = '', Event = '', Text = ''):
     if Event == '':
-        ASS_BUF.append('{0}{1}{2}\r\n'.format(SubDlg, Event, Text))
+        ASS_BUF.append('{0}{1}{2}'.format(SubDlg, Event, Text))
     else:
-        ASS_BUF.append('{0}{{{1}}}{2}\r\n'.format(SubDlg, Event, Text))
+        ASS_BUF.append('{0}{{{1}}}{2}'.format(SubDlg, Event, Text))
 
 #############################################################################################################
 
