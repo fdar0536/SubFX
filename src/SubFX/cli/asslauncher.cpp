@@ -50,12 +50,18 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
                             shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
-    string scriptName(config->scriptName.substr(0,
-                                          config->scriptName.length() - 3));
+    //string scriptName(config->scriptName.substr(0,
+      //                                    config->scriptName.length() - 3));
     py::object mainObj;
     try
     {
-        mainObj = py::module::import(scriptName.c_str()).attr("TCFXMain");
+        //mainObj = py::module::import(scriptName.c_str()).attr("TCFXMain");
+        py::object imp = py::module::import("importlib.util");
+        py::object spec = imp.attr("spec_from_file_location")("main",
+                                                    config->scriptName);
+        mainObj = imp.attr("module_from_spec")(spec);
+        spec.attr("loader").attr("exec_module")(mainObj);
+        mainObj = mainObj.attr("TCFXMain");
     }
     catch (py::error_already_set &e)
     {
@@ -73,7 +79,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
     }
     case SubMode::syls:
     {
-        modeName = "syl";
+        modeName = "syls";
         if (!assConfig->isSylAvailable())
         {
             pExecConfigWarning(modeName);
@@ -134,7 +140,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             
             try
             {
-                resObj = mainObj(line, py::list(), -1);
+                resObj = mainObj(line, py::list(), i);
                 resString = resObj.cast<vector<string>>();
             }
             catch (py::error_already_set &e)
@@ -176,9 +182,9 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
                 }
                 
                 assBuf.insert(assBuf.end(), resString.begin(), resString.end());
-            }
-        }
-    }
+            } // end for j
+        } // end if (modeName == "line")
+    } // end for i
     
     return 0;
 }

@@ -228,7 +228,7 @@ void AssParser::parseLine(string &line)
         }
         else if (regex_match(line, boost::regex("^YCbCr Matrix: (.*)")))
         {
-            string res(line.substr(23));
+            string res(line.substr(14));
             metaData->colorMatrix = res;
         }
         break;
