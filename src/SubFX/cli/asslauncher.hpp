@@ -15,7 +15,7 @@ public:
     
     AssLauncher(SubFXAssInit *assConfig);
     
-    void exec(SubFXAssInit *assConfig);
+    int exec(SubFXAssInit *assConfig);
     
 private:
     
@@ -34,8 +34,22 @@ private:
     {
         lastError = error.what();
         success = false;
+        
+        const char *now(getCurrentTime());
+        if (now)
+        {
+            fputs(now, logFile);
+        }
+        else
+        {
+            fputs("CANNOT get current time!", logFile);
+        }
+        
         fputs(lastError.c_str(), logFile);
+        fputs("", logFile);
     }
+    
+    const char *getCurrentTime();
     
 };
 

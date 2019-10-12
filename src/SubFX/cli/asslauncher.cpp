@@ -2,6 +2,8 @@
 #pragma warning(disable: 4996)
 #endif    /* _MSC_VER */
 
+#include <ctime>
+
 #include "pybind11/cast.h"
 #include "pybind11/attr.h"
 #include "pybind11/stl.h"
@@ -18,7 +20,7 @@ AssLauncher::AssLauncher(SubFXAssInit *assConfig) :
     assBuf(vector<string>())
 {}
 
-void AssLauncher::exec(SubFXAssInit *assConfig)
+int AssLauncher::exec(SubFXAssInit *assConfig)
 {
     auto parser(assConfig->getParser());
     auto configs(assConfig->getConfigDatas());
@@ -30,7 +32,7 @@ void AssLauncher::exec(SubFXAssInit *assConfig)
         {
             resString.clear();
             assBuf.clear();
-            return;
+            return 1;
         }
     }
     
@@ -43,6 +45,7 @@ void AssLauncher::exec(SubFXAssInit *assConfig)
     
     success = true;
     lastError = "";
+    return 0;
 }
 
 // private member function
@@ -188,9 +191,35 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
 
 void AssLauncher::pExecConfigWarning(string &input)
 {
-    string output("Warning: \"");
+    const char *now(getCurrentTime());
+    string output;
+    if (now)
+    {
+        output = string(now);
+    }
+    else
+    {
+        output = "CANNOT get current time!";
+    }
+    
+    output += "\n";
+    output += "Warning: \"";
     output += input;
     output += "\" mode is not available. ";
     output += "Fallback to \"line\" mode.";
     fputs(output.c_str(), logFile);
+    fputs("", logFile);
+}
+
+const char *AssLauncher::getCurrentTime()
+{
+    time_t rawtime;
+    time(&rawtime);
+    struct tm *now(localtime(&rawtime));
+    if (!now)
+    {
+        return nullptr;
+    }
+    
+    return asctime(now);
 }

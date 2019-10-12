@@ -57,8 +57,7 @@ int main(int argc, char **argv)
         return 1;
     }
     
-    assLauncher->exec(assConfig);
-    if (!assLauncher->isSuccess())
+    if (assLauncher->exec(assConfig))
     {
         cerr << assLauncher->getLastError() << endl;
         delete assLauncher;
