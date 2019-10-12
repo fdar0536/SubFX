@@ -140,7 +140,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             
             try
             {
-                resObj = mainObj(line, py::list(), i);
+                resObj = mainObj(line, py::list());
                 resString = resObj.cast<vector<string>>();
             }
             catch (py::error_already_set &e)
@@ -167,7 +167,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             {
                 try
                 {
-                    resObj = mainObj(line, list[j], i);
+                    resObj = mainObj(line, list[j]);
                     resString = resObj.cast<vector<string>>();
                 }
                 catch (py::error_already_set &e)
