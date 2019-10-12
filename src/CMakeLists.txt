@@ -42,6 +42,6 @@ configure_file(config.h.in config.h @ONLY)
 include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 
 # frontend
-if (enable_python)
+if (ENABLE_PYTHON)
     include(SubFX/CMakeLists.txt)
-endif (enable_python)
+endif (ENABLE_PYTHON)
