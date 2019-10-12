@@ -12,10 +12,11 @@
 
 #include "asscommon.hpp"
 #include "ass.hpp"
+#include "../common/basecommon.hpp"
 
 using namespace std;
 
-class CoreFile : protected CoreAss
+class SYMBOL_SHOW CoreFile : protected CoreAss
 {
 public:
 

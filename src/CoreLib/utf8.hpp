@@ -10,9 +10,11 @@
 
 #include <cstdint>
 
+#include "../common/basecommon.hpp"
+
 using namespace std;
 
-class CoreUtf8
+class SYMBOL_SHOW CoreUtf8
 {
 public:
     CoreUtf8() {}

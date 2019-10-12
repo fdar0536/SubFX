@@ -10,10 +10,11 @@
 #include <string>
 
 #include "common.hpp"
+#include "../common/basecommon.hpp"
 
 using namespace std;
 
-class CoreMath : public CoreCommon
+class SYMBOL_SHOW CoreMath : public CoreCommon
 {
 public:
      CoreMath();

@@ -11,10 +11,11 @@
 #include <map>
 
 #include "math.hpp"
+#include "../common/basecommon.hpp"
 
 using namespace std;
 
-class CoreShape : protected CoreMath
+class SYMBOL_SHOW CoreShape : protected CoreMath
 {
 public:
 

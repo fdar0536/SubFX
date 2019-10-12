@@ -15,12 +15,13 @@
 #endif
 
 #include "math.hpp"
+#include "../common/basecommon.hpp"
 
 #define FONT_PRECISION 64
 
 using namespace std;
 
-class FontHandle : protected CoreMath
+class SYMBOL_SHOW FontHandle : protected CoreMath
 {
 public:
 

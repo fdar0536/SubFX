@@ -502,7 +502,7 @@ vector<double> CoreShape::curve4_to_lines(double px0, double py0,
     pts.reserve(4);
 
     function<void(double, double, double, double, double, double, double, double)> 
-    convert_recursive([&](
+    convert_recursive{ [&convert_recursive, this, &pts](
                            double x0, double y0,
                            double x1, double y1,
                            double x2, double y2,
@@ -526,7 +526,7 @@ vector<double> CoreShape::curve4_to_lines(double px0, double py0,
                               resVec.at(12), resVec.at(13),
                               resVec.at(14), resVec.at(15));
         }
-    });
+    } };
 
     convert_recursive(px0, py0, px1, py1, px2, py2, px3, py3);
     return pts;

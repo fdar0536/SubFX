@@ -12,10 +12,11 @@
 #include "ass.hpp"
 #include "asscommon.hpp"
 #include "utf8.hpp"
+#include "../common/basecommon.hpp"
 
 using namespace std;
 
-class AssParser : protected CoreAss, protected CoreUtf8
+class SYMBOL_SHOW AssParser : protected CoreAss, protected CoreUtf8
 {
 public:
     

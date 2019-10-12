@@ -11,9 +11,11 @@
 
 #include <cstdint>
 
+#include "../common/basecommon.hpp"
+
 using namespace std;
 
-class CoreAss
+class SYMBOL_SHOW CoreAss
 {
 public:
 
