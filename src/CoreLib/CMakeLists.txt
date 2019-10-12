@@ -47,4 +47,4 @@ option(ENABLE_PYTHON "Enable python binding" ON)
 
 if (ENABLE_PYTHON)
     include(CoreLib/python/CMakeLists.txt)
-endif (enable_python)
+endif (ENABLE_PYTHON)
