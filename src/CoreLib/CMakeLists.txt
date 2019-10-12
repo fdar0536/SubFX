@@ -43,8 +43,8 @@ target_link_libraries(CoreLib ${CoreLib_libs})
 target_include_directories(CoreLib PUBLIC ${CoreLib_includes})
 
 # python
-option(enable_python "Enable python binding" ON)
+option(ENABLE_PYTHON "Enable python binding" ON)
 
-if (enable_python)
+if (ENABLE_PYTHON)
     include(CoreLib/python/CMakeLists.txt)
 endif (enable_python)

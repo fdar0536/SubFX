@@ -35,10 +35,6 @@ Now is under development.
 - [ ] Nice frontend
 - [ ] Document
 
-## Known issue(s)
-
-- GCC CANNOT compile this.
-
 ## Licence
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)

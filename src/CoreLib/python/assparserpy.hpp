@@ -8,11 +8,13 @@
 #include "../CoreLib.hpp"
 #include "pybind11/pybind11.h"
 
+#include "../../common/basecommon.hpp"
+
 using namespace std;
 
 namespace py = pybind11;
 
-class AssParserPy
+class SYMBOL_SHOW AssParserPy
 {
 public:
     

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class SubFXAssInit : public ConfigParser
+class SYMBOL_HIDE SubFXAssInit : public ConfigParser
 {
 public:
     
