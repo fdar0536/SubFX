@@ -11,6 +11,8 @@ namespace py = pybind11;
 
 void printHelp(char **argv);
 
+void cleanUp(AssLauncher *, SubFXAssInit *);
+
 int main(int argc, char **argv)
 {
     if (argc != 2)
@@ -38,7 +40,7 @@ int main(int argc, char **argv)
     if (!assConfig->isSuccess())
     {
         cerr << assConfig->getLastError() << endl;
-        delete assConfig;
+        cleanUp(nullptr, assConfig);
         return 1;
     }
     
@@ -46,28 +48,25 @@ int main(int argc, char **argv)
     if (!assLauncher)
     {
         cerr << "Fail to allocate memory" << endl;
+        cleanUp(nullptr, assConfig);
         return 1;
     }
     
     if (!assLauncher->isSuccess())
     {
         cerr << assLauncher->getLastError() << endl;
-        delete assLauncher;
-        delete assConfig;
+        cleanUp(assLauncher, assConfig);
         return 1;
     }
     
-    if (assLauncher->exec(assConfig))
+    int ret(assLauncher->exec(assConfig));
+    if (ret)
     {
-        cerr << assLauncher->getLastError() << endl;
-        delete assLauncher;
-        delete assConfig;
-        return 1;
+        cerr << "Something error happened. Please see log for details." << endl;
     }
     
-    delete assLauncher;
-    delete assConfig;
-    return 0;
+    cleanUp(assLauncher, assConfig);
+    return ret;
 }
 
 void printHelp(char **argv)
@@ -75,4 +74,17 @@ void printHelp(char **argv)
     cout << argv[0] << " " << SUBFX_VERSION << " usage:" << endl;
     cout << argv[0] << " /path/to/your/configFile.json" << endl;
     cout << "\"-h\" or \"--help\": print this message and exit." << endl;
+}
+
+void cleanUp(AssLauncher *input1, SubFXAssInit *input2)
+{
+    if (input1)
+    {
+        delete input1;
+    }
+    
+    if (input2)
+    {
+        delete input2;
+    }
 }

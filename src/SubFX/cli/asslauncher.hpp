@@ -23,6 +23,12 @@ private:
     
     vector<string> assBuf;
     
+    size_t totalConfigs;
+    
+    size_t currentConfig;
+    
+    void reset();
+    
     int execConfig(SubFXAssInit *assConfig,
                    shared_ptr<ConfigData> &config,
                    py::list &dialogs);
@@ -46,10 +52,12 @@ private:
         }
         
         fputs(lastError.c_str(), logFile);
-        fputs("", logFile);
+        fputs("\n", logFile);
     }
     
     const char *getCurrentTime();
+    
+    void reportProgress(size_t currentLine, size_t totalLines);
     
 };
 
