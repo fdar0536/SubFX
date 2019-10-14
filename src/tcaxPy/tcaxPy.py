@@ -420,15 +420,15 @@ def iclip2(Scale, Draw):    # deprecated
 def GetVersion():
     print('tcaxLib version: ' + tcaxLibGetVersion() + '\ntcaxPy version: ' + tcaxPy_Version)
 
-def GetHelp():
-    print(GetValueIDsInfo())
-
 def Pause():
     print('Press any key to continue...')
     sys.stdin.readline()
 
 def GetRootDir():
-    return __file__.rsplit('\\', 1)[0]
+    if sys.platform == 'win32':
+        return __file__.rsplit('\\', 1)[0]
+    else:
+        return '/'
 
 def GetWorkingDir():
     return sys.path[0]
