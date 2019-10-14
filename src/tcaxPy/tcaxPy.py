@@ -28,19 +28,6 @@ import sys
 
 tcaxPy_Version       = '0.8.0.0'
 
-######################################### Data Management Function ##########################################
-
-def UseSitePackages():      # invoke this function right after importing tcaxPy module if you want to use Python 3rd party packages
-    if (sys.platform == "win32"):
-        sys.path.append(sys.prefix)
-        sys.path.append(sys.prefix + '\\DLLs')
-        sys.path.append(sys.prefix + '\\Lib')
-        sys.path.append(sys.prefix + '\\Lib\\site-packages')
-    else:
-        sys.path.append(sys.prefix)
-        sys.path.append(sys.prefix + '/lib')
-        sys.path.append(sys.prefix + '/lib/python3.7/site-packages')
-
 ########################################## Main FX Function #################################################
 def SubL(Start = 0, End = 0, Layer = 0, Style = 'TCMS'):
     return 'Dialogue: {0},{1},{2},{3},NTP,0000,0000,0000,,'.format(int(Layer), FmtTime(Start), FmtTime(End), Style)
@@ -480,19 +467,6 @@ def tcaxLog(info):
     logfile.write(s.encode('utf-8'))
     logfile.close()
 
-def Progress(i, j, file_id = 1, file_num = 1):
-    total = 0
-    for l in range(__tcax_data[val_nLines]):
-        total += __tcax_data[val_nTexts][l]
-    completed = 0
-    for l in range(i):
-        completed += __tcax_data[val_nTexts][l]
-    completed += j + 1
-    utility().ShowProgress(total, completed, file_id - 1, file_num)
-
-def progress(completed, total):
-    ShowProgress(total, completed, 0, 1)
-
 #--------------------------------------------- Advanced Function -------------------------------------------#
 
 def Sum(LIS, I, diff = 0):       # 高级加法函数 在数列LIS里 从第一项累加到第I项
@@ -748,110 +722,5 @@ def AssDrawOffset(draw, x, y):      # 平移ASS绘图代码
             i += 6
         i += 1
     return ret
-
-#--------------------------------------------- PIX Function -------------------------------------------#
-
-def PixPos(PIX, x, y):
-    return ((x, y), PIX[1], PIX[2])
-
-def PixPosShift(PIX, dx, dy):
-    x = PIX[0][0]
-    y = PIX[0][1]
-    return ((x + dx, y + dy), PIX[1], PIX[2])
-
-def PixFromPoints(points):
-    pt_num = len(points)
-    minX = points[0][0]
-    minY = points[0][1]
-    maxX = points[0][0]
-    maxY = points[0][1]
-    for i in range(pt_num):
-        minX = min(minX, points[i][0])
-        minY = min(minY, points[i][1])
-        maxX = max(maxX, points[i][0])
-        maxY = max(maxY, points[i][1])
-    buf = []
-    width = int(maxX - minX + 0.5) + 1
-    height = int(maxY - minY + 0.5) + 1
-    size = height * width * 4
-    for i in range(size):
-        buf.append(0)
-    for i in range(pt_num):
-        buf[(int(points[i][1] - minY + 0.5) * width + int(points[i][0] - minX + 0.5)) * 4 + 3] = points[i][2]
-    return ((minX, minY), (width, height), tuple(buf))
-
-def PixPointsV(PIX):
-    width = PIX[1][0]
-    height = PIX[1][1]
-    points = []
-    for w in range(width):
-        for h in range(height):
-            idx = 4 * (h * width + w)
-            pixA = PIX[2][idx + 3]
-            if pixA != 0:
-                points.append((w, h, pixA))
-    return points
-
-def PixInvertA(PIX):
-    buf = list(PIX[2])
-    width = PIX[1][0]
-    height = PIX[1][1]
-    for h in range(height):
-        for w in range(width):
-            index = 4 * (h * width + w) + 3
-            buf[index] = 255 - buf[index]
-    return (PIX[0], PIX[1], tuple(buf))
-
-def PixR2A(PIX):
-    buf = []
-    width = PIX[1][0]
-    height = PIX[1][1]
-    for h in range(height):
-        for w in range(width):
-            index = 4 * (h * width + w)
-            buf.append(0)
-            buf.append(0)
-            buf.append(0)
-            buf.append(PIX[2][index + 0])
-    return (PIX[0], PIX[1], tuple(buf))
-
-def PixA2RGB(PIX):
-    buf = list(PIX[2])
-    width = PIX[1][0]
-    height = PIX[1][1]
-    for h in range(height):
-        for w in range(width):
-            index = 4 * (h * width + w)
-            buf[index] = buf[index + 3]
-            buf[index + 1] = buf[index + 3]
-            buf[index + 2] = buf[index + 3]
-            buf[index + 3] = 255
-    return (PIX[0], PIX[1], tuple(buf))
-
-def PixAddA(PIX, step):
-    buf = list(PIX[2])
-    width = PIX[1][0]
-    height = PIX[1][1]
-    for h in range(height):
-        for w in range(width):
-            index = 4 * (h * width + w) + 3
-            buf[index] += int(step + 0.5)
-            if buf[index] < 0:
-                buf[index] = 0
-            if buf[index] > 255:
-                buf[index] = 255
-    return (PIX[0], PIX[1], tuple(buf))
-
-def PixSwitchRB(PIX):
-    buf = list(PIX[2])
-    width = PIX[1][0]
-    height = PIX[1][1]
-    for h in range(height):
-        for w in range(width):
-            index = 4 * (h * width + w)
-            temp = buf[index]
-            buf[index] = buf[index + 2]
-            buf[index + 2] = temp
-    return (PIX[0], PIX[1], tuple(buf))
 
 #############################################################################################################
