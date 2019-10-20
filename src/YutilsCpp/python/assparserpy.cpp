@@ -3,16 +3,18 @@
 
 namespace py = pybind11;
 
-AssParserPy::AssParserPy(string &fileName) :
+using namespace Yutils;
+
+AssParserPy::AssParserPy(std::string &fileName) :
     metaData(py::dict()),
     styleData(py::dict()),
     dialogParsed(false),
     dialogData(py::list())
 {
-    parser = make_shared<AssParser>(fileName);
+    parser = std::make_shared<AssParser>(fileName);
     if (parser == nullptr)
     {
-        throw invalid_argument("Failed to create ass parser.");
+        throw std::invalid_argument("Failed to create ass parser.");
     }
 
     initData();
@@ -45,17 +47,17 @@ void AssParserPy::upgradeDialogs()
     dialogParsed = true;
 }
 
-shared_ptr<AssMeta> AssParserPy::getMetaPtr() const
+std::shared_ptr<AssMeta> AssParserPy::getMetaPtr() const
 {
     return parser->meta();
 }
 
-map<string, shared_ptr<AssStyle>> AssParserPy::getStyleData() const
+std::map<std::string, std::shared_ptr<AssStyle>> AssParserPy::getStyleData() const
 {
     return parser->styles();
 }
 
-vector<shared_ptr<AssDialog>> AssParserPy::getDialogs() const
+std::vector<std::shared_ptr<AssDialog>> AssParserPy::getDialogs() const
 {
     return parser->dialogs();
 }
@@ -93,7 +95,7 @@ void AssParserPy::setUpMeta()
     newData["play_res_x"] = meta->play_res_x;
     newData["play_res_y"] = meta->play_res_y;
     newData["colorMatrix"] = meta->colorMatrix;
-    
+
     metaData = newData;
 }
 
@@ -176,7 +178,7 @@ void AssParserPy::getDialogsData()
         dialog["i"] = assDialog->i;
         dialog["duration"] = assDialog->duration;
         dialog["mid_time"] = assDialog->mid_time;
-        
+
         auto assStyle(assDialog->styleref);
         py::dict style;
         style["fontname"] = assStyle->fontname;
@@ -205,7 +207,7 @@ void AssParserPy::getDialogsData()
         style["alpha3"] = assStyle->alpha3;
         style["color4"] = assStyle->color4;
         style["alpha4"] = assStyle->alpha4;
-        
+
         dialog["styleref"] = style;
         dialog["text_stripped"] = assDialog->text_stripped;
         dialog["width"] = assDialog->width;

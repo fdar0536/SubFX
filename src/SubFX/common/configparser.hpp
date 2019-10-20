@@ -7,7 +7,6 @@
 
 #include "nlohmann/json.hpp"
 
-using namespace std;
 using json = nlohmann::json;
 
 enum class SubMode
@@ -24,52 +23,52 @@ public:
     startLine(0),
     endLine(0)
     {}
-    
-    string scriptName;
-    
+
+    std::string scriptName;
+
     SubMode mode;
-    
+
     int startLine;
-    
+
     int endLine;
 };
 
 class ConfigParser
 {
 public:
-    
+
     bool isSuccess() const;
-    
-    string getLastError() const;
-    
-    string getSubName() const;
-    
-    string getLogFileName() const;
-    
-    string getOutputFileName() const;
-    
-    vector<shared_ptr<ConfigData>> getConfigDatas() const;
-    
+
+    std::string getLastError() const;
+
+    std::string getSubName() const;
+
+    std::string getLogFileName() const;
+
+    std::string getOutputFileName() const;
+
+    std::vector<std::shared_ptr<ConfigData>> getConfigDatas() const;
+
 protected:
-    
-    ConfigParser(string &jsonFileName);
-    
-    string subName;
-    
-    string logFile;
-    
-    string outputFile;
-    
-    vector<shared_ptr<ConfigData>> configDatas;
-    
+
+    ConfigParser(std::string &jsonFileName);
+
+    std::string subName;
+
+    std::string logFile;
+
+    std::string outputFile;
+
+    std::vector<std::shared_ptr<ConfigData>> configDatas;
+
     bool success;
-    
-    string lastError;
-    
+
+    std::string lastError;
+
 private:
-    
-    void parseConfig(string &jsonFileName);
-    
+
+    void parseConfig(std::string &jsonFileName);
+
     template<class T>
     bool getConfigItem(T &dst, json &config, const char *entry)
     {
@@ -83,10 +82,10 @@ private:
             success = false;
             return false;
         }
-        
+
         return true;
     }
-    
+
 };
 
 #endif // CONFIGPARSER_HPP

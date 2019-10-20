@@ -13,14 +13,12 @@
 
 #include "asslauncher.hpp"
 
-using namespace std;
-
 namespace py = pybind11;
 
 AssLauncher::AssLauncher(SubFXAssInit *assConfig) :
     Launcher(assConfig->getLogFileName(), assConfig->getOutputFileName()),
-    resString(vector<string>()),
-    assBuf(vector<string>()),
+    resString(std::vector<std::string>()),
+    assBuf(std::vector<std::string>()),
     totalConfigs(0),
     currentConfig(1)
 {}
@@ -37,21 +35,21 @@ int AssLauncher::exec(SubFXAssInit *assConfig)
         if (execConfig(assConfig, config, dialogs))
         {
             reset();
-            cout << endl;
+            std::cout << std::endl;
             return 1;
         }
-        
-        cout << endl;
+
+        std::cout << std::endl;
         ++currentConfig;
     }
-    
+
     auto meta(parser->getMetaPtr());
     auto styles(parser->getStyleData());
-    
-    cout << "Writing output..." << endl;
+
+    std::cout << "Writing output..." << std::endl;
     file->writeAssFile(meta, styles, assBuf);
     reset();
-    
+
     success = true;
     lastError = "";
     return 0;
@@ -67,7 +65,7 @@ void AssLauncher::reset()
 }
 
 int AssLauncher::execConfig(SubFXAssInit *assConfig,
-                            shared_ptr<ConfigData> &config,
+                            std::shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
     py::object mainObj;
@@ -85,8 +83,8 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
         pExecConfigError(e);
         return 1;
     }
-    
-    string modeName;
+
+    std::string modeName;
     switch (config->mode)
     {
     case SubMode::lines:
@@ -102,7 +100,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             pExecConfigWarning(modeName);
             modeName = "line";
         }
-        
+
         break;
     }
     case SubMode::words:
@@ -113,7 +111,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             pExecConfigWarning(modeName);
             modeName = "line";
         }
-        
+
         break;
     }
     case SubMode::chars:
@@ -124,15 +122,15 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             pExecConfigWarning(modeName);
             modeName = "line";
         }
-        
+
         break;
     }
     } // end switch (config->mode)
-    
+
     size_t startLine(static_cast<size_t>(config->startLine));
     size_t endLine(config->endLine < 0 ? (dialogs.size() - 1)
                                        : static_cast<size_t>(config->endLine));
-    
+
     if (startLine >= py::len(dialogs) ||
         endLine >= py::len(dialogs))
     {
@@ -143,9 +141,9 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
         fputs(lastError.c_str(), logFile);
         return 1;
     }
-    
+
     py::list dialogsBak(dialogs);
-    cout << "Current script: " << config->scriptName << endl;
+    std::cout << "Current script: " << config->scriptName << std::endl;
     size_t totalLines(endLine - startLine + 1);
     for (size_t i = startLine; i <= endLine; ++i)
     {
@@ -156,11 +154,11 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             PyDict_DelItemString(line.ptr(), "syls");
             PyDict_DelItemString(line.ptr(), "words");
             PyDict_DelItemString(line.ptr(), "chars");
-            
+
             try
             {
                 resObj = mainObj(line, py::list());
-                resString = resObj.cast<vector<string>>();
+                resString = resObj.cast<std::vector<std::string>>();
             }
             catch (py::error_already_set &e)
             {
@@ -172,7 +170,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
                 pExecConfigError(e);
                 return 1;
             }
-            
+
             assBuf.insert(assBuf.end(), resString.begin(), resString.end());
         }
         else
@@ -181,13 +179,13 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
             PyDict_DelItemString(line.ptr(), "syls");
             PyDict_DelItemString(line.ptr(), "words");
             PyDict_DelItemString(line.ptr(), "chars");
-            
+
             for (size_t j = 0; j < py::len(list); ++j)
             {
                 try
                 {
                     resObj = mainObj(line, list[j]);
-                    resString = resObj.cast<vector<string>>();
+                    resString = resObj.cast<std::vector<std::string>>();
                 }
                 catch (py::error_already_set &e)
                 {
@@ -199,32 +197,32 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
                     pExecConfigError(e);
                     return 1;
                 }
-                
+
                 assBuf.insert(assBuf.end(),
                               resString.begin(),
                               resString.end());
             } // end for j
         } // end if (modeName == "line")
-        
+
         reportProgress(i + 1, totalLines);
     } // end for i
-    
+
     return 0;
 }
 
-void AssLauncher::pExecConfigWarning(string &input)
+void AssLauncher::pExecConfigWarning(std::string &input)
 {
     const char *now(getCurrentTime());
-    string output;
+    std::string output;
     if (now)
     {
-        output = string(now);
+        output = std::string(now);
     }
     else
     {
         output = "CANNOT get current time!";
     }
-    
+
     output += "\n";
     output += "Warning: \"";
     output += input;
@@ -243,22 +241,22 @@ const char *AssLauncher::getCurrentTime()
     {
         return nullptr;
     }
-    
+
     return asctime(now);
 }
 
 void AssLauncher::reportProgress(size_t currentLine, size_t totalLines)
 {
-    
-    cout<< setiosflags(ios::fixed) << setprecision(3);
+
+    std::cout<< std::setiosflags(std::ios::fixed) << std::setprecision(3);
     double progress = static_cast<double>(currentLine);
     progress /= (static_cast<double>(totalLines));
     progress *= 100.f;
-    cout << "Current progress: " << progress;
-    
+    std::cout << "Current progress: " << progress;
+
     progress = static_cast<double>(currentConfig);
     progress /= static_cast<double>(totalConfigs);
     progress *= 100.f;
-    cout << "% Total progress: " << progress;
-    cout << "%\r" << flush;
+    std::cout << "% Total progress: " << progress;
+    std::cout << "%\r" << std::flush;
 }

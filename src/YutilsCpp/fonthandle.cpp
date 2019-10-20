@@ -13,11 +13,17 @@
 
 #include "fonthandle.hpp"
 
-using namespace std;
+using namespace Yutils;
 
-FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
-    bool strikeout, int size,
-    double xscale, double yscale, double hspace) :
+FontHandle::FontHandle(std::string &family,
+                       bool bold,
+                       bool italic,
+                       bool underline,
+                       bool strikeout,
+                       int size,
+                       double xscale,
+                       double yscale,
+                       double hspace) :
 #ifdef _WIN32
     dc(nullptr),
     font(nullptr),
@@ -32,10 +38,10 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     xscale(xscale),
     yscale(yscale)
 {
-    CoreMath();
+    Math();
     if (size <= 0)
     {
-        throw invalid_argument("size cannot lower than 0");
+        throw std::invalid_argument("size cannot lower than 0");
     }
 
 #ifndef _WIN32
@@ -44,28 +50,28 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     downscale = (1.f / static_cast<double>(upscale));
 
 #ifdef _WIN32
-    wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
+    std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
     if (wcslen(family_dst.c_str()) > 31)
     {
-        throw invalid_argument("family name to long");
+        throw std::invalid_argument("family name to long");
     }
 
     dc = CreateCompatibleDC(nullptr);
     if (!dc)
     {
-        throw runtime_error("CANNOT create DC");
+        throw std::runtime_error("CANNOT create DC");
     }
 
     int ret = SetMapMode(dc, MM_TEXT);
     if (ret == 0)
     {
-        throw runtime_error("Fail to SetMapMode");
+        throw std::runtime_error("Fail to SetMapMode");
     }
 
     ret = SetBkMode(dc, TRANSPARENT);
     if (ret == 0)
     {
-        throw runtime_error("Fail to SetBkMode");
+        throw std::runtime_error("Fail to SetBkMode");
     }
 
     font = CreateFontW(
@@ -87,7 +93,7 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
 
     if (!font)
     {
-        throw runtime_error("CANNOT create font");
+        throw std::runtime_error("CANNOT create font");
     }
 
     old_font = SelectObject(dc, font);
@@ -96,14 +102,14 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     surface = cairo_image_surface_create(CAIRO_FORMAT_A8, 1, 1);
     if (!surface)
     {
-        throw runtime_error("CANNOT create cairo_surface_t");
+        throw std::runtime_error("CANNOT create cairo_surface_t");
     }
 
     context = cairo_create(surface);
     if (!context)
     {
         cairo_surface_destroy(surface);
-        throw runtime_error("CANNOT create cairo_t");
+        throw std::runtime_error("CANNOT create cairo_t");
     }
 
     layout = pango_cairo_create_layout(context);
@@ -111,7 +117,7 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     {
         cairo_destroy(context);
         cairo_surface_destroy(surface);
-        throw runtime_error("CANNOT create PangoLayout");
+        throw std::runtime_error("CANNOT create PangoLayout");
     }
 
     //set font to layout
@@ -121,7 +127,7 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
         g_object_unref(layout);
         cairo_destroy(context);
         cairo_surface_destroy(surface);
-        throw runtime_error("CANNOT create PangoFontDescription");
+        throw std::runtime_error("CANNOT create PangoFontDescription");
     }
 
     pango_font_description_set_family(font_desc, family.c_str());
@@ -132,7 +138,7 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
     pango_font_description_set_absolute_size(font_desc,
                                              size * PANGO_SCALE * upscale);
     pango_layout_set_font_description(layout, font_desc);
-    
+
     PangoAttrList *attr(pango_attr_list_new());
     if (!attr)
     {
@@ -140,7 +146,7 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
         g_object_unref(layout);
         cairo_destroy(context);
         cairo_surface_destroy(surface);
-        throw runtime_error("CANNOT create PangoAttrList");
+        throw std::runtime_error("CANNOT create PangoAttrList");
     }
 
     pango_attr_list_insert(attr,
@@ -163,14 +169,14 @@ FontHandle::FontHandle(string &family, bool bold, bool italic, bool underline,
         g_object_unref(layout);
         cairo_destroy(context);
         cairo_surface_destroy(surface);
-        throw runtime_error("CANNOT create PangoFontMetrics");
+        throw std::runtime_error("CANNOT create PangoFontMetrics");
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(metrics)));
     double descent(static_cast<double>(pango_font_metrics_get_descent(metrics)));
 
     fonthack_scale = size / ((ascent + descent) / (double)PANGO_SCALE * downscale);
-    
+
     pango_font_metrics_unref(metrics);
     pango_attr_list_unref(attr);
     pango_font_description_free(font_desc);
@@ -191,22 +197,22 @@ FontHandle::~FontHandle()
 }
 
 // public member function
-map<string, double> FontHandle::metrics()
+std::map<std::string, double> FontHandle::metrics()
 {
 #ifdef _WIN32
-    TEXTMETRICW  *fontMetrics(new (nothrow) TEXTMETRICW);
+    TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
     if (!fontMetrics)
     {
-        throw runtime_error("CANNOT create TEXTMETRICW");
+        throw std::runtime_error("CANNOT create TEXTMETRICW");
     }
 
     if (GetTextMetricsW(dc, fontMetrics) == 0)
     {
         delete fontMetrics;
-        throw runtime_error("Fail to GetTextMetricsW");
+        throw std::runtime_error("Fail to GetTextMetricsW");
     }
 
-    map<string, double> ret;
+    std::map<std::string, double> ret;
     ret["height"] = fontMetrics->tmHeight * downscale * yscale;
     ret["ascent"] = fontMetrics->tmAscent * downscale * yscale;
     ret["descent"] = fontMetrics->tmDescent * downscale * yscale;
@@ -220,10 +226,10 @@ map<string, double> FontHandle::metrics()
         pango_layout_get_font_description(layout),
         nullptr
     ));
-    
+
     if (!fontMetrics)
     {
-        throw runtime_error("CANNOT create PangoFontMetrics");
+        throw std::runtime_error("CANNOT create PangoFontMetrics");
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(fontMetrics)));
@@ -233,7 +239,7 @@ map<string, double> FontHandle::metrics()
     descent = descent / PANGO_SCALE * downscale;
     pango_font_metrics_unref(fontMetrics);
 
-    map<string, double> ret;
+    std::map<std::string, double> ret;
     ret["height"] = (ascent + descent) * yscale * fonthack_scale;
     ret["ascent"] = ascent * yscale * fonthack_scale;
     ret["descent"] = descent * yscale * fonthack_scale;
@@ -244,24 +250,24 @@ map<string, double> FontHandle::metrics()
     return ret;
 }
 
-map<string, double> FontHandle::text_extents(string &text)
+std::map<std::string, double> FontHandle::text_extents(std::string &text)
 {
 #ifdef _WIN32
     wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen = wcslen(textDst.c_str());
 
-    SIZE *size(new (nothrow) SIZE);
+    SIZE *size(new (std::nothrow) SIZE);
     if (!(size))
     {
-        throw runtime_error("CANNOT allocate SIZE");
+        throw std::runtime_error("CANNOT allocate SIZE");
     }
 
     if (GetTextExtentPoint32W(dc, textDst.c_str(), textLen, size) == 0)
     {
         delete size;
-        throw runtime_error("Fail to GetTextExtentPoint32W");
+        throw std::runtime_error("Fail to GetTextExtentPoint32W");
     }
-    map<string, double> ret;
+    std::map<std::string, double> ret;
 
     ret["width"] = (size->cx * downscale + hspace * textLen) * xscale;
     ret["height"] = size->cy * downscale * yscale;
@@ -269,14 +275,14 @@ map<string, double> FontHandle::text_extents(string &text)
     delete size;
 #else
     pango_layout_set_text(layout, text.c_str(), -1);
-    PangoRectangle *rect(new (nothrow) PangoRectangle);
+    PangoRectangle *rect(new (std::nothrow) PangoRectangle);
     if (!rect)
     {
-        throw runtime_error("CANNOT create PangoRectangle");
+        throw std::runtime_error("CANNOT create PangoRectangle");
     }
 
     pango_layout_get_pixel_extents(layout, nullptr, rect);
-    map<string, double> ret;
+    std::map<std::string, double> ret;
     ret["width"] = rect->width * downscale * xscale * fonthack_scale;
     ret["height"] = rect->height * downscale * yscale * fonthack_scale;
 
@@ -286,30 +292,30 @@ map<string, double> FontHandle::text_extents(string &text)
     return ret;
 }
 
-string FontHandle::text_to_shape(string &text)
+std::string FontHandle::text_to_shape(std::string &text)
 {
 #ifdef _WIN32
-    wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
+    std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        throw invalid_argument("text too long");
+        throw std::invalid_argument("text too long");
     }
 
     INT *charWidths(nullptr);
     if (hspace != 0)
     {
-        charWidths = new (nothrow) INT[textLen];
+        charWidths = new (std::nothrow) INT[textLen];
         if (!charWidths)
         {
-            throw runtime_error("CANNOT allocate INT array");
+            throw std::runtime_error("CANNOT allocate INT array");
         }
 
-        SIZE *size(new (nothrow) SIZE);
+        SIZE *size(new (std::nothrow) SIZE);
         if (!size)
         {
             delete[] charWidths;
-            throw runtime_error("CANNOT allocate SIZE");
+            throw std::untime_error("CANNOT allocate SIZE");
         }
 
         int space(hspace * upscale);
@@ -319,7 +325,7 @@ string FontHandle::text_to_shape(string &text)
             {
                 delete[] charWidths;
                 delete size;
-                throw runtime_error("Fail to GetTextExtentPoint32W");
+                throw std::runtime_error("Fail to GetTextExtentPoint32W");
             }
 
             charWidths[i] = size->cx + space;
@@ -335,7 +341,7 @@ string FontHandle::text_to_shape(string &text)
             delete[] charWidths;
         }
 
-        throw runtime_error("Fail to BeginPath");
+        throw std::runtime_error("Fail to BeginPath");
     }
 
 
@@ -346,7 +352,7 @@ string FontHandle::text_to_shape(string &text)
             delete[] charWidths;
         }
 
-        throw runtime_error("Fail to ExtTextOutW");
+        throw std::runtime_error("Fail to ExtTextOutW");
     }
 
     if (EndPath(dc) == 0)
@@ -356,7 +362,7 @@ string FontHandle::text_to_shape(string &text)
             delete[] charWidths;
         }
 
-        throw runtime_error("Fail to EndPath");
+        throw std::runtime_error("Fail to EndPath");
     }
 
     int points_n(GetPath(dc, nullptr, nullptr, 0));
@@ -371,30 +377,30 @@ string FontHandle::text_to_shape(string &text)
         return string();
     }
 
-    POINT *points(new (nothrow) POINT[points_n]);
+    POINT *points(new (std::nothrow) POINT[points_n]);
     if (!points)
     {
         if (!charWidths)
         {
             delete[] charWidths;
         }
-        throw runtime_error("Fail to allocate POINT array");
+        throw std::runtime_error("Fail to allocate POINT array");
     }
 
-    BYTE *types(new (nothrow) BYTE[points_n]);
+    BYTE *types(new (std::nothrow) BYTE[points_n]);
     if (!types)
     {
         if (!charWidths)
         {
             delete[] charWidths;
         }
-        
+
         throw runtime_error("Fail to allocate BYTE array");
     }
 
     GetPath(dc, points, types, points_n);
 
-    vector<string> shape;
+    std::vector<std::string> shape;
     shape.reserve(5000); // may be larger or smaller?
 
     int i(0);
@@ -497,17 +503,17 @@ string FontHandle::text_to_shape(string &text)
     cairo_path_t *path(cairo_copy_path(context));
     if (!path)
     {
-        throw runtime_error("CANNOT create cairo_path_t");
+        throw std::runtime_error("CANNOT create cairo_path_t");
     }
 
     if (path->status != CAIRO_STATUS_SUCCESS)
     {
         cairo_new_path(context);
         cairo_path_destroy(path);
-        return string();
+        return std::string();
     }
 
-    vector<string> shape;
+    std::vector<std::string> shape;
     shape.reserve(5000); // may be larger or smaller?
     int i(0), cur_type(0), last_type(99999); // first loop has no last_type
     double tmpValue(0.f);
@@ -569,6 +575,7 @@ string FontHandle::text_to_shape(string &text)
             {
                 shape.push_back("c");
             }
+            break;
         default:
             break;
         }
@@ -581,7 +588,7 @@ string FontHandle::text_to_shape(string &text)
     cairo_path_destroy(path);
 #endif
 
-    stringstream s;
-    copy(shape.begin(), shape.end(), ostream_iterator<string>(s, " "));
+    std::stringstream s;
+    std::copy(shape.begin(), shape.end(), std::ostream_iterator<std::string>(s, " "));
     return s.str();
 }

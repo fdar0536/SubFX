@@ -1,5 +1,5 @@
-#ifndef CORELIB_HPP
-#define CORELIB_HPP
+#ifndef YUTILSCPP_HPP
+#define YUTILSCPP_HPP
 
 /* assparser.hpp contains ass.hpp and utf8.hpp */
 #include "assparser.hpp"
@@ -11,4 +11,4 @@
 
 #include "shape.hpp"
 
-#endif // CORELIB_HPP
+#endif // YUTILSCPP_HPP

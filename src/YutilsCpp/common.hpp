@@ -13,15 +13,18 @@
 
 #define UNUSED(x) static_cast<void>(x)
 
-using namespace std;
+namespace Yutils
+{
 
-class CoreCommon
+class Common
 {
 public:
-    CoreCommon();
+
+    Common();
 
 protected:
-    pair<double, double> rotate2d(double, double, double);
+
+    std::pair<double, double> rotate2d(double, double, double);
 
     // math.rad
     double rad(double angle);
@@ -32,7 +35,9 @@ protected:
     // math.random
     double random(double min, double max);
 
-    string doubleToString(double input);
+    std::string doubleToString(double input);
 };
+
+} // end namespace Yutils
 
 #endif // COMMON_HPP

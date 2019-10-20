@@ -16,18 +16,20 @@
 
 #define CURVE_TOLERANCE 1 // Angle in degree to define a curve as flat
 
-CoreShape::CoreShape()
+using namespace Yutils;
+
+Shape::Shape()
 {
-    CoreMath();
+    Math();
 }
 
-tuple<double, double, double, double> CoreShape::bounding(string &shape)
+std::tuple<double, double, double, double> Shape::bounding(std::string &shape)
 {
     // Bounding data
     double x0(0.f), y0(0.f), x1(0.f), y1(0.f);
     uint8_t flag(0);
-    function<pair<double, double>(double, double, string&)> flt(
-        [&](double x, double y, string &pointType)
+    std::function<std::pair<double, double>(double, double, std::string&)> flt(
+        [&](double x, double y, std::string &pointType)
         {
             UNUSED(pointType);
             if (flag == 0)
@@ -39,26 +41,26 @@ tuple<double, double, double, double> CoreShape::bounding(string &shape)
                 flag = 1;
             }
 
-            x0 = min(x0, x);
-            y0 = min(y0, y);
-            x1 = max(x1, x);
-            y1 = max(y1, y);
+            x0 = std::min(x0, x);
+            y0 = std::min(y0, y);
+            x1 = std::max(x1, x);
+            y1 = std::max(y1, y);
 
-            return pair<double, double>();
+            return std::pair<double, double>();
         }
     );
 
     filter(shape, flt);
 
-    return make_tuple(x0, y0, x1, y1);
+    return std::make_tuple(x0, y0, x1, y1);
 }
 
-string CoreShape::filter(string &shape,
-                         function<pair<double, double>(double, double, string &)> &flt)
+std::string Shape::filter(std::string &shape,
+                          std::function<std::pair<double, double>(double, double, std::string &)> &flt)
 {
     if (!flt)
     {
-        throw invalid_argument("flt is empty!");
+        throw std::invalid_argument("flt is empty!");
     }
 
     typedef enum _FLT_STATUS
@@ -66,27 +68,27 @@ string CoreShape::filter(string &shape,
         start, detect_type, read_data
     } FLT_STATUS;
 
-    string tmpString(shape);
+    std::string tmpString(shape);
     FLT_STATUS status(start);
-    regex typeReg("^([mnlbspc])(\\s*)");
-    regex dataReg("^(-?\\d+\\.?\\d*)(\\s+)(-?\\d+\\.?\\d*)(\\s*)");
-    smatch sm;
-    string shapeType("");
-    string output("");
+    std::regex typeReg("^([mnlbspc])(\\s*)");
+    std::regex dataReg("^(-?\\d+\\.?\\d*)(\\s+)(-?\\d+\\.?\\d*)(\\s*)");
+    std::smatch sm;
+    std::string shapeType("");
+    std::string output("");
     double point1(0.f), point2(0.f);
     while (tmpString.length() != 0)
     {
         if (((uint8_t)tmpString.at(0) & 0x80) != 0)
         {
             // input is not ascii
-            throw invalid_argument("input is out of ASCII!");
+            throw std::invalid_argument("input is out of ASCII!");
         }
 
         switch (status)
         {
         case start:
         {
-            if (regex_search(tmpString, sm, regex("^([mnlbsp])(\\s+)")))
+            if (std::regex_search(tmpString, sm, std::regex("^([mnlbsp])(\\s+)")))
             {
                 status = read_data;
                 shapeType = sm[1];
@@ -95,7 +97,7 @@ string CoreShape::filter(string &shape,
             }
             else
             {
-                throw invalid_argument("shape syntax error: unexpected token in the begging of shape.");
+                throw std::invalid_argument("shape syntax error: unexpected token in the begging of shape.");
             }
 
             continue; // goto next loop
@@ -111,9 +113,9 @@ string CoreShape::filter(string &shape,
             }
             else
             {
-                string err(tmpString.substr(0, 1));
+                std::string err(tmpString.substr(0, 1));
                 err = "shape syntax error: expect m, n, l, b, s, p or c, but get " + err + " .";
-                throw invalid_argument(err);
+                throw std::invalid_argument(err);
             }
 
             continue; // goto next loop
@@ -128,7 +130,7 @@ string CoreShape::filter(string &shape,
 
             if (regex_search(tmpString, sm, dataReg))
             {
-                string number(sm[1]);
+                std::string number(sm[1]);
                 sscanf(number.c_str(), "%lf", &point1);
 
                 number = sm[3];
@@ -146,7 +148,7 @@ string CoreShape::filter(string &shape,
         }
         } //end switch
 
-        pair<double, double> newPoints(flt(point1, point2, shapeType));
+        std::pair<double, double> newPoints(flt(point1, point2, shapeType));
         output += (doubleToString(round(newPoints.first, FP_PRECISION)) + " ");
         output += (doubleToString(round(newPoints.second, FP_PRECISION)) + " ");
     } // end while (tmpString.length() != 0)
@@ -154,27 +156,27 @@ string CoreShape::filter(string &shape,
     return output;
 }
 
-string CoreShape::flatten(string &shape)
+std::string Shape::flatten(std::string &shape)
 {
     typedef enum _STATUS
     {
         find_start, get_data
     } STATUS;
-    string tmpString = shape;
+    std::string tmpString = shape;
     STATUS status(find_start);
     double x0(0.f), y0(0.f), x1(0.f), y1(0.f);
     double x2(0.f), y2(0.f), x3(0.f), y3(0.f);
-    string output("");
-    string number("");
-    regex startReg("(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+b(\\s+)");
-    regex pointReg("^(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)(\\s*)");
-    smatch sm;
+    std::string output("");
+    std::string number("");
+    std::regex startReg("(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+b(\\s+)");
+    std::regex pointReg("^(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)(\\s*)");
+    std::smatch sm;
     while (tmpString.length() != 0)
     {
         if (((uint8_t)tmpString.at(0) & 0x80) != 0)
         {
             // input is not ascii
-            throw invalid_argument("input is out of ASCII!");
+            throw std::invalid_argument("input is out of ASCII!");
         }
 
         switch (status)
@@ -225,7 +227,7 @@ string CoreShape::flatten(string &shape)
                 number = sm[6];
                 sscanf(number.c_str(), "%lf", &y3);
 
-                vector<double> line_points(curve4_to_lines(x0, y0, x1, y1, x2, y2, x3, y3));
+                std::vector<double> line_points(curve4_to_lines(x0, y0, x1, y1, x2, y2, x3, y3));
 
                 for (size_t i = 0; i < line_points.size(); ++i)
                 {
@@ -253,37 +255,37 @@ string CoreShape::flatten(string &shape)
     return output;
 }
 
-string CoreShape::move(string &shape, double x, double y)
+std::string Shape::move(std::string &shape, double x, double y)
 {
-    function<pair<double, double>(double, double, string &)> flt([&](
-        double cx, double cy, string &input)
+    std::function<std::pair<double, double>(double, double, std::string &)> flt([&](
+        double cx, double cy, std::string &input)
         {
             UNUSED(input);
-            return make_pair(cx + x, cy + y);
+            return std::make_pair(cx + x, cy + y);
         }
     );
 
     return filter(shape, flt);
 }
 
-vector<map<string, double>> CoreShape::to_pixels(string &shape)
+std::vector<std::map<std::string, double>> Shape::to_pixels(std::string &shape)
 {
     // Scale values for supersampled rendering
     uint8_t upscale(SUPERSAMPLING);
     double downscale(0.125f); // 1 / 8
-    function<pair<double, double>(double, double, string &)> flt([&](double x, double y,
-                                                                     string &input)
+    std::function<std::pair<double, double>(double, double, std::string &)> flt([&](double x, double y,
+                                                                     std::string &input)
     {
         UNUSED(input);
-        return make_pair(x * static_cast<double>(upscale),
-                         y * static_cast<double>(upscale));
+        return std::make_pair(x * static_cast<double>(upscale),
+                              y * static_cast<double>(upscale));
     });
 
     // Upscale shape for later downsampling
-    string newShape(filter(shape, flt));
-    tuple<double, double, double, double> tmpTuple(bounding(newShape));
-    double x1(get<0>(tmpTuple)), y1(get<1>(tmpTuple));
-    double x2(get<2>(tmpTuple)), y2(get<3>(tmpTuple));
+    std::string newShape(filter(shape, flt));
+    std::tuple<double, double, double, double> tmpTuple(bounding(newShape));
+    double x1(std::get<0>(tmpTuple)), y1(std::get<1>(tmpTuple));
+    double x2(std::get<2>(tmpTuple)), y2(std::get<3>(tmpTuple));
 
     double shift_x(-(x1 - ((int64_t)x1 % upscale)));
     double shift_y(-(y1 - ((int64_t)y1 % upscale)));
@@ -293,7 +295,7 @@ vector<map<string, double>> CoreShape::to_pixels(string &shape)
     // Create image
     double img_width(ceil((x2 + shift_x) * downscale) * upscale);
     double img_height(ceil((y2 + shift_y) * downscale) * upscale);
-    vector<bool> img_data;
+    std::vector<bool> img_data;
     img_data.resize(img_width * img_height);
     fill(img_data.begin(), img_data.end(), false);
 
@@ -301,7 +303,7 @@ vector<map<string, double>> CoreShape::to_pixels(string &shape)
     render_shape(img_width, img_height, img_data, newShape);
 
     // Extract pixels from image
-    vector<map<string, double>> pixels;
+    std::vector<std::map<std::string, double>> pixels;
     pixels.reserve((img_height-upscale) * (img_width-upscale));
     double opacity(0.f);
     for (double y = 0; y <= (img_height - upscale); y += upscale)
@@ -322,7 +324,7 @@ vector<map<string, double>> CoreShape::to_pixels(string &shape)
 
             if (opacity > 0.f)
             {
-                map<string, double> pixel;
+                std::map<std::string, double> pixel;
                 pixel["alpha"] = (uint8_t)(255 - (opacity * (downscale * downscale)));
                 pixel["x"] = (x - shift_x) * downscale;
                 pixel["y"] = (y - shift_y) * downscale;
@@ -336,13 +338,13 @@ vector<map<string, double>> CoreShape::to_pixels(string &shape)
 
 
 // private member function
-vector<double> CoreShape::curve4_subdivide(double x0, double y0,
-                                           double x1, double y1,
-                                           double x2, double y2,
-                                           double x3, double y3,
-                                           double pct)
+std::vector<double> Shape::curve4_subdivide(double x0, double y0,
+                                            double x1, double y1,
+                                            double x2, double y2,
+                                            double x3, double y3,
+                                            double pct)
 {
-    vector<double> ret;
+    std::vector<double> ret;
     ret.reserve(16);
     ret.push_back(x0);
     ret.push_back(y0);
@@ -362,13 +364,13 @@ vector<double> CoreShape::curve4_subdivide(double x0, double y0,
     __m128d res1r(_mm_add_pd(point0r, point1r));
     __m128d res2r(_mm_add_pd(point1r, point2r));
     __m128d res3r(_mm_add_pd(point2r, point3r));
-    
+
     res1r = _mm_mul_pd(res1r, pctsr);
     // now res1r contains {x01, y01}
-    
+
     res2r = _mm_mul_pd(res2r, pctsr);
     // now res2r contains {x12, y12}
-    
+
     res3r = _mm_mul_pd(res3r, pctsr);
     // now res3r contains {x23, y23}
 
@@ -417,51 +419,51 @@ vector<double> CoreShape::curve4_subdivide(double x0, double y0,
     double y01 = (y0 + y1) * pct;
     ret.push_back(x01);
     ret.push_back(y01);
-    
+
     double x12 = (x1 + x2) * pct;
     double y12 = (y1 + y2) * pct;
     double x23 = (x2 + x3) * pct;
     double y23 = (y2 + y3) * pct;
-    
+
     double x012 = (x01 + x12) * pct;
     double y012 = (y01 + y12) * pct;
     ret.push_back(x012);
     ret.push_back(y012);
-    
+
     double x123 = (x12 + x23) * pct;
     double y123 = (y12 + y23) * pct;
-    
+
     double x0123 = (x012 + x123) * pct;
     double y0123 = (y012 + y123) * pct;
     ret.push_back(x0123);
     ret.push_back(y0123);
     ret.push_back(x0123);
     ret.push_back(y0123);
-    
+
     ret.push_back(x123);
     ret.push_back(y123);
-    
+
     ret.push_back(x23);
     ret.push_back(y23);
-    
+
     ret.push_back(x3);
     ret.push_back(y3);
 #endif
     return ret;
 }
 
-bool CoreShape::curve4_is_flat(double x0, double y0,
-                               double x1, double y1,
-                               double x2, double y2,
-                               double x3, double y3,
-                               double tolerance)
+bool Shape::curve4_is_flat(double x0, double y0,
+                           double x1, double y1,
+                           double x2, double y2,
+                           double x3, double y3,
+                           double tolerance)
 {
-    vector<pair<double, double>> vecs;
+    std::vector<std::pair<double, double>> vecs;
     vecs.reserve(3);
 
-    vecs.push_back(make_pair(x1 - x0, y1 - y0));
-    vecs.push_back(make_pair(x2 - x1, y2 - y1));
-    vecs.push_back(make_pair(x3 - x2, y3 - y2));
+    vecs.push_back(std::make_pair(x1 - x0, y1 - y0));
+    vecs.push_back(std::make_pair(x2 - x1, y2 - y1));
+    vecs.push_back(std::make_pair(x3 - x2, y3 - y2));
 
     size_t i(0), n(3);
     while (i < n)
@@ -493,15 +495,15 @@ bool CoreShape::curve4_is_flat(double x0, double y0,
     return true;
 }
 
-vector<double> CoreShape::curve4_to_lines(double px0, double py0,
-                                          double px1, double py1,
-                                          double px2, double py2,
-                                          double px3, double py3)
+std::vector<double> Shape::curve4_to_lines(double px0, double py0,
+                                           double px1, double py1,
+                                           double px2, double py2,
+                                           double px3, double py3)
 {
-    vector<double> pts;
+    std::vector<double> pts;
     pts.reserve(4);
 
-    function<void(double, double, double, double, double, double, double, double)> 
+    std::function<void(double, double, double, double, double, double, double, double)>
     convert_recursive{ [&convert_recursive, this, &pts](
                            double x0, double y0,
                            double x1, double y1,
@@ -516,7 +518,7 @@ vector<double> CoreShape::curve4_to_lines(double px0, double py0,
         }
         else
         {
-            vector<double> resVec(curve4_subdivide(x0, y0, x1, y1, x2, y2, x3, y3, 0.5));
+            std::vector<double> resVec(curve4_subdivide(x0, y0, x1, y1, x2, y2, x3, y3, 0.5));
             convert_recursive(resVec.at(0), resVec.at(1),
                               resVec.at(2), resVec.at(3),
                               resVec.at(4), resVec.at(5),
@@ -532,17 +534,18 @@ vector<double> CoreShape::curve4_to_lines(double px0, double py0,
     return pts;
 }
 
-void CoreShape::render_shape(double width, double height,
-                             vector<bool> &image, string &shape)
+void Shape::render_shape(double width, double height,
+                         std::vector<bool> &image,
+                         std::string &shape)
 {
-    vector<tuple<double, double, double, double>> lines;
+    std::vector<std::tuple<double, double, double, double>> lines;
     lines.reserve(500);
-    vector<double> last_point;
+    std::vector<double> last_point;
     last_point.reserve(2);
-    vector<double> last_move;
+    std::vector<double> last_move;
     last_move.reserve(2);
-    function<pair<double, double>(double, double, string &)>
-    flt([&](double x, double y, string &typ)
+    std::function<std::pair<double, double>(double, double, std::string &)>
+    flt([&](double x, double y, std::string &typ)
     {
         // Use integers to avoid rounding errors
         x = round(x);
@@ -557,10 +560,10 @@ void CoreShape::render_shape(double width, double height,
                     !(last_point.at(1) < 0 && last_move.at(1) < 0) &&
                     !(last_point.at(1) > height && last_move.at(1) > height))
                 {
-                    lines.push_back(make_tuple(last_point.at(0),
-                                               last_point.at(1),
-                                               last_move.at(0) - last_point.at(0),
-                                               last_move.at(1) - last_point.at(1)));
+                    lines.push_back(std::make_tuple(last_point.at(0),
+                                                    last_point.at(1),
+                                                    last_move.at(0) - last_point.at(0),
+                                                    last_move.at(1) - last_point.at(1)));
                 }
 
                 last_move.at(0) = x;
@@ -580,10 +583,10 @@ void CoreShape::render_shape(double width, double height,
                     !(last_point.at(1) < 0 && y < 0) &&
                     !(last_point.at(1) > height && y > height))
                 {
-                    lines.push_back(make_tuple(last_point.at(0),
-                                               last_point.at(1),
-                                               x - last_point.at(0),
-                                               y - last_point.at(1)));
+                    lines.push_back(std::make_tuple(last_point.at(0),
+                                                    last_point.at(1),
+                                                    x - last_point.at(0),
+                                                    y - last_point.at(1)));
                 }
             }
         }
@@ -600,10 +603,10 @@ void CoreShape::render_shape(double width, double height,
             last_point.push_back(y);
         }
 
-        return pair<double, double>();
+        return std::pair<double, double>();
     });
 
-    string shapeBak(shape);
+    std::string shapeBak(shape);
     shapeBak = flatten(shapeBak);
     filter(shapeBak, flt);
 
@@ -613,18 +616,18 @@ void CoreShape::render_shape(double width, double height,
             !(last_point.at(1) < 0 && last_move.at(1) < 0) &&
             !(last_point.at(1) > height && last_move.at(1) > height))
         {
-            lines.push_back(make_tuple(last_point.at(0),
-                                       last_point.at(1),
-                                       last_move.at(0) - last_point.at(0),
-                                       last_move.at(1) - last_point.at(1)));
+            lines.push_back(std::make_tuple(last_point.at(0),
+                                            last_point.at(1),
+                                            last_move.at(0) - last_point.at(0),
+                                            last_move.at(1) - last_point.at(1)));
         }
     }
 
     // Calculates line x horizontal line intersection
-    function<vector<double>(double, double, double, double, double)>
+    std::function<std::vector<double>(double, double, double, double, double)>
     line_x_hline([](double x, double y, double vx, double vy, double y2)
     {
-        vector<double> ret;
+        std::vector<double> ret;
         ret.reserve(2);
         if (vy != 0)
         {
@@ -640,32 +643,32 @@ void CoreShape::render_shape(double width, double height,
     });
 
     auto tmpTuple(bounding(shape));
-    for (double y = max(floor(get<1>(tmpTuple)), (double)0.f);
-         y <= (min(ceil(get<3>(tmpTuple)), height) - 1);
+    for (double y = std::max(floor(std::get<1>(tmpTuple)), (double)0.f);
+         y <= (std::min(ceil(std::get<3>(tmpTuple)), height) - 1);
          ++y)
     {
-        vector<pair<double, double>> row_stops;
+        std::vector<std::pair<double, double>> row_stops;
         row_stops.reserve(lines.size());
 
         for (size_t i = 0; i < lines.size(); ++i)
         {
             auto line(lines.at(i));
-            vector<double> cx(line_x_hline(get<0>(line),
-                                           get<1>(line),
-                                           get<2>(line),
-                                           get<3>(line),
-                                           y + 0.5));
+            std::vector<double> cx(line_x_hline(std::get<0>(line),
+                                                std::get<1>(line),
+                                                std::get<2>(line),
+                                                std::get<3>(line),
+                                                y + 0.5));
             if (cx.size() != 0)
             {
-                row_stops.push_back(make_pair(trim(cx.at(0), 0, width),
-                                              get<3>(line) > 0.f ? 1.f : -1.f));
+                row_stops.push_back(std::make_pair(trim(cx.at(0), 0, width),
+                                              std::get<3>(line) > 0.f ? 1.f : -1.f));
             }
         } //end for i
 
         if (row_stops.size() > 0)
         {
-            sort(row_stops.begin(), row_stops.end(), [](const pair<double, double> &a,
-                                                        const pair<double, double> &b)
+            std::sort(row_stops.begin(), row_stops.end(), [](const std::pair<double, double> &a,
+                                                        const std::pair<double, double> &b)
                                                         {
                                                             return (a.first < b.first);
                                                         });

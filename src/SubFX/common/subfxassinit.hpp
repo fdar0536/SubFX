@@ -1,31 +1,31 @@
 #ifndef SUBFXASSINIT_HPP
 #define SUBFXASSINIT_HPP
 
-#include "../../CoreLib/python/assparserpy.hpp"
+#include "../../YutilsCpp/python/assparserpy.hpp"
 #include "configparser.hpp"
 
-using namespace std;
+typedef Yutils::AssParserPy YAssParserPy;
 
 class SYMBOL_HIDE SubFXAssInit : public ConfigParser
 {
 public:
-    
-    SubFXAssInit(string &jsonFileName);
-    
+
+    SubFXAssInit(std::string &jsonFileName);
+
     bool isSylAvailable() const;
-    
+
     bool isWordAvailable() const;
-    
+
     bool isCharAvailable() const;
-    
-    shared_ptr<AssParserPy> getParser() const;
-    
+
+    std::shared_ptr<YAssParserPy> getParser() const;
+
 private:
-    
+
     void init();
-    
-    shared_ptr<AssParserPy> assParser;
-    
+
+    std::shared_ptr<YAssParserPy> assParser;
+
 };
 
 #endif // SUBFXASSINIT_HPP

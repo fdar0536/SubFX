@@ -12,14 +12,14 @@
 
 #include "ass.hpp"
 
-using namespace std;
+using namespace Yutils;
 
-uint64_t CoreAss::stringToMs(string &ass_ms)
+uint64_t Ass::stringToMs(std::string &ass_ms)
 {
-    regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
-    if (!regex_match(ass_ms, reg))
+    std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
+    if (!std::regex_match(ass_ms, reg))
     {
-        throw invalid_argument("ASS timestamp expected");
+        throw std::invalid_argument("ASS timestamp expected");
     }
 
     using boost::lexical_cast;
@@ -30,7 +30,7 @@ uint64_t CoreAss::stringToMs(string &ass_ms)
     {
         // hour
         ret = lexical_cast<uint64_t>(ass_ms.substr(0, 1)) * 3600000;
-        
+
         // minute
         ret += (lexical_cast<uint64_t>(ass_ms.substr(2, 2)) * 60000);
 
@@ -42,13 +42,13 @@ uint64_t CoreAss::stringToMs(string &ass_ms)
     }
     catch (const bad_lexical_cast &) // for safety
     {
-        throw invalid_argument("cannot convert!");
+        throw std::invalid_argument("cannot convert!");
     }
 
     return ret;
 }
 
-string CoreAss::msToString(uint64_t ms_ass)
+std::string Ass::msToString(uint64_t ms_ass)
 {
     uint32_t hr((int)floor(ms_ass / 3600000) % 10); //hour
     uint32_t mins(floor(ms_ass % 3600000 / 60000)); // minutes
@@ -57,20 +57,20 @@ string CoreAss::msToString(uint64_t ms_ass)
 
     char buf[500];
     sprintf(buf, "%d:%02d:%02d.%02d", hr, mins, sec, csec);
-    return string(buf);
+    return std::string(buf);
 }
 
-tuple<uint8_t, uint8_t, uint8_t, uint8_t> CoreAss::stringToColorAlpha(string &input)
+std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Ass::stringToColorAlpha(std::string &input)
 {
     uint8_t r(0), g(0), b(0), a(0);
-    string tmpString;
-    if (regex_match(input, regex("^&[Hh]{1}[0-9a-fA-F]{2}&$")))
+    std::string tmpString;
+    if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{2}&$")))
     {
         // alpha only &HAA&
         tmpString = input.substr(2, 2);
         a = stoul(tmpString, nullptr, 16);
     }
-    else if (regex_match(input, regex("^&[Hh]{1}[0-9a-fA-F]{6}&$")))
+    else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{6}&$")))
     {
         // ass color &HBBGGRR&
         tmpString = input.substr(2, 2);
@@ -82,7 +82,7 @@ tuple<uint8_t, uint8_t, uint8_t, uint8_t> CoreAss::stringToColorAlpha(string &in
         tmpString = input.substr(6, 2);
         r = stoul(tmpString, nullptr, 16);
     }
-    else if (regex_match(input, regex("^&[Hh]{1}[0-9a-fA-F]{8}$")))
+    else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{8}$")))
     {
         // both &HAABBGGRR
         tmpString = input.substr(2, 2);
@@ -99,19 +99,19 @@ tuple<uint8_t, uint8_t, uint8_t, uint8_t> CoreAss::stringToColorAlpha(string &in
     }
     else
     {
-        throw invalid_argument("Invalid input");
+        throw std::invalid_argument("Invalid input");
     }
 
-    return make_tuple(r, g, b, a);
+    return std::make_tuple(r, g, b, a);
 }
 
-string CoreAss::colorAlphaToString(vector<uint8_t> &input)
+std::string Ass::colorAlphaToString(std::vector<uint8_t> &input)
 {
     if (input.size() != 1 &&
         input.size() != 3 &&
         input.size() != 4)
     {
-        throw invalid_argument("Invalid input!");
+        throw std::invalid_argument("Invalid input!");
     }
 
     char buf[500];
@@ -144,5 +144,5 @@ string CoreAss::colorAlphaToString(vector<uint8_t> &input)
     }
     } // end switch
 
-    return string(buf);
+    return std::string(buf);
 }

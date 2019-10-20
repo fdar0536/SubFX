@@ -13,44 +13,45 @@
 #include "math.hpp"
 #include "../common/basecommon.hpp"
 
-using namespace std;
+namespace Yutils
+{
 
-class SYMBOL_SHOW CoreShape : protected CoreMath
+class SYMBOL_SHOW Shape : protected Math
 {
 public:
 
-    CoreShape();
+    Shape();
 
     // Calculates shape bounding box
     // It may throw invalid_argument
-    tuple<double, double, double, double> bounding(string &);
+    std::tuple<double, double, double, double> bounding(std::string &);
 
     // Filters shape points
     // It may throw invalid argument
-    string filter(string &, function<pair<double, double>(double, double, string &)> &);
+    std::string filter(std::string &, std::function<std::pair<double, double>(double, double, std::string &)> &);
 
     // Converts shape curves to lines
     // It may throw invalid_argument
-    string flatten(string &);
+    std::string flatten(std::string &);
 
     // Shifts shape coordinates
     // It may throw invalid_argument
-    string move(string &, double, double);
+    std::string move(std::string &, double, double);
 
     // Converts shape to pixels
     // It may throw invalid_argument
-    vector<map<string, double>> to_pixels(string &);
+    std::vector<std::map<std::string, double>> to_pixels(std::string &);
 
 private:
-    
+
     // 4th degree curve subdivider
     // for flatten
-    vector<double> curve4_subdivide(double, double,
-                                    double, double,
-                                    double, double,
-                                    double, double,
-                                    double);
-    
+    std::vector<double> curve4_subdivide(double, double,
+                                         double, double,
+                                         double, double,
+                                         double, double,
+                                         double);
+
     // Check flatness of 4th degree curve with angles
     // for flatten
     bool curve4_is_flat(double, double,
@@ -58,17 +59,19 @@ private:
                         double, double,
                         double, double,
                         double);
-    
+
     // Convert 4th degree curve to line points
     // for flatten
-    vector<double> curve4_to_lines(double, double,
-                                   double, double,
-                                   double, double,
-                                   double, double);
-    
+    std::vector<double> curve4_to_lines(double, double,
+                                        double, double,
+                                        double, double,
+                                        double, double);
+
     // Renderer (on binary image with aliasing)
     // for to_pixels
-    void render_shape(double, double, vector<bool> &, string &);
+    void render_shape(double, double, std::vector<bool> &, std::string &);
 };
+
+}
 
 #endif // SHAPE_HPP

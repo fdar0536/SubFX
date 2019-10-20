@@ -14,9 +14,10 @@
 #define ASS_TRUE -1
 #define ASS_FALSE 0
 
-using namespace std;
-
 // reference: https://github.com/weizhenye/ASS/wiki/ASS-%E5%AD%97%E5%B9%95%E6%A0%BC%E5%BC%8F%E8%A7%84%E8%8C%83
+
+namespace Yutils
+{
 
 class AssMeta
 {
@@ -33,7 +34,7 @@ public:
     bool scaled_border_and_shadow;
     uint16_t play_res_x;
     uint16_t play_res_y;
-    string colorMatrix;
+    std::string colorMatrix;
 };
 
 class AssStyle
@@ -68,7 +69,7 @@ public:
     alpha4("&H00&")
     {}
 
-    string fontname;
+    std::string fontname;
     int fontsize;
     int8_t bold;
     int8_t italic;
@@ -86,14 +87,14 @@ public:
     double margin_r;
     double margin_v;
     int encoding;
-    string color1;
-    string alpha1;
-    string color2;
-    string alpha2;
-    string color3;
-    string alpha3;
-    string color4;
-    string alpha4;
+    std::string color1;
+    std::string alpha1;
+    std::string color2;
+    std::string alpha2;
+    std::string color3;
+    std::string alpha3;
+    std::string color4;
+    std::string alpha4;
 };
 
 class AssSymbol
@@ -124,7 +125,7 @@ public:
 
     uint64_t start_time;
     uint64_t end_time;
-    string text;
+    std::string text;
     uint32_t i;
     uint64_t duration;
     uint64_t mid_time;
@@ -152,8 +153,8 @@ public:
     text("")
     {}
 
-    string tags;
-    string text;
+    std::string tags;
+    std::string text;
 };
 
 class AssSyl : public AssSymbol
@@ -167,7 +168,7 @@ public:
         AssSymbol();
     }
 
-    string tags;
+    std::string tags;
     uint32_t prespace;
     uint32_t postspace;
 };
@@ -204,7 +205,7 @@ class AssDialog : public AssSymbol
 {
 public:
     AssDialog() :
-    styleref(make_shared<AssStyle>()),
+    styleref(std::make_shared<AssStyle>()),
     text_stripped(""),
     comment(false),
     layer(0),
@@ -216,30 +217,32 @@ public:
     effect(""),
     leadin(0.f),
     leadout(0.f),
-    textChunked(vector<shared_ptr<AssTextChunked>>()),
-    syls(vector<shared_ptr<AssSyl>>()),
-    words(vector<shared_ptr<AssWord>>()),
-    chars(vector<shared_ptr<AssChar>>())
+    textChunked(std::vector<std::shared_ptr<AssTextChunked>>()),
+    syls(std::vector<std::shared_ptr<AssSyl>>()),
+    words(std::vector<std::shared_ptr<AssWord>>()),
+    chars(std::vector<std::shared_ptr<AssChar>>())
     {
         AssSymbol();
     }
 
-    shared_ptr<AssStyle> styleref;
-    string text_stripped;
+    std::shared_ptr<AssStyle> styleref;
+    std::string text_stripped;
     bool comment;
     uint32_t layer;
-    string style;
-    string actor;
+    std::string style;
+    std::string actor;
     double margin_l;
     double margin_r;
     double margin_v;
-    string effect;
+    std::string effect;
     double leadin;
     double leadout;
-    vector<shared_ptr<AssTextChunked>> textChunked;
-    vector<shared_ptr<AssSyl>> syls;
-    vector<shared_ptr<AssWord>> words;
-    vector<shared_ptr<AssChar>> chars;
+    std::vector<std::shared_ptr<AssTextChunked>> textChunked;
+    std::vector<std::shared_ptr<AssSyl>> syls;
+    std::vector<std::shared_ptr<AssWord>> words;
+    std::vector<std::shared_ptr<AssChar>> chars;
 };
+
+}
 
 #endif // ASSCOMMON_HPP

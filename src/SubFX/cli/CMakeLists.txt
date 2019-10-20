@@ -6,9 +6,9 @@ add_executable(SubFXCLI
     ../common/subfxassinit.cpp
 )
 
-add_dependencies(SubFXCLI CoreLibPy)
+add_dependencies(SubFXCLI AssParserPy)
 
 LIST(APPEND SubFXCLI_includes ${nlohmann_json_INCLUDE_DIRS})
 
-target_link_libraries(SubFXCLI CoreLibPy)
+target_link_libraries(SubFXCLI AssParserPy)
 target_include_directories(SubFXCLI PUBLIC ${SubFXCLI_includes})

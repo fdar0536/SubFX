@@ -4,11 +4,10 @@
 
 #include <iostream>
 
-#include "launcher.hpp" 
+#include "launcher.hpp"
 
-using namespace std;
-
-Launcher::Launcher(const string &logFile, const string &outputFile) :
+Launcher::Launcher(const std::string &logFile,
+                   const std::string &outputFile) :
     success(false),
     lastError("")
 {
@@ -28,13 +27,14 @@ bool Launcher::isSuccess() const
     return success;
 }
 
-string Launcher::getLastError() const
+std::string Launcher::getLastError() const
 {
     return lastError;
 }
 
 // private member function
-void Launcher::LauncherInit(const string &logFile, const string &outputFile)
+void Launcher::LauncherInit(const std::string &logFile,
+                            const std::string &outputFile)
 {
     if (logFile == "")
     {
@@ -50,24 +50,24 @@ void Launcher::LauncherInit(const string &logFile, const string &outputFile)
             return;
         }
     }
-    
+
     try
     {
-        this->file = make_shared<CoreFile>(outputFile);
+        this->file = std::make_shared<YFile>(outputFile);
     }
-    catch (invalid_argument &)
+    catch (std::invalid_argument &)
     {
         lastError = "Cannot open output subtitle file.";
         success = false;
         return;
     }
-    
+
     if (this->file == nullptr)
     {
         lastError = "Fail to allocate memory.";
         success = false;
         return;
     }
-    
+
     success = true;
 }

@@ -6,18 +6,18 @@
 
 namespace py = pybind11;
 
-using namespace std;
+using namespace Yutils;
 
-PYBIND11_MODULE(CoreLibPy, m)
+PYBIND11_MODULE(YutilsPy, m)
 {
     m.doc() = "This is core library for SubFX, a modified version of Yutils.";
 
     /* in math.hpp */
-    py::class_<CoreMath>(m, "CoreMath")
-    
+    py::class_<Math>(m, "Math")
+
     .def(py::init<>())
-    
-    .def("arc_curve", &CoreMath::arc_curve,
+
+    .def("arc_curve", &Math::arc_curve,
     "list[tuple(cx, cy)] = arc_curve(x, y, cx, cy, angle)\n"
     "Converts arc data to bezier curves.\n"
     "x & y is the arc starting point, cx & cy the arc center (= orientation point to keep the same distance to all arc points) and angle the angle in degree of the arc.\n"
@@ -26,7 +26,7 @@ PYBIND11_MODULE(CoreLibPy, m)
     "It returns a list of tuples. Each tuple is one of the control points of a bezier curve.\n"
     "Every four tuples describe a bezier curve.")
 
-    .def("bezier", &CoreMath::bezier,
+    .def("bezier", &Math::bezier,
         py::arg("pct"),
         py::arg("pts"),
         py::arg("is3D") = false,
@@ -38,18 +38,18 @@ PYBIND11_MODULE(CoreLibPy, m)
     "if \"is3D\" is set to false, the third number of tuples of pts will be ignored,\n"
     "and the third number of returned tuple always is zero.\n")
 
-    .def("degree", &CoreMath::degree,
+    .def("degree", &Math::degree,
     "degree = degree(x1, y1, z1, x2, y2, z2)\n"
     "Calculates the degree between vectors x1|y1|z1 and x2|y2|z3\n")
 
-    .def("distance", &CoreMath::distance,
+    .def("distance", &Math::distance,
             py::arg("x"),
             py::arg("y"),
             py::arg("z") = 0.f,
     "length = distance(x, y[, z])\n"
     "Calculates length of given vector.\n")
 
-    .def("line_intersect", &CoreMath::line_intersect,
+    .def("line_intersect", &Math::line_intersect,
     "tuple(x, y) = line_intersect(x0, y0, x1, y1, x2, y2, x3, y3, strict)\n"
     "Calculates intersection point of two lines.\n"
     "x0, y0, x1, y1 are both points of line 1, x2, y2, x3, y3 are points of line 2.\n"
@@ -58,60 +58,60 @@ PYBIND11_MODULE(CoreLibPy, m)
     "If both lines are parallel, x is nil(= tuple(0, 0)).\n"
     "If strict is true and there's no intersection on the strict length lines, x is inf (std::numeric_limits<double>::infinity()).\n")
 
-    .def("ortho", &CoreMath::ortho,
+    .def("ortho", &Math::ortho,
     "tuple(rx, ry, rz) = ortho(x1, y1, z1, x2, y2, z2)\n"
     "Calculates the orthogonal vector to vectors x1|y1|z1 and x2|y2|z3.\n")
 
-    .def("randomsteps", &CoreMath::randomsteps,
+    .def("randomsteps", &Math::randomsteps,
     "r = randomsteps(min, max, step)\n"
     "Generates randomly a number in range min to max with gap size step between numbers.\n")
 
-    .def("round", &CoreMath::round,
+    .def("round", &Math::round,
         py::arg("x"),
         py::arg("dec") = 0.f,
     "r = round(x[, dec])\n"
     "Rounds x to nearest integer.\n"
     "Optionally, dec defines the position behind decimal point to round to.\n")
 
-    .def("stretch", &CoreMath::stretch,
+    .def("stretch", &Math::stretch,
     "tuple(rx, ry, rz) = stretch(x, y, z, length)\n"
     "Stretches vector x|y|z to length length.\n")
 
-    .def("trim", &CoreMath::trim,
+    .def("trim", &Math::trim,
     "r = trim(x, min, max)\n"
     "If x is smaller than min, returns min.\n"
     "If x is greater than max, returns max.\n"
     "Otherwise returns x.\n")
-    
-    .def("ellipse", &CoreMath::ellipse,
+
+    .def("ellipse", &Math::ellipse,
     "tuple(new_x, new_y) = ellipse(x, y, width, height, angle)\n"
     "Calculates a point on ellipse with given angle, center point x/y, width and height.\n")
-    
-    .def("randomway", &CoreMath::randomway,
+
+    .def("randomway", &Math::randomway,
     "direction = randomway()\n"
     "Returns randomly -1 or 1.\n")
-    
-    .def("rotate", &CoreMath::rotate,
+
+    .def("rotate", &Math::rotate,
     "rotated_point = rotate(point, axis, angle)\n"
     "Allows to rotate a point in 3D room.\n");
 
     /* in shape.hpp */
-    py::class_<CoreShape>(m, "CoreShape")
+    py::class_<Shape>(m, "Shape")
 
     .def(py::init<>())
 
-    .def("bounding", &CoreShape::bounding,
+    .def("bounding", &Shape::bounding,
     "tuple(x0, y0, x1, y1) = bounding(shape)\n"
     "Calculates the bounding box of shape shape.\n"
     "x0|y0 is the upper-left and x1|y1 the lower-right corner of the rectangle.\n")
-    
-    .def("filter", &CoreShape::filter,
+
+    .def("filter", &Shape::filter,
     "new_shape = filter(shape, flt)\n"
     "Filters points of shape shape by function flt and returns a new one.\n"
     "flt receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
     "example:\n"
     "import CoreLib\n"
-    "shape = CoreLib.CoreShape()\n"
+    "shape = CoreLib.Shape()\n"
     "\n"
     "def flt(x, y, pointType):\n"
     "    if pointType == \"m\":\n"
@@ -122,17 +122,17 @@ PYBIND11_MODULE(CoreLibPy, m)
     "test = \"m 1 2 l 3 4 5 6 b 7 8 9 10 11 12 13 14 c\"\n"
     "print(shape.filter(test, flt))\n")
 
-    .def("flatten", &CoreShape::flatten,
+    .def("flatten", &Shape::flatten,
     "flattened_shape = flatten(shape)\n"
     "Converts all 3rd order bezier curves in shape shape to lines,\n"
     "creating a new shape.\n")
-    
-    .def("move", &CoreShape::move,
+
+    .def("move", &Shape::move,
     "new_shape = move(shape, x, y)\n"
     "Shifts points of shape shape horizontally by x and vertically by y,\n"
     "creating a new shape.\n")
-    
-    .def("to_pixels", &CoreShape::to_pixels,
+
+    .def("to_pixels", &Shape::to_pixels,
     "pixels = to_pixels(shape)\n"
     "Renders shape shape and returns pixels.\n"
     "pixels is a list of dictionaries, each one with following fields:\n"
@@ -141,28 +141,28 @@ PYBIND11_MODULE(CoreLibPy, m)
     "alpha: opacity\n");
 
     /* in ass.hpp */
-    py::class_<CoreAss>(m, "CoreAss")
-    
+    py::class_<Ass>(m, "Ass")
+
     .def(py::init<>())
-    
-    .def("stringToMs", &CoreAss::stringToMs,
+
+    .def("stringToMs", &Ass::stringToMs,
     "ms_ass = stringToMs(ass_ms)\n"
     "Converts time to numeric.\n"
     "ass_ms is a string in ASS format H:MM:SS.XX (H=Hours, M=Minutes, S=Seconds, X=Milliseconds*10).\n"
     "ms_ass is milliseconds as number.\n")
-    
-    .def("msToString", &CoreAss::msToString,
+
+    .def("msToString", &Ass::msToString,
     "ass_ms = msToString(ms_ass)\n"
     "Converts time to ASS presentation.\n"
     "ass_ms is string in ASS format H:MM:SS.XX (H=Hours, M=Minutes, S=Seconds, X=Milliseconds*10)\n"
     "ms_ass is milliseconds as number.\n")
-    
-    .def("stringToColorAlpha", &CoreAss::stringToColorAlpha,
+
+    .def("stringToColorAlpha", &Ass::stringToColorAlpha,
     "tuple(r, g, b, a) = stringToColorAlpha(input)\n"
     "Converts color, alpha or color+alpha to numeric\n"
     "input is a string as ASS color (&HBBGGRR&), alpha (&HAA&) or both (&HAABBGGRR)\n")
-    
-    .def("colorAlphaToString", &CoreAss::colorAlphaToString,
+
+    .def("colorAlphaToString", &Ass::colorAlphaToString,
     "output = colorAlphaToString(input)\n"
     "input = [r, g, b] or [a]\n"
     "Converts color or alpha to ASS presentation.\n"
@@ -171,18 +171,18 @@ PYBIND11_MODULE(CoreLibPy, m)
     "else output will be an ASS alpha presentation(&HAA&).");
 
     py::class_<AssParserPy>(m, "AssParser")
-    
-    .def(py::init<string &>(),
+
+    .def(py::init<std::string &>(),
     "Create a AssParser object.\n"
     "input string is ass's file name.\n")
-    
+
     .def("meta", &AssParserPy::meta,
     "Returns ASS meta data as dictionary with following fields\n"
     "wrap_style: text line wrapping mode as number\n"
     "scaled_border_and_shadow: borders and shadows should be implicated in script-to-frame scale?\n"
     "play_res_x: script horizontal resolution\n"
     "play_res_y: script vertical resolution\n")
-    
+
     .def("styles", &AssParserPy::styles,
     "Returns ASS styles as dictionary. Dictionary keys are style names, values are dictionaries with following fields:\n"
     "fontname: font face name\n"
@@ -203,7 +203,7 @@ PYBIND11_MODULE(CoreLibPy, m)
     "margin_r: margin from right screen border\n"
     "margin_v: margin from vertical screen borders\n"
     "encoding: codepage to interpret text\n")
-    
+
     .def("dialogs", &AssParserPy::dialogs,
     "Returns ASS dialogs as list. Each entry is a dictionary with following fields:\n"
     "comment: dialog is comment?\n"
@@ -217,7 +217,7 @@ PYBIND11_MODULE(CoreLibPy, m)
     "margin_v: dialog margin to horizontal edges\n"
     "effect: dialog effect description\n"
     "text: dialog text\n")
-    
+
     .def("upgradeDialogs", &AssParserPy::upgradeDialogs,
     "Add the following fields to dialogs dictionary.\n"
     "After upgrade, you can get upgraded dialogs by calling dialogs().\n"
@@ -317,8 +317,8 @@ PYBIND11_MODULE(CoreLibPy, m)
     "leadout: dialog posttime / duration from this dialog to next one (in case there's none, it's 1000.1)\n");
 
     /* in file.hpp */
-    py::class_<CoreFile>(m, "CoreFile", "This class is for handling file IO of Ass.")
-    .def(py::init<const string &, const string &>(),
+    py::class_<File>(m, "CoreFile", "This class is for handling file IO of Ass.")
+    .def(py::init<const std::string &, const std::string &>(),
         py::arg("fileName"),
         py::arg("assHeader") = "",
     "Create a CoreFile object.\n"
@@ -326,24 +326,25 @@ PYBIND11_MODULE(CoreLibPy, m)
     "assHeader as its name, too.\n"
     "If assHeader is an empty string, the file will be opened in append mode.\n"
     "If not, the file will be opened in write mode.\n")
-    
-    .def("writeAssFile", py::overload_cast<vector<string>&>(&CoreFile::writeAssFile),
+
+    .def("writeAssFile",
+         py::overload_cast<std::vector<std::string>&>(&File::writeAssFile),
     "writeFile(assBuf)\n"
     "Write all contents in assBuf to the file.\n"
     "assBuf is a list of strings.\n")
-    
-    .def("reset", &CoreFile::reset,
+
+    .def("reset", &File::reset,
         py::arg("fileName"),
         py::arg("assHeader") = ""
     "reset(fileName, assHeader)\n"
     "Same as constructor, but this is set new content to object.\n")
-    
-    .def("isAppend", &CoreFile::isAppend,
+
+    .def("isAppend", &File::isAppend,
     "It returns this object's file is in append mode or not.");
 
     /* in fonthandle.hpp */
     py::class_<FontHandle>(m, "FontHandle")
-    .def(py::init<string &, bool, bool, bool,
+    .def(py::init<std::string &, bool, bool, bool,
                bool, int, int, int, int>(),
                py::arg("family"),
                py::arg("bold"),

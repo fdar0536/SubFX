@@ -5,21 +5,21 @@ set(CMAKE_CXX_STANDARD 14)
 set(SUBFX_VERSION r0.0.1)
 
 if (UNIX)
-    add_compile_options(-Wall -Werror -Wextra)
-    
+    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -fvisibility-inlines-hidden)
+
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
     endif ()
-    
+
     add_link_options(-Wl,--unresolved-symbols=report-all)
 else () # Windows
     if (MINGW)
-        add_compile_options(-Wall -Werror -Wextra)
-        
+        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -fvisibility-inlines-hidden)
+
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)
         endif ()
-        
+
         add_link_options(-Wl,--unresolved-symbols=report-all)
     else () # msvc or icc
         add_compile_options(/W4)
@@ -36,7 +36,7 @@ endif (UNIX)
 
 option(ENABLE_SSE2 "Enable SSE2 SIMD" ON)
 
-include(CoreLib/CMakeLists.txt)
+include(YutilsCpp/CMakeLists.txt)
 
 configure_file(config.h.in config.h @ONLY)
 include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})

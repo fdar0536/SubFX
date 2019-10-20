@@ -4,35 +4,37 @@
 #include <memory>
 #include <cstdio>
 
-#include "../../CoreLib/CoreLib.hpp"
+#include "../../YutilsCpp/YutilsCpp.hpp"
 
-using namespace std;
+typedef Yutils::File YFile;
 
 class Launcher
 {
 public:
-    
+
     virtual ~Launcher();
-    
+
     bool isSuccess() const;
-    
-    string getLastError() const;
-    
+
+    std::string getLastError() const;
+
 protected:
-    
-    Launcher(const string &logFile, const string &outputFile);
-    
+
+    Launcher(const std::string &logFile,
+             const std::string &outputFile);
+
     bool success;
-    
-    string lastError;
-    
+
+    std::string lastError;
+
     FILE *logFile;
-    
-    shared_ptr<CoreFile> file;
-    
+
+    std::shared_ptr<YFile> file;
+
 private:
-    
-    void LauncherInit(const string &logFile, const string &outputFile);
+
+    void LauncherInit(const std::string &logFile,
+                      const std::string &outputFile);
 };
 
 #endif // LAUNCHER_HPP

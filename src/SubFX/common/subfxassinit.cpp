@@ -1,8 +1,6 @@
 #include "subfxassinit.hpp"
 
-using namespace std;
-
-SubFXAssInit::SubFXAssInit(string &jsonFileName) :
+SubFXAssInit::SubFXAssInit(std::string &jsonFileName) :
     ConfigParser(jsonFileName),
     assParser(nullptr)
 {
@@ -24,7 +22,7 @@ bool SubFXAssInit::isCharAvailable() const
     return assParser->isCharAvailable();
 }
 
-shared_ptr<AssParserPy> SubFXAssInit::getParser() const
+std::shared_ptr<YAssParserPy> SubFXAssInit::getParser() const
 {
     return assParser;
 }
@@ -36,24 +34,24 @@ void SubFXAssInit::init()
     {
         return;
     }
-    
+
     try
     {
-        assParser = make_shared<AssParserPy>(subName);
+        assParser = std::make_shared<YAssParserPy>(subName);
         assParser->upgradeDialogs();
     }
-    catch (invalid_argument &e)
+    catch (std::invalid_argument &e)
     {
         lastError = e.what();
         success = false;
         return;
     }
-    catch (runtime_error &e)
+    catch (std::runtime_error &e)
     {
         lastError = e.what();
         success = false;
         return;
     }
-    
+
     success = true;
 }
