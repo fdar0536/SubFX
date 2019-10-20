@@ -14,18 +14,20 @@
 
 namespace Yutils
 {
-    class SYMBOL_SHOW Utf8
-    {
-    public:
-        Utf8() {}
 
-    protected:
+class SYMBOL_SHOW Utf8
+{
+public:
+    Utf8() {}
 
-        uint32_t utf8StringLen(std::string &);
+protected:
 
-        // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
-        std::vector<std::string> utf8StringSplit(std::string &);
-    };
+    uint32_t utf8StringLen(std::string &);
+
+    // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
+    std::vector<std::string> utf8StringSplit(std::string &);
+};
+
 }
 
 #endif // UTF8_HPP
