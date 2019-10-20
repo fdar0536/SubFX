@@ -6,7 +6,7 @@ Now is under development.
 
 ## Dependency
 
-### CoreLib
+### YutilsCpp
 
 - C++14
 - [Boost C++ Libraries](https://www.boost.org)
@@ -22,7 +22,7 @@ Now is under development.
 #### Common
 
 - C++14
-- CoreLib with Python
+- YutilsCpp with Python
 - [nlohmann's json](https://github.com/nlohmann/json)
 
 #### CLI
