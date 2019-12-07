@@ -111,7 +111,7 @@ PYBIND11_MODULE(YutilsPy, m)
     "flt receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
     "example:\n"
     "import YutilsPy\n"
-    "shape = Yutils.Shape()\n"
+    "shape = YutilsPy.Shape()\n"
     "\n"
     "def flt(x, y, pointType):\n"
     "    if pointType == \"m\":\n"
