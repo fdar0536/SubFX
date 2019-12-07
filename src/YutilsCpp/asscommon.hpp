@@ -1,10 +1,6 @@
 #ifndef ASSCOMMON_HPP
 #define ASSCOMMON_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <string>
 #include <vector>
 #include <memory>

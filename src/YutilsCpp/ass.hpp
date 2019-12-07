@@ -1,10 +1,6 @@
 #ifndef ASS_HPP
 #define ASS_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <string>
 #include <tuple>
 #include <vector>

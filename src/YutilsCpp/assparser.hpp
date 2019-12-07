@@ -1,10 +1,6 @@
 #ifndef ASSPARSER_HPP
 #define ASSPARSER_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <string>
 #include <vector>
 #include <map>

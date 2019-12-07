@@ -1,10 +1,6 @@
 #ifndef MATH_HPP
 #define MATH_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <vector>
 #include <tuple>
 #include <string>

@@ -1,10 +1,6 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <string>
 #include <utility>
 

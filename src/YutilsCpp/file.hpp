@@ -1,10 +1,6 @@
 #ifndef FILE_HPP
 #define FILE_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <vector>
 #include <stdexcept>
 #include <fstream>

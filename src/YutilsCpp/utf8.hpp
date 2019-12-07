@@ -1,10 +1,6 @@
 #ifndef UTF8_HPP
 #define UTF8_HPP
 
-#ifdef _MSC_VER
-#pragma once
-#endif    /* _MSC_VER */
-
 #include <vector>
 #include <string>
 
@@ -15,9 +11,10 @@
 namespace Yutils
 {
 
-class SYMBOL_SHOW Utf8
+class Utf8
 {
 public:
+
     Utf8() {}
 
 protected:

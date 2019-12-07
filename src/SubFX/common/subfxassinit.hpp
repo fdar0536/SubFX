@@ -6,7 +6,7 @@
 
 typedef Yutils::AssParserPy YAssParserPy;
 
-class SYMBOL_HIDE SubFXAssInit : public ConfigParser
+class SubFXAssInit : public ConfigParser
 {
 public:
 

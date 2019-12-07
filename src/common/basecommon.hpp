@@ -10,7 +10,6 @@
 #define SYMBOL_HIDE
 #else
 #define SYMBOL_SHOW __attribute__((visibility("default")))
-#define SYMBOL_HIDE __attribute__((visibility("hidden")))
 #endif
 
 #endif // BASECOMMON_HPP
