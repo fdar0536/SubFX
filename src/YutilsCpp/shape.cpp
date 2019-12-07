@@ -7,9 +7,8 @@
 #include <cmath>
 
 #include "config.h"
-
-#ifdef ENABLE_SSE2
-#include <emmintrin.h> // SSE2
+#ifdef ENABLE_SIMD
+#include "emmintrin.h" // SSE
 #endif
 
 #include "shape.hpp"
@@ -348,7 +347,7 @@ std::vector<double> Shape::curve4_subdivide(double x0, double y0,
     ret.reserve(16);
     ret.push_back(x0);
     ret.push_back(y0);
-#ifdef ENABLE_SSE2
+#ifdef ENABLE_SIMD
     double point0[] = {x0, y0};
     double point1[] = {x1, y1};
     double point2[] = {x2, y2};

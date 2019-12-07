@@ -8,6 +8,14 @@
 
 #include "math.hpp"
 
+#ifdef ENABLE_SIMD
+#ifdef ENABLE_AVX
+#include "immintrin.h" // AVX
+#else
+#include "emmintrin.h" // SSE
+#endif // ENABLE_AVX
+#endif // ENABLE_SIMD
+
 using namespace Yutils;
 
 Math::Math()
@@ -307,7 +315,63 @@ std::tuple<double, double, double> Math::bezier2(double pct,
                          std::vector<std::tuple<double, double, double>> &pts,
                                                  bool is3D)
 {
-    double pts1(0.f), pts2(0.f), pts3(0.f), pct_inv(1 - pct);
+    double pct_inv(1 - pct);
+#if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
+
+    double pctArray[] = {pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv};
+
+    double ctrl0[] = {std::get<0>(pts.at(0)), std::get<1>(pts.at(0))};
+    double ctrl1[] = {std::get<0>(pts.at(1)), std::get<1>(pts.at(1))};
+
+    __m128d pctArray_reg(_mm_loadu_pd(pctArray));
+    __m128d pct_inv_array_reg(_mm_loadu_pd(pct_inv_array));
+    __m128d ctrl0_reg(_mm_loadu_pd(ctrl0));
+    __m128d ctrl1_reg(_mm_loadu_pd(ctrl1));
+
+    __m128d tmp_reg(_mm_mul_pd(pct_inv_array_reg, ctrl0_reg));
+    __m128d res_reg(_mm_mul_pd(pctArray_reg, ctrl1_reg));
+    res_reg = _mm_add_pd(tmp_reg, res_reg);
+    _mm_store_pd(ctrl0, res_reg);
+
+    if (is3D)
+    {
+        return std::make_tuple(
+                ctrl0[0],
+                ctrl0[1],
+                pct_inv * std::get<2>(pts.at(0)) + pct * std::get<2>(pts.at(1)));
+    }
+
+    return std::make_tuple(ctrl0[0], ctrl0[1], 0.);
+#elif defined(ENABLE_SIMD) && defined(ENABLE_AVX) // AVX
+    double pctArray[] = {pct, pct, pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv, pct_inv, pct_inv};
+    // double twoArray[] = {2., 2., 2., 2.};
+
+    double ctrl0[] = {std::get<0>(pts.at(0)), std::get<1>(pts.at(0)),
+                      std::get<2>(pts.at(0)), 0};
+    double ctrl1[] = {std::get<0>(pts.at(1)), std::get<1>(pts.at(1)),
+                      std::get<2>(pts.at(1)), 0};
+
+    __m256d pctArray_reg(_mm256_loadu_pd(pctArray));
+    __m256d pct_inv_array_reg(_mm256_loadu_pd(pct_inv_array));
+    // __m256d twoArray_reg(_mm256_loadu_pd(twoArray));
+    __m256d ctrl0_reg(_mm256_loadu_pd(ctrl0));
+    __m256d ctrl1_reg(_mm256_loadu_pd(ctrl1));
+
+    __m256d tmp_reg(_mm256_mul_pd(pct_inv_array_reg, ctrl0_reg));
+    __m256d res_reg(_mm256_mul_pd(pctArray_reg, ctrl1_reg));
+    res_reg = _mm256_add_pd(tmp_reg, res_reg);
+    _mm256_store_pd(ctrl0, res_reg);
+
+    if (is3D)
+    {
+        return std::make_tuple(ctrl0[0], ctrl0[1], ctrl0[2]);
+    }
+
+    return std::make_tuple(ctrl0[0], ctrl0[1], 0.);
+#else // pure c++
+    double pts1(0.f), pts2(0.f), pts3(0.f);
 
     pts1 = pct_inv * std::get<0>(pts.at(0)) + pct * std::get<0>(pts.at(1));
     pts2 = pct_inv * std::get<1>(pts.at(0)) + pct * std::get<1>(pts.at(1));
@@ -317,6 +381,7 @@ std::tuple<double, double, double> Math::bezier2(double pct,
     }
 
     return std::make_tuple(pts1, pts2, pts3);
+#endif
 }
 
 std::tuple<double, double, double> Math::bezier3(double pct,

@@ -34,7 +34,11 @@ else () # windows
     find_package(ICU 64.2 REQUIRED COMPONENTS uc in)
 endif (UNIX)
 
-option(ENABLE_SSE2 "Enable SSE2 SIMD" ON)
+option(ENABLE_SIMD "Enable X86 SIMD, include SSE" ON)
+if(ENABLE_SIMD)
+    set(ENABLE_SSE ON)
+    option(ENABLE_AVX "Enable AVX" ON)
+endif(ENABLE_SIMD)
 
 include(YutilsCpp/CMakeLists.txt)
 

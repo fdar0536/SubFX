@@ -16,14 +16,14 @@ add_library(YutilsCpp SHARED
     YutilsCpp/utf8.cpp
 )
 
-if (ENABLE_SSE2)
+if (ENABLE_SSE)
     if (UNIX)
         set_source_files_properties(shape.cpp PROPERTIES
-            COMPILE_FLAGS ${CMAKE_CXX_FLAGS} -msse2)
+            COMPILE_FLAGS ${CMAKE_CXX_FLAGS} -msse)
     else () # windows
         if (MINGW)
             set_source_files_properties(shape.cpp PROPERTIES
-                                        COMPILE_FLAGS ${CMAKE_CXX_FLAGS} -msse2)
+                                        COMPILE_FLAGS ${CMAKE_CXX_FLAGS} -msse)
         endif (MINGW)
     endif (UNIX)
 endif (ENABLE_SSE2)

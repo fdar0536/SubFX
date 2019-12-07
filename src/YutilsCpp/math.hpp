@@ -7,6 +7,7 @@
 
 #include "common.hpp"
 #include "../common/basecommon.hpp"
+#include "config.h"
 
 namespace Yutils
 {
