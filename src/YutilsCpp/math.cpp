@@ -619,11 +619,22 @@ std::tuple<double, double, double> Math::bezierN(double pct,
                          std::vector<std::tuple<double, double, double>> &pts,
                                                  bool is3D)
 {
-    double ret_x(0.f), ret_y(0.f), ret_z(0.f), pct_inv(1 - pct);
+    double pct_inv(1 - pct);
     size_t ni(pts.size() - 1);
     double nd = static_cast<double>(ni);
     double bern(0);
     std::tuple<double, double, double> pt;
+
+#if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
+    double ret_z(0.);
+    double retArray[] = {0., 0.};
+    __m128d ret_reg(_mm_loadu_pd(retArray));
+#elif defined(ENABLE_SIMD) && defined(ENABLE_AVX) // AVX
+    double retArray[] = {0., 0., 0., 0.};
+    __m256d ret_reg(_mm256_loadu_pd(retArray));
+#else
+    double ret_x(0.), ret_y(0.), ret_z(0.);
+#endif
     for (size_t i = 0; i <= ni; ++i)
     {
         pt = pts.at(i);
@@ -634,21 +645,58 @@ std::tuple<double, double, double> Math::bezierN(double pct,
         bern *= pow(pct, static_cast<double>(i));
         bern += pow(pct_inv, static_cast<double>(ni - i));
 
+#if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
+        double bernArray[] = {bern, bern};
+        __m128d bern_reg(_mm_loadu_pd(bernArray));
+
+        double ptArray[] = {std::get<0>(pt), std::get<1>(pt)};
+        __m128d pt_reg(_mm_loadu_pd(ptArray));
+
+        __m128d tmp_reg(_mm_mul_pd(pt_reg, bern_reg));
+        ret_reg = _mm_add_pd(ret_reg, tmp_reg);
+        if (is3D)
+        {
+            ret_z += (std::get<2>(pt) * bern);
+        }
+#elif defined(ENABLE_SIMD) && defined(ENABLE_AVX) // AVX
+        double bernArray[] = {bern, bern, bern, bern};
+        __m256d bern_reg(_mm256_loadu_pd(bernArray));
+
+        double ptArray[] = {std::get<0>(pt), std::get<1>(pt),
+                            std::get<2>(pt), 0.};
+        __m256d pt_reg(_mm256_loadu_pd(ptArray));
+
+        __m256d tmp_reg(_mm256_mul_pd(pt_reg, bern_reg));
+        ret_reg = _mm256_add_pd(ret_reg, tmp_reg);
+#else
         ret_x += (std::get<0>(pt) * bern);
         ret_y += (std::get<1>(pt) * bern);
         if (is3D)
         {
             ret_z += (std::get<2>(pt) * bern);
         }
+#endif
+    }
+#if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
+    _mm_storeu_pd(retArray, ret_reg);
+    return std::make_tuple(retArray[0], retArray[1], ret_z);
+#elif defined(ENABLE_SIMD) && defined(ENABLE_AVX) // AVX
+    _mm256_storeu_pd(retArray, ret_reg);
+    if (is3D)
+    {
+        return std::make_tuple(retArray[0], retArray[1], retArray[2]);
     }
 
+    return std::make_tuple(retArray[0], retArray[1], 0.);
+#else
     return std::make_tuple(ret_x, ret_y, ret_z);
+#endif
 }
 
 double Math::fac(double n)
 {
-    double k = 1.f;
-    for (double i = 2.f; i <= n; ++i)
+    double k = 1.;
+    for (double i = 2.; i <= n; ++i)
     {
         k *= i;
     }
