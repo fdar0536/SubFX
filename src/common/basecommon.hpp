@@ -7,7 +7,6 @@
 #else
 #define SYMBOL_SHOW __declspec(dllexport)
 #endif // __MINGW32__
-#define SYMBOL_HIDE
 #else
 #define SYMBOL_SHOW __attribute__((visibility("default")))
 #endif
