@@ -28,30 +28,30 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
                                                        double cx, double cy,
                                                        double angle)
 {
-    if (angle < -360.f || angle > 360.f)
+    if (angle < -360. || angle > 360.)
     {
         throw std::invalid_argument("start & center point and valid angle (-360<=x<=360) expected");
     }
 
-    if (angle == 0.f)
+    if (angle == 0.)
     {
         throw std::invalid_argument("angle CANNOT be zero");
     }
 
     // Factor for bezier control points distance to node points
-    double kappa(4.f * (sqrt(2.f) - 1.f) / 3.f);
-    double rx0, ry0, rx1, ry1, rx2, ry2, rx3(0.f), ry3, rx03, ry03;
+    double kappa(4. * (sqrt(2.) - 1.) / 3.);
+    double rx0, ry0, rx1, ry1, rx2, ry2, rx3(0.), ry3, rx03, ry03;
 
     rx0 = x - cx;
     ry0 = y - cy;
 
-    double cw = (angle > 0.f ? 1.f : -1.f);
+    double cw = (angle > 0. ? 1. : -1.);
 
     // 把do while loop轉換成while loop
     size_t curves_n(4);
     std::vector<std::pair<double, double>> curves;
     curves.reserve(curves_n);
-    double angle_sum(0.f);
+    double angle_sum(0.);
     double cur_angle_pct;
     std::pair<double, double> tmpPair;
     std::tuple<double, double, double> tmpTuple;
@@ -59,8 +59,8 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
 
     while (angle_sum < angle)
     {
-        cur_angle_pct = std::min((angle - angle_sum), static_cast<double>(90.f)) / 90.f;
-        tmpPair = rotate2d(rx0, ry0, cw * 90.f * cur_angle_pct);
+        cur_angle_pct = std::min((angle - angle_sum), static_cast<double>(90.)) / 90.;
+        tmpPair = rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
 
         // 下面會有用
         rx3 = tmpPair.first;
@@ -72,20 +72,20 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
 
         // Scale arc vector to curve node <-> control point distance
         tmpDouble = distance(rx03, ry03);
-        tmpDouble = pow(tmpDouble, 2) / 2.f;
+        tmpDouble = pow(tmpDouble, 2) / 2.;
         tmpDouble = sqrt(tmpDouble);
         tmpTuple = stretch(rx03, ry03, 0, tmpDouble * kappa);
         rx03 = std::get<0>(tmpTuple);
         ry03 = std::get<1>(tmpTuple);
 
         // Get curve control points
-        tmpPair = rotate2d(rx03, ry03, cw * (-45.f) * cur_angle_pct);
+        tmpPair = rotate2d(rx03, ry03, cw * (-45.) * cur_angle_pct);
         rx1 = rx0 + tmpPair.first;
         ry1 = ry0 + tmpPair.second;
 
-        tmpPair = rotate2d(rx03 * -1.f,
-                                        ry03 * -1.f,
-                                        cw * 45.f * cur_angle_pct);
+        tmpPair = rotate2d(rx03 * -1.,
+                           ry03 * -1.,
+                           cw * 45. * cur_angle_pct);
         rx2 = rx3 + tmpPair.first;
         ry2 = ry3 + tmpPair.second;
 
@@ -100,7 +100,7 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
         // Prepare next curve
         rx0 = rx3;
         ry0 = ry3;
-        angle_sum += 90.f;
+        angle_sum += 90.;
     }
 
     return curves;
@@ -110,7 +110,7 @@ std::tuple<double, double, double> Math::bezier(double pct,
                         std::vector<std::tuple<double, double, double>> &pts,
                         bool is3D)
 {
-    if (pct < 0.f || pct > 1.f)
+    if (pct < 0. || pct > 1.)
     {
         throw std::invalid_argument("pct must between 0 and 1");
     }
@@ -145,7 +145,7 @@ double Math::degree(double x1, double y1, double z1,
     // Return with sign by clockwise direction
     if ((x1 * y2 - y1 * x2) < 0)
     {
-        return (degree * -1.f);
+        return (degree * -1.);
     }
 
     return degree;
@@ -168,15 +168,15 @@ std::pair<double, double> Math::line_intersect(double x0, double y0,
     double x32(x2 - x3);
     double y32(y2 - y3);
 
-    if ((x10 == 0.f && y10 == 0.f) ||
-        (x32 == 0.f && y32 == 0.f))
+    if ((x10 == 0. && y10 == 0.) ||
+        (x32 == 0. && y32 == 0.))
     {
         throw std::invalid_argument("lines mustn't have zero length");
     }
 
     // Calculate determinant and check for parallel lines
     double det = x10 * y32 - y10 * x32;
-    if (det == 0.f)
+    if (det == 0.)
     {
         return std::pair<double, double>();
     }
@@ -190,10 +190,10 @@ std::pair<double, double> Math::line_intersect(double x0, double y0,
 
     if (strict)
     {
-        double s = (x10 != 0.f ? (ix - x1) / x10 : (iy - y1) / y10);
-        double t = (x32 != 0.f ? (ix - x3) / x32 : (iy - y3) / y32);
+        double s = (x10 != 0. ? (ix - x1) / x10 : (iy - y1) / y10);
+        double t = (x32 != 0. ? (ix - x3) / x32 : (iy - y3) / y32);
 
-        if (s < 0.f || s > 1.f || t < 0.f || t > 1.f)
+        if (s < 0. || s > 1. || t < 0. || t > 1.)
         {
             return std::make_pair(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         }
@@ -223,7 +223,7 @@ double Math::randomsteps(double min, double max, double step)
 double Math::round(double x, double dec)
 {
     // Return number rounded to wished decimal size
-    if (dec != 0.f && dec >= 1.f)
+    if (dec != 0. && dec >= 1.)
     {
         dec = pow(10, floor(dec));
         return floor(x * dec + 0.5) / dec;
@@ -236,7 +236,7 @@ std::tuple<double, double, double> Math::stretch(double x, double y,
                                                  double z, double length)
 {
     double cur_length(distance(x, y, z));
-    if (cur_length == 0.f)
+    if (cur_length == 0.)
     {
         return std::make_tuple(0.f, 0.f, 0.f);
     }
@@ -260,8 +260,8 @@ std::pair<double, double> Math::ellipse(double x, double y,
                                         double a)
 {
     double ra(rad(a));
-    return std::make_pair(x + w / 2.f * sin(ra),
-                          y + h / 2.f * cos(ra));
+    return std::make_pair(x + w / 2. * sin(ra),
+                          y + h / 2. * cos(ra));
 }
 
 double Math::randomway()
@@ -269,14 +269,14 @@ double Math::randomway()
     double ret;
     while(1)
     {
-        ret = random(0, 1) * 2.f - 1.f;
-        if (ret != 0.f)
+        ret = random(0, 1) * 2. - 1.;
+        if (ret != 0.)
         {
             break;
         }
     }
 
-    return (ret < 0.f ? -1.f : 1.f);
+    return (ret < 0. ? -1. : 1.);
 }
 
 std::tuple<double, double, double> Math::rotate(std::tuple<double, double, double> p,

@@ -14,7 +14,6 @@ endif (UNIX)
 
 option(ENABLE_SIMD "Enable X86 SIMD, include SSE" ON)
 if(ENABLE_SIMD)
-    set(ENABLE_SSE ON)
     option(ENABLE_AVX "Enable AVX" ON)
 endif(ENABLE_SIMD)
 
