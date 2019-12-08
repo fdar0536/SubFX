@@ -50,10 +50,10 @@ uint64_t Ass::stringToMs(std::string &ass_ms)
 
 std::string Ass::msToString(uint64_t ms_ass)
 {
-    uint32_t hr((int)floor(ms_ass / 3600000) % 10); //hour
-    uint32_t mins(floor(ms_ass % 3600000 / 60000)); // minutes
-    uint32_t sec(floor(ms_ass % 60000 / 1000)); // second
-    uint32_t csec(floor(ms_ass % 1000 / 10)); // centisecond
+    uint32_t hr(static_cast<int>(floor(ms_ass / 3600000)) % 10); //hour
+    uint32_t mins(static_cast<uint32_t>(floor(ms_ass % 3600000 / 60000))); // minutes
+    uint32_t sec(static_cast<uint32_t>(floor(ms_ass % 60000 / 1000))); // second
+    uint32_t csec(static_cast<uint32_t>(floor(ms_ass % 1000 / 10))); // centisecond
 
     char buf[500];
     sprintf(buf, "%d:%02d:%02d.%02d", hr, mins, sec, csec);
@@ -68,34 +68,34 @@ std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Ass::stringToColorAlpha(std::stri
     {
         // alpha only &HAA&
         tmpString = input.substr(2, 2);
-        a = stoul(tmpString, nullptr, 16);
+        a = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
     }
     else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{6}&$")))
     {
         // ass color &HBBGGRR&
         tmpString = input.substr(2, 2);
-        b = stoul(tmpString, nullptr, 16);
+        b = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
 
         tmpString = input.substr(4, 2);
-        g = stoul(tmpString, nullptr, 16);
+        g = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
 
         tmpString = input.substr(6, 2);
-        r = stoul(tmpString, nullptr, 16);
+        r = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
     }
     else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{8}$")))
     {
         // both &HAABBGGRR
         tmpString = input.substr(2, 2);
-        a = stoul(tmpString, nullptr, 16);
+        a = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
 
         tmpString = input.substr(4, 2);
-        b = stoul(tmpString, nullptr, 16);
+        b = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
 
         tmpString = input.substr(6, 2);
-        g = stoul(tmpString, nullptr, 16);
+        g = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
 
         tmpString = input.substr(8, 2);
-        r = stoul(tmpString, nullptr, 16);
+        r = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
     }
     else
     {
