@@ -18,7 +18,6 @@ public:
     Math();
 
     /**
-     * @brief arc_curve
      * Converts arc data to bezier curves.
      * x & y is the arc starting point,
      * cx & cy the arc center (= orientation point to keep the same distance to all arc points)
@@ -39,7 +38,6 @@ public:
                                                      double angle);
 
     /**
-     * @brief bezier
      * Calculates a point on a bezier curve of any order.
      *
      * @param pct The position on the curve in range 0<=x<=1.
@@ -57,20 +55,17 @@ public:
                 bool is3D = false);
 
     /**
-     * @brief degree
-     * Calculates the degree between vectors x1|y1|z1 and x2|y2|z3
+     * Calculates the degree between vectors x1|y1|z1 and x2|y2|z3.
      */
     double degree(double x1, double y1, double z1,
                   double x2, double y2, double z2);
 
     /**
-     * @brief distance
      * Calculates length of given vector.
      */
     double distance(double x, double y, double z = 0.f);
 
     /**
-     * @brief line_intersect
      * Calculates intersection point of two lines.
      * x0, y0, x1, y1 are both points of line 1,
      * x2, y2, x3, y3 are points of line 2.
@@ -89,7 +84,11 @@ public:
                                              double x3, double y3,
                                              bool strict);
 
-    //Get orthogonal vector of 2 given vectors
+    /**
+     * @brief Get orthogonal vector of 2 given vectors.
+     *
+     * Calculates the orthogonal vector to vectors x1|y1|z1 and x2|y2|z3.
+     */
     std::tuple<double, double, double> ortho(double x1,
                                              double y1,
                                              double z1,
@@ -97,28 +96,73 @@ public:
                                              double y2,
                                              double z2);
 
-    // Generates a random number in given range with specific item distance
-    // it may throw invalid_argument
+    /**
+     * @brief Generates a random number in given range with specific item distance.
+     *
+     * Generates randomly a number in range min to max with gap size step between numbers.
+     *
+     * @throw std::invalid_argument If min is greater than max or
+     *                              sttp is less than zero,
+     *                              this function will throw std::invalid_argument.
+     */
     double randomsteps(double min, double max, double step);
 
-    // Rounds number
-    double round(double x, double dec = 0.f);
+    /**
+     * @brief Rounds number.
+     *
+     * Rounds input to nearest integer.
+     *
+     * @param x input number.
+     * @param dec Defines the position behind decimal point to round to.
+     */
+    double round(double x, double dec = 0.);
 
-    // Scales vector to given length
+    /**
+     * @brief Scales vector to given length.
+     *
+     * Stretches vector x|y|z to length length.
+     */
     std::tuple<double, double, double> stretch(double x, double y,
                                                double z, double length);
 
-    // Trim number in range
-    // it may throw invalid_argument
+    /**
+     * @brief Trim number in range
+     *
+     * If x is smaller than min, returns min.
+     * If x is greater than max, returns max.
+     * Otherwise returns x.
+     *
+     * @throw std::invalid_argument If min is greater than max,
+     *                              this function will throw std::invalid_argument.
+     */
     double trim(double x, double min, double max);
 
+    /**
+     * Calculates a point on ellipse with given angle,
+     * center point x/y, width and height.
+     */
     std::pair<double, double> ellipse(double x, double y,
                                       double w, double h,
                                       double a);
 
+    /**
+     * Returns randomly -1 or 1.
+     */
     double randomway();
 
-    // rotate may throw invalid_argument
+    /**
+     * Allows to rotate a point in 3D room.
+     *
+     * @param p input point(x, y, z) in tuple.
+     * @param axis "x" or "y" or "z".
+     * @param angle As its name in degree.
+     * @return Rotated point(x, y, z) in the tuple.
+     *
+     * @throw std::invalid_argument If axix is not "x" and
+     *                              is not "y" and
+     *                              is not "z",
+     *                              this function will throw std::invalid_argument.
+     */
     std::tuple<double, double, double> rotate(std::tuple<double, double, double> p,
                                               std::string axis,
                                               double angle);
