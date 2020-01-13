@@ -48,6 +48,7 @@ public:
      *             If is3D is set to false,
      *             the third number of tuples of pts will be ignored,
      *             and the third number of returned tuple always is zero.
+     *
      * @throw std::invalid_argument
      */
     std::tuple<double, double, double> bezier(double pct,
