@@ -29,10 +29,10 @@ public:
      * Each pair is one of the control points of a bezier curve.
      * Every four pairs describe a bezier curve.
      *
-     * @exception std::invalid_argument When angle is less than -360 or
-     *                                  is greater than 360 or
-     *                                  is equal to 0, this function will throw
-     *                                  std::invalid_argument.
+     * @throw std::invalid_argument When angle is less than -360 or
+     *                              is greater than 360 or
+     *                              is equal to 0, this function will throw
+     *                              std::invalid_argument.
      */
     std::vector<std::pair<double, double>> arc_curve(double x, double y,
                                                      double cx, double cy,
@@ -50,7 +50,7 @@ public:
      *             If is3D is set to false,
      *             the third number of tuples of pts will be ignored,
      *             and the third number of returned tuple always is zero.
-     * @exception std::invalid_argument
+     * @throw std::invalid_argument
      */
     std::tuple<double, double, double> bezier(double pct,
                 std::vector<std::tuple<double, double, double>> &pts,
@@ -63,15 +63,31 @@ public:
     double degree(double x1, double y1, double z1,
                   double x2, double y2, double z2);
 
-    // Degree between two 3d vectors
+    /**
+     * @brief distance
+     * Calculates length of given vector.
+     */
     double distance(double x, double y, double z = 0.f);
 
-    // line_intersect may throw invalid_argument
+    /**
+     * @brief line_intersect
+     * Calculates intersection point of two lines.
+     * x0, y0, x1, y1 are both points of line 1,
+     * x2, y2, x3, y3 are points of line 2.
+     * strict is a flag, determining the intersection has to be located on the lines.
+     * x, y can be the intersection point.
+     * If both lines are parallel, it will return empty pair.
+     * If strict is true and there's no intersection on the strict length lines,
+     * it will return inf (std::make_pair(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity())).
+     *
+     * @throw std::invalid_argument If one of lines or both have zero length,
+     *                              this function will throw std::invalid_argument.
+     */
     std::pair<double, double> line_intersect(double x0, double y0,
-                                          double x1, double y1,
-                                          double x2, double y2,
-                                          double x3, double y3,
-                                          bool strict);
+                                             double x1, double y1,
+                                             double x2, double y2,
+                                             double x3, double y3,
+                                             bool strict);
 
     //Get orthogonal vector of 2 given vectors
     std::tuple<double, double, double> ortho(double x1,
