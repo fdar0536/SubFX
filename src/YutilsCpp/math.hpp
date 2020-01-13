@@ -17,18 +17,51 @@ class SYMBOL_SHOW Math : protected Common
 public:
     Math();
 
-    // arc_curve may throw invalid_argument
+    /**
+     * @brief arc_curve
+     * Converts arc data to bezier curves.
+     * x & y is the arc starting point,
+     * cx & cy the arc center (= orientation point to keep the same distance to all arc points)
+     * and angle the angle in degree of the arc.
+     * For each 90° one curve is generated, so a maximum of 4 curves can span a circle.
+     * Curves are 3rd order bezier curves.
+     * It returns a vector conatins pairs.
+     * Each pair is one of the control points of a bezier curve.
+     * Every four pairs describe a bezier curve.
+     *
+     * @exception std::invalid_argument When angle is less than -360 or
+     *                                  is greater than 360 or
+     *                                  is equal to 0, this function will throw
+     *                                  std::invalid_argument.
+     */
     std::vector<std::pair<double, double>> arc_curve(double x, double y,
                                                      double cx, double cy,
                                                      double angle);
 
-    // bezier may throw invalid_argument
+    /**
+     * @brief bezier
+     * Calculates a point on a bezier curve of any order.
+     *
+     * @param pct The position on the curve in range 0<=x<=1.
+     * @param pts A vector contains tuples,
+     *            each tuple containing 3 numbers as curve point.
+     *            the size of this vector MUST greater than 1.
+     * @param is3D It indicates pts is 3D or not.
+     *             If is3D is set to false,
+     *             the third number of tuples of pts will be ignored,
+     *             and the third number of returned tuple always is zero.
+     * @exception std::invalid_argument
+     */
     std::tuple<double, double, double> bezier(double pct,
                 std::vector<std::tuple<double, double, double>> &pts,
                 bool is3D = false);
 
+    /**
+     * @brief degree
+     * Calculates the degree between vectors x1|y1|z1 and x2|y2|z3
+     */
     double degree(double x1, double y1, double z1,
-               double x2, double y2, double z2);
+                  double x2, double y2, double z2);
 
     // Degree between two 3d vectors
     double distance(double x, double y, double z = 0.f);

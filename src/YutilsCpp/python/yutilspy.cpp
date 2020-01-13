@@ -35,7 +35,7 @@ PYBIND11_MODULE(YutilsPy, m)
     "pct is the position on the curve in range 0<=x<=1.\n"
     "pts is a list of tuples, each one containing 3 numbers as curve point.\n"
     "is3D is boolean indicates pts is 3D or not.\n"
-    "if \"is3D\" is set to false, the third number of tuples of pts will be ignored,\n"
+    "If \"is3D\" is set to false, the third number of tuples of pts will be ignored,\n"
     "and the third number of returned tuple always is zero.\n")
 
     .def("degree", &Math::degree,
