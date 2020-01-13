@@ -153,7 +153,7 @@ std::istream &AssParser::safeGetline(std::istream &is, std::string &buf)
                 is.setstate(std::ios::eofbit);
             return is;
         default:
-            buf += (char)c;
+            buf += static_cast<char>(c);
         }
     }
 }
@@ -243,7 +243,7 @@ void AssParser::parseLine(std::string &line)
             std::shared_ptr<AssStyle> style(std::make_shared<AssStyle>());
             try
             {
-                style->encoding = lexical_cast<int>(match[match.size() - 1]);
+                style->encoding = lexical_cast<int>(match[match.size() - static_cast<int>(1)]);
             }
             catch (...)
             {
