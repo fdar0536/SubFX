@@ -72,15 +72,13 @@ public:
      * If both lines are parallel, it will return empty pair.
      * If strict is true and there's no intersection on the strict length lines,
      * it will return inf (std::make_pair(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity())).
-     *
-     * @throw std::invalid_argument If one of lines or both have zero length,
-     *                              this function will throw std::invalid_argument.
      */
-    std::pair<double, double> line_intersect(double x0, double y0,
-                                             double x1, double y1,
-                                             double x2, double y2,
-                                             double x3, double y3,
-                                             bool strict);
+    std::pair<std::pair<double, double>, const char *>
+    line_intersect(double x0, double y0,
+                   double x1, double y1,
+                   double x2, double y2,
+                   double x3, double y3,
+                   bool strict);
 
     /**
      * @brief Get orthogonal vector of 2 given vectors.

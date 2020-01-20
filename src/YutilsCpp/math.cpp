@@ -162,11 +162,12 @@ double Math::distance(double x, double y, double z)
     return sqrt(x * x + y * y + z * z);
 }
 
-std::pair<double, double> Math::line_intersect(double x0, double y0,
-                                               double x1, double y1,
-                                               double x2, double y2,
-                                               double x3, double y3,
-                                               bool strict)
+std::pair<std::pair<double, double>, const char *>
+Math::line_intersect(double x0, double y0,
+                     double x1, double y1,
+                     double x2, double y2,
+                     double x3, double y3,
+                     bool strict)
 {
     // Get line vectors & check valid lengths
     double x10(x0 - x1);
@@ -177,14 +178,16 @@ std::pair<double, double> Math::line_intersect(double x0, double y0,
     if ((x10 == 0. && y10 == 0.) ||
         (x32 == 0. && y32 == 0.))
     {
-        throw std::invalid_argument("lines mustn't have zero length");
+        return std::make_pair(std::pair<double, double>(),
+                              "lines mustn't have zero length");
     }
 
     // Calculate determinant and check for parallel lines
     double det = x10 * y32 - y10 * x32;
     if (det == 0.)
     {
-        return std::pair<double, double>();
+        return std::make_pair(std::pair<double, double>(),
+                              nullptr);
     }
 
     // Calculate line intersection (endless line lengths)
@@ -201,11 +204,13 @@ std::pair<double, double> Math::line_intersect(double x0, double y0,
 
         if (s < 0. || s > 1. || t < 0. || t > 1.)
         {
-            return std::make_pair(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+            return std::make_pair(std::make_pair(std::numeric_limits<double>::infinity(),
+                                                 std::numeric_limits<double>::infinity()),
+                                  nullptr);
         }
     }
 
-    return std::make_pair(ix, iy);
+    return std::make_pair(std::make_pair(ix, iy), nullptr);
 }
 
 std::tuple<double, double, double> Math::ortho(double x1, double y1,double z1,
