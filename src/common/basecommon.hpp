@@ -17,7 +17,7 @@ class ConstructCommon
 {
 protected:
 
-    ConstructCommon() {};
+    ConstructCommon() {}
 
     template<class T>
     static std::shared_ptr<T> createCommon()
