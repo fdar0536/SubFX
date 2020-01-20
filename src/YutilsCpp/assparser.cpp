@@ -517,12 +517,11 @@ const char *AssParser::parseDialogs()
             ""
         );
 
-        TEXT_SIZE *textsize(nullptr);
-        try
-        {
-            textsize = textSize(dialog->text_stripped, dialog->styleref);
-        }
-        catch (...)
+        std::shared_ptr<TEXT_SIZE> textsize(nullptr);
+        const char *err(nullptr);
+        std::tie(textsize, err) = textSize(dialog->text_stripped,
+                                           dialog->styleref);
+        if (err)
         {
             std::string tmpString = "Fail to upgrade dialogs in dialog ";
             tmpString += lexical_cast<std::string>(dialog->i);
@@ -582,13 +581,9 @@ const char *AssParser::parseDialogs()
             dialog->y = dialog->bottom;
         }
 
-        delete textsize;
         std::string tmpString(" ");
-        try
-        {
-            textsize = textSize(tmpString, dialog->styleref);
-        }
-        catch (...)
+        std::tie(textsize, err) = textSize(tmpString, dialog->styleref);
+        if (err)
         {
             tmpString = "Fail to upgrade dialogs in dialog ";
             tmpString += lexical_cast<std::string>(dialog->i);
@@ -596,7 +591,6 @@ const char *AssParser::parseDialogs()
         }
 
         space_width = textsize->width;
-        delete textsize;
         textsize = nullptr;
 
         // Add dialog text chunks
@@ -673,11 +667,8 @@ const char *AssParser::parseDialogs()
                     syl->text = dialog->textChunked.at(index)->text;
                 }
 
-                try
-                {
-                    textsize = textSize(syl->text, dialog->styleref);
-                }
-                catch (...)
+                std::tie(textsize, err) = textSize(syl->text, dialog->styleref);
+                if (err)
                 {
                     dialog->syls.clear();
                     return "Error when getting syl's data.";
@@ -690,7 +681,6 @@ const char *AssParser::parseDialogs()
                 syl->external_leading = textsize->external_leading;
                 syl->internal_leading = textsize->internal_leading;
 
-                delete textsize;
                 textsize = nullptr;
                 lastTime = syl->end_time;
                 dialog->syls.push_back(syl);
@@ -748,7 +738,7 @@ const char *AssParser::parseDialogs()
                 }
                 else
                 {
-                    double max_width(0.f), sum_height(0.);
+                    double max_width(0.), sum_height(0.);
                     for (size_t index = 0; index < dialog->syls.size(); ++index)
                     {
                         std::shared_ptr<AssSyl> syl(dialog->syls.at(index));
@@ -807,14 +797,11 @@ const char *AssParser::parseDialogs()
             std::shared_ptr<AssWord> word(std::make_shared<AssWord>());
 
             word->text = match[2];
-            try
-            {
-                textsize = textSize(word->text, dialog->styleref);
-            }
-            catch (...)
+            std::tie(textsize, err) = textSize(word->text, dialog->styleref);
+            if (err)
             {
                 dialog->words.clear();
-                throw std::runtime_error("Error when paring words.");
+                return "Error when paring words.";
             }
 
             tmpString = match[1];
@@ -836,7 +823,6 @@ const char *AssParser::parseDialogs()
             word->internal_leading = textsize->internal_leading;
             word->external_leading = textsize->external_leading;
 
-            delete textsize;
             textsize = nullptr;
             dialog->words.push_back(word);
             tmpString = match.suffix();
@@ -846,7 +832,7 @@ const char *AssParser::parseDialogs()
         // Calculate word positions with all words data already available
         if (dialog->words.size() > 0)
         {
-            if (dialog->words.at(0)->width != 0.f)
+            if (dialog->words.at(0)->width != 0.)
             {
                 if (dialog->styleref->alignment > 6 ||
                     dialog->styleref->alignment < 4)
@@ -859,7 +845,7 @@ const char *AssParser::parseDialogs()
                         // Horizontal position
                         cur_x += (word->prespace * space_width);
                         word->left = cur_x;
-                        word->center = word->left + (word->width / 2.f);
+                        word->center = word->left + (word->width / 2.);
                         word->right = word->left + word->width;
 
                         if (((dialog->styleref->alignment - 1) % 3) == 0)
@@ -889,7 +875,7 @@ const char *AssParser::parseDialogs()
                 }
                 else
                 {
-                    double max_width(0.f), sum_height(0.f);
+                    double max_width(0.), sum_height(0.);
                     for (size_t index = 0; index < dialog->words.size(); ++index)
                     {
                         std::shared_ptr<AssWord> word(dialog->words.at(index));
@@ -897,39 +883,39 @@ const char *AssParser::parseDialogs()
                         sum_height += word->height;
                     } //end for index;
 
-                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.f));
-                    double x_fix(0.f);
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.));
+                    double x_fix(0.);
                     for (size_t index = 0; index < dialog->words.size(); ++index)
                     {
                         std::shared_ptr<AssWord> word(dialog->words.at(index));
 
                         // Horizontal position
-                        x_fix = ((max_width - word->width)/ 2.f);
+                        x_fix = ((max_width - word->width)/ 2.);
                         if (dialog->styleref->alignment == 4)
                         {
                             word->left = dialog->left + x_fix;
-                            word->center = word->left + (word->width / 2.f);
+                            word->center = word->left + (word->width / 2.);
                             word->right = word->left + word->width;
                             word->x = word->left;
                         }
                         else if (dialog->styleref->alignment == 5)
                         {
-                            word->left = static_cast<double>(metaData->play_res_x >> 1) - (word->width / 2.f);
-                            word->center = word->left + (word->width / 2.f);
+                            word->left = static_cast<double>(metaData->play_res_x >> 1) - (word->width / 2.);
+                            word->center = word->left + (word->width / 2.);
                             word->right = word->left + word->width;
                             word->x = word->center;
                         }
                         else // dialog->styleref->alignment == 6
                         {
                             word->left = dialog->right - word->width - x_fix;
-                            word->center = word->left + (word->width / 2.f);
+                            word->center = word->left + (word->width / 2.);
                             word->right = word->left + word->width;
                             word->x = word->right;
                         }
 
                         // Vertical position
                         word->top = cur_y;
-                        word->middle = word->top + (word->height / 2.f);
+                        word->middle = word->top + (word->height / 2.);
                         word->bottom = word->top + word->height;
                         cur_y += word->height;
                     } // end for index
@@ -945,7 +931,7 @@ const char *AssParser::parseDialogs()
         for (size_t cIndex = 0; cIndex < charText.size(); ++cIndex)
         {
             std::shared_ptr<AssChar> assChar(std::make_shared<AssChar>());
-            assChar->i = cIndex;
+            assChar->i = static_cast<uint32_t>(cIndex);
             assChar->start_time = dialog->start_time;
             assChar->mid_time = dialog->mid_time;
             assChar->end_time = dialog->end_time;
@@ -961,7 +947,7 @@ const char *AssParser::parseDialogs()
                 {
                     if (charIndex == assChar->i)
                     {
-                        assChar->syl_i = syl->i;
+                        assChar->syl_i = static_cast<int>(syl->i);
                         assChar->start_time = syl->start_time;
                         assChar->mid_time = syl->mid_time;
                         assChar->end_time = syl->end_time;
@@ -982,7 +968,7 @@ syl_reference_found:
                 {
                     if (charIndex == assChar->i)
                     {
-                        assChar->word_i = word->i;
+                        assChar->word_i = static_cast<int>(word->i);
                         goto word_reference_found;
                     }
                     ++charIndex;
@@ -990,14 +976,11 @@ syl_reference_found:
             } // end for index
 
 word_reference_found:
-            try
-            {
-                textsize = textSize(assChar->text, dialog->styleref);
-            }
-            catch (...)
+            std::tie(textsize, err) = textSize(assChar->text, dialog->styleref);
+            if (err)
             {
                 dialog->chars.clear();
-                throw std::runtime_error("Error when parsing chars.");
+                return "Error when parsing chars.";
             }
 
             assChar->width = textsize->width;
@@ -1007,7 +990,6 @@ word_reference_found:
             assChar->internal_leading = textsize->internal_leading;
             assChar->external_leading = textsize->external_leading;
 
-            delete textsize;
             textsize = nullptr;
             dialog->chars.push_back(assChar);
         } //end for cIndex
@@ -1015,7 +997,7 @@ word_reference_found:
         // Calculate character positions with all characters data already available
         if (dialog->chars.size() > 0)
         {
-            if (dialog->chars.at(0)->width != 0)
+            if (dialog->chars.at(0)->width != 0.
             {
                 if (dialog->styleref->alignment > 6 || dialog->styleref->alignment < 4)
                 {
@@ -1064,8 +1046,8 @@ word_reference_found:
                         sum_height += assChar->height;
                     } // end for index
 
-                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.f));
-                    double x_fix(0.f);
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.));
+                    double x_fix(0.);
                     for (size_t index = 0; index < dialog->chars.size(); ++index)
                     {
                         std::shared_ptr<AssChar> assChar(dialog->chars.at(index));
@@ -1075,21 +1057,21 @@ word_reference_found:
                         if (dialog->styleref->alignment == 4)
                         {
                             assChar->left = dialog->left + x_fix;
-                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->center = assChar->left + (assChar->width / 2.);
                             assChar->right = assChar->left + assChar->width;
                             assChar->x = assChar->left;
                         }
                         else if (dialog->styleref->alignment == 5)
                         {
-                            assChar->left = static_cast<double>(metaData->play_res_x >> 1) - (assChar->width / 2.f);
-                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->left = static_cast<double>(metaData->play_res_x >> 1) - (assChar->width / 2.);
+                            assChar->center = assChar->left + (assChar->width / 2.);
                             assChar->right = assChar->left + assChar->width;
                             assChar->x = assChar->center;
                         }
                         else // dialog->styleref->alignment == 6
                         {
                             assChar->left = dialog->right - assChar->width - x_fix;
-                            assChar->center = assChar->left + (assChar->width / 2.f);
+                            assChar->center = assChar->left + (assChar->width / 2.);
                             assChar->right = assChar->left + assChar->width;
                             assChar->y = assChar->right;
                         }
@@ -1120,8 +1102,8 @@ word_reference_found:
     for (size_t i = 0; i < dialogData.size(); ++i)
     {
         std::shared_ptr<AssDialog> dialog(dialogData.at(i));
-        dialog->leadin = (i == 0 ? 1000.1f : (dialog->start_time - dialogData.at(i - 1)->end_time));
-        dialog->leadout = (i == last ? 1000.1f : (dialogData.at(i + 1)->start_time - dialog->end_time));
+        dialog->leadin = (i == 0 ? 1000.1 : (dialog->start_time - dialogData.at(i - 1)->end_time));
+        dialog->leadout = (i == last ? 1000.1 : (dialogData.at(i + 1)->start_time - dialog->end_time));
     }
 
     // here maybe have a better solution
