@@ -13,11 +13,9 @@ namespace Yutils
 
 class Utf8
 {
-public:
+protected:
 
     Utf8() {}
-
-protected:
 
     uint32_t utf8StringLen(std::string &);
 
