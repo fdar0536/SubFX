@@ -221,19 +221,21 @@ FontHandle::~FontHandle()
 }
 
 // public member function
-std::map<std::string, double> FontHandle::metrics()
+std::pair<std::map<std::string, double>, const char *> FontHandle::metrics()
 {
 #ifdef _WIN32
     TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
     if (!fontMetrics)
     {
-        throw std::runtime_error("CANNOT create TEXTMETRICW");
+        return std::make_pair(std::map<std::string, double>(),
+                              "CANNOT create TEXTMETRICW");
     }
 
     if (GetTextMetricsW(dc, fontMetrics) == 0)
     {
         delete fontMetrics;
-        throw std::runtime_error("Fail to GetTextMetricsW");
+        return std::make_pair(std::map<std::string, double>(),
+                              "Fail to GetTextMetricsW");
     }
 
     std::map<std::string, double> ret;
@@ -253,7 +255,8 @@ std::map<std::string, double> FontHandle::metrics()
 
     if (!fontMetrics)
     {
-        throw std::runtime_error("CANNOT create PangoFontMetrics");
+        return std::make_pair(std::map<std::string, double>(),
+                              "CANNOT create PangoFontMetrics");
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(fontMetrics)));
@@ -267,29 +270,32 @@ std::map<std::string, double> FontHandle::metrics()
     ret["height"] = (ascent + descent) * yscale * fonthack_scale;
     ret["ascent"] = ascent * yscale * fonthack_scale;
     ret["descent"] = descent * yscale * fonthack_scale;
-    ret["internal_leading"] = 0.f;
+    ret["internal_leading"] = 0.;
     ret["external_leading"] = pango_layout_get_spacing(layout) / PANGO_SCALE * downscale * yscale * fonthack_scale;
 #endif
 
-    return ret;
+    return std::make_pair(ret, nullptr);
 }
 
-std::map<std::string, double> FontHandle::text_extents(std::string &text)
+std::pair<std::map<std::string, double>, const char *>
+FontHandle::text_extents(std::string &text)
 {
 #ifdef _WIN32
     wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen = wcslen(textDst.c_str());
 
     SIZE *size(new (std::nothrow) SIZE);
-    if (!(size))
+    if (!size)
     {
-        throw std::runtime_error("CANNOT allocate SIZE");
+        return std::make_pair(std::map<std::string, double>(),
+                              "CANNOT allocate SIZE");
     }
 
     if (GetTextExtentPoint32W(dc, textDst.c_str(), textLen, size) == 0)
     {
         delete size;
-        throw std::runtime_error("Fail to GetTextExtentPoint32W");
+        return std::make_pair(std::map<std::string, double>(),
+                              "Fail to GetTextExtentPoint32W");
     }
     std::map<std::string, double> ret;
 
@@ -302,7 +308,8 @@ std::map<std::string, double> FontHandle::text_extents(std::string &text)
     PangoRectangle *rect(new (std::nothrow) PangoRectangle);
     if (!rect)
     {
-        throw std::runtime_error("CANNOT create PangoRectangle");
+        return std::make_pair(std::map<std::string, double>(),
+                              "CANNOT create PangoRectangle");
     }
 
     pango_layout_get_pixel_extents(layout, nullptr, rect);
@@ -313,17 +320,19 @@ std::map<std::string, double> FontHandle::text_extents(std::string &text)
     delete rect;
 #endif
 
-    return ret;
+    return std::make_pair(ret, nullptr);
 }
 
-std::string FontHandle::text_to_shape(std::string &text)
+std::pair<std::string, const char *>
+FontHandle::text_to_shape(std::string &text)
 {
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        throw std::invalid_argument("text too long");
+        return std::make_pair(std::string(),
+                              "text too long");
     }
 
     INT *charWidths(nullptr);
@@ -332,14 +341,16 @@ std::string FontHandle::text_to_shape(std::string &text)
         charWidths = new (std::nothrow) INT[textLen];
         if (!charWidths)
         {
-            throw std::runtime_error("CANNOT allocate INT array");
+            return std::make_pair(std::string(),
+                                  "CANNOT allocate INT array");
         }
 
         SIZE *size(new (std::nothrow) SIZE);
         if (!size)
         {
             delete[] charWidths;
-            throw std::untime_error("CANNOT allocate SIZE");
+            return std::make_pair(std::string(),
+                                  "CANNOT allocate SIZE");
         }
 
         int space(hspace * upscale);
@@ -349,7 +360,8 @@ std::string FontHandle::text_to_shape(std::string &text)
             {
                 delete[] charWidths;
                 delete size;
-                throw std::runtime_error("Fail to GetTextExtentPoint32W");
+                return std::make_pair(std::string(),
+                                      "Fail to GetTextExtentPoint32W");
             }
 
             charWidths[i] = size->cx + space;
@@ -365,7 +377,9 @@ std::string FontHandle::text_to_shape(std::string &text)
             delete[] charWidths;
         }
 
-        throw std::runtime_error("Fail to BeginPath");
+        AbortPath(dc);
+        return std::make_pair(std::string(),
+                              "Fail to BeginPath");
     }
 
 
@@ -376,7 +390,9 @@ std::string FontHandle::text_to_shape(std::string &text)
             delete[] charWidths;
         }
 
-        throw std::runtime_error("Fail to ExtTextOutW");
+        AbortPath(dc);
+        return std::make_pair(std::string(),
+                              "Fail to ExtTextOutW");
     }
 
     if (EndPath(dc) == 0)
@@ -386,7 +402,9 @@ std::string FontHandle::text_to_shape(std::string &text)
             delete[] charWidths;
         }
 
-        throw std::runtime_error("Fail to EndPath");
+        AbortPath(dc);
+        return std::make_pair(std::string(),
+                              "Fail to EndPath");
     }
 
     int points_n(GetPath(dc, nullptr, nullptr, 0));
@@ -398,7 +416,8 @@ std::string FontHandle::text_to_shape(std::string &text)
         }
 
         AbortPath(dc);
-        return string();
+        return std::make_pair(std::string(),
+                              nullptr);
     }
 
     POINT *points(new (std::nothrow) POINT[points_n]);
@@ -408,7 +427,10 @@ std::string FontHandle::text_to_shape(std::string &text)
         {
             delete[] charWidths;
         }
-        throw std::runtime_error("Fail to allocate POINT array");
+
+        AbortPath(dc);
+        return std::make_pair(std::string(),
+                              "Fail to allocate POINT array");
     }
 
     BYTE *types(new (std::nothrow) BYTE[points_n]);
@@ -419,7 +441,10 @@ std::string FontHandle::text_to_shape(std::string &text)
             delete[] charWidths;
         }
 
-        throw runtime_error("Fail to allocate BYTE array");
+        delete[] points;
+        AbortPath(dc);
+        return std::make_pair(std::string(),
+                              "Fail to allocate BYTE array");
     }
 
     GetPath(dc, points, types, points_n);
@@ -527,20 +552,22 @@ std::string FontHandle::text_to_shape(std::string &text)
     cairo_path_t *path(cairo_copy_path(context));
     if (!path)
     {
-        throw std::runtime_error("CANNOT create cairo_path_t");
+        return std::make_pair(std::string(),
+                              "CANNOT create cairo_path_t");
     }
 
     if (path->status != CAIRO_STATUS_SUCCESS)
     {
         cairo_new_path(context);
         cairo_path_destroy(path);
-        return std::string();
+        return std::make_pair(std::string(),
+                              nullptr);
     }
 
     std::vector<std::string> shape;
     shape.reserve(5000); // may be larger or smaller?
     int i(0), cur_type(0), last_type(99999); // first loop has no last_type
-    double tmpValue(0.f);
+    double tmpValue(0.);
     while (i < path->num_data)
     {
         cur_type = path->data[i].header.type;
@@ -614,5 +641,5 @@ std::string FontHandle::text_to_shape(std::string &text)
 
     std::stringstream s;
     std::copy(shape.begin(), shape.end(), std::ostream_iterator<std::string>(s, " "));
-    return s.str();
+    return std::make_pair(s.str(), nullptr);
 }

@@ -35,16 +35,12 @@ public:
 
     ~FontHandle();
 
-    // metrics may throw runtime_error
-    std::map<std::string, double> metrics();
+    std::pair<std::map<std::string, double>, const char *> metrics();
 
-    // text_extents may throw runtime_error
-    std::map<std::string, double> text_extents(std::string &text);
+    std::pair<std::map<std::string, double>, const char *>
+    text_extents(std::string &text);
 
-    // text_to_shape may throw
-    // 1. invalid_argument
-    // 2. runtome_error
-    std::string text_to_shape(std::string &text);
+    std::pair<std::string, const char *> text_to_shape(std::string &text);
 
 protected:
 
