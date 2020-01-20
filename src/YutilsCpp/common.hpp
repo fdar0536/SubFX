@@ -14,11 +14,9 @@ namespace Yutils
 
 class Common
 {
-public:
+protected:
 
     Common();
-
-protected:
 
     std::pair<double, double> rotate2d(double, double, double);
 

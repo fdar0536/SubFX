@@ -18,24 +18,34 @@
 
 using namespace Yutils;
 
-Math::Math()
+std::shared_ptr<Math> Math::create()
 {
-    Common();
+    Math *ret = new (std::nothrow) Math();
+    if (!ret)
+    {
+        return std::shared_ptr<Math>(nullptr);
+    }
+
+    return std::shared_ptr<Math>(ret);
 }
 
 // public member function
-std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
-                                                       double cx, double cy,
-                                                       double angle)
+std::tuple<std::vector<std::pair<double, double>>, const char *>
+Math::arc_curve(double x, double y,
+                double cx, double cy,
+                double angle)
 {
+    std::vector<std::pair<double, double>> curves;
     if (angle < -360. || angle > 360.)
     {
-        throw std::invalid_argument("start & center point and valid angle (-360<=x<=360) expected");
+        return std::make_tuple(curves,
+                               "start & center point and valid angle (-360<=x<=360) expected");
     }
 
     if (angle == 0.)
     {
-        throw std::invalid_argument("angle CANNOT be zero");
+        return std::make_tuple(curves,
+                               "angle CANNOT be zero");
     }
 
     // Factor for bezier control points distance to node points
@@ -49,34 +59,27 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
 
     // 把do while loop轉換成while loop
     size_t curves_n(4);
-    std::vector<std::pair<double, double>> curves;
     curves.reserve(curves_n);
     double angle_sum(0.);
     double cur_angle_pct;
     std::pair<double, double> tmpPair;
-    std::tuple<double, double, double> tmpTuple;
     double tmpDouble;
 
     while (angle_sum < angle)
     {
         cur_angle_pct = std::min((angle - angle_sum), static_cast<double>(90.)) / 90.;
-        tmpPair = rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
+        std::tie(rx3, ry3) = rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
 
-        // 下面會有用
-        rx3 = tmpPair.first;
-        ry3 = tmpPair.second;
-
-        // std::get arc start to end vector
-        rx03 = tmpPair.first - rx0;
-        ry03 = tmpPair.second - ry0;
+        // arc start to end vector
+        rx03 = rx3 - rx0;
+        ry03 = ry3 - ry0;
 
         // Scale arc vector to curve node <-> control point distance
         tmpDouble = distance(rx03, ry03);
         tmpDouble = pow(tmpDouble, 2) / 2.;
         tmpDouble = sqrt(tmpDouble);
-        tmpTuple = stretch(rx03, ry03, 0, tmpDouble * kappa);
-        rx03 = std::get<0>(tmpTuple);
-        ry03 = std::get<1>(tmpTuple);
+        std::tie(rx03, ry03, std::ignore) = stretch(rx03, ry03, 0,
+                                                    tmpDouble * kappa);
 
         // Get curve control points
         tmpPair = rotate2d(rx03, ry03, cw * (-45.) * cur_angle_pct);
@@ -103,7 +106,7 @@ std::vector<std::pair<double, double>> Math::arc_curve(double x, double y,
         angle_sum += 90.;
     }
 
-    return curves;
+    return make_tuple(curves, nullptr);
 } // end CoreMath::arc_curve
 
 std::tuple<double, double, double> Math::bezier(double pct,

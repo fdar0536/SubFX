@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <memory>
 
 #include "common.hpp"
 #include "../common/basecommon.hpp"
@@ -15,7 +16,8 @@ namespace Yutils
 class SYMBOL_SHOW Math : protected Common
 {
 public:
-    Math();
+
+    static std::shared_ptr<Math> create();
 
     /**
      * Converts arc data to bezier curves.
@@ -27,15 +29,11 @@ public:
      * It returns a vector conatins pairs.
      * Each pair is one of the control points of a bezier curve.
      * Every four pairs describe a bezier curve.
-     *
-     * @throw std::invalid_argument When angle is less than -360 or
-     *                              is greater than 360 or
-     *                              is equal to 0, this function will throw
-     *                              std::invalid_argument.
      */
-    std::vector<std::pair<double, double>> arc_curve(double x, double y,
-                                                     double cx, double cy,
-                                                     double angle);
+    std::tuple<std::vector<std::pair<double, double>>, const char *>
+    arc_curve(double x, double y,
+              double cx, double cy,
+              double angle);
 
     /**
      * Calculates a point on a bezier curve of any order.
@@ -167,6 +165,10 @@ public:
     std::tuple<double, double, double> rotate(std::tuple<double, double, double> p,
                                               std::string axis,
                                               double angle);
+
+protected:
+
+    Math() : Common() {}
 
 private:
     std::tuple<double, double, double> bezier2(double pct,

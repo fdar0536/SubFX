@@ -17,7 +17,7 @@ using namespace Yutils;
 
 Common::Common()
 {
-    srand(time(nullptr));
+    srand(static_cast<uint32_t>(time(nullptr)));
 }
 
 // protected member function
@@ -29,12 +29,12 @@ std::pair<double, double> Common::rotate2d(double x, double y, double angle)
 
 double Common::rad(double angle)
 {
-    return (angle * pi / 180.f);
+    return (angle * pi / 180.);
 }
 
 double Common::deg(double r)
 {
-    return (r * 180.f / pi);
+    return (r * 180. / pi);
 }
 
 double Common::random(double min, double max)
@@ -45,6 +45,6 @@ double Common::random(double min, double max)
 std::string Common::doubleToString(double input)
 {
     double buffer[500];
-    sprintf((char*)buffer, "%.3lf", input);
-    return std::string((char*)buffer);
+    sprintf(reinterpret_cast<char *>(buffer), "%.3lf", input);
+    return std::string(reinterpret_cast<char *>(buffer));
 }
