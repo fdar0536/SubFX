@@ -96,12 +96,10 @@ public:
      * @brief Generates a random number in given range with specific item distance.
      *
      * Generates randomly a number in range min to max with gap size step between numbers.
-     *
-     * @throw std::invalid_argument If min is greater than max or
-     *                              sttp is less than zero,
-     *                              this function will throw std::invalid_argument.
      */
-    double randomsteps(double min, double max, double step);
+    std::pair<double, const char *> randomsteps(double min,
+                                                double max,
+                                                double step);
 
     /**
      * @brief Rounds number.
@@ -127,11 +125,8 @@ public:
      * If x is smaller than min, returns min.
      * If x is greater than max, returns max.
      * Otherwise returns x.
-     *
-     * @throw std::invalid_argument If min is greater than max,
-     *                              this function will throw std::invalid_argument.
      */
-    double trim(double x, double min, double max);
+    std::pair<double, const char *> trim(double x, double min, double max);
 
     /**
      * Calculates a point on ellipse with given angle,
@@ -153,15 +148,11 @@ public:
      * @param axis "x" or "y" or "z".
      * @param angle As its name in degree.
      * @return Rotated point(x, y, z) in the tuple.
-     *
-     * @throw std::invalid_argument If axix is not "x" and
-     *                              is not "y" and
-     *                              is not "z",
-     *                              this function will throw std::invalid_argument.
      */
-    std::tuple<double, double, double> rotate(std::tuple<double, double, double> p,
-                                              std::string axis,
-                                              double angle);
+    std::pair<std::tuple<double, double, double>, const char *>
+    rotate(std::tuple<double, double, double> p,
+           std::string axis,
+           double angle);
 
 protected:
 

@@ -221,14 +221,17 @@ std::tuple<double, double, double> Math::ortho(double x1, double y1,double z1,
                            x1 * y2 - y1 * x2);
 }
 
-double Math::randomsteps(double min, double max, double step)
+std::pair<double, const char *> Math::randomsteps(double min,
+                                                  double max,
+                                                  double step)
 {
     if (max < min || step <= 0)
     {
-        throw std::invalid_argument("Invalid input!");
+        return std::make_pair(0., "Invalid input!");
     }
 
-    return std::min(min + random(0, ceil((max - min) / step)) * step, max);
+    return std::make_pair(std::min(min + random(0, ceil((max - min) / step)) * step, max),
+                          nullptr);
 }
 
 double Math::round(double x, double dec)
@@ -256,14 +259,15 @@ std::tuple<double, double, double> Math::stretch(double x, double y,
     return std::make_tuple(x * factor, y * factor, z * factor);
 }
 
-double Math::trim(double x, double min, double max)
+std::pair<double, const char *> Math::trim(double x, double min, double max)
 {
     if (max < min)
     {
-        throw std::invalid_argument("Invalid input!");
+        return std::make_pair(0., "Invalid input!");
     }
 
-    return (x < min ? min : (x > max ? max : x));
+    return std::make_pair((x < min ? min : (x > max ? max : x)),
+                          nullptr);
 }
 
 std::pair<double, double> Math::ellipse(double x, double y,
@@ -290,13 +294,15 @@ double Math::randomway()
     return (ret < 0. ? -1. : 1.);
 }
 
-std::tuple<double, double, double> Math::rotate(std::tuple<double, double, double> p,
-                                                std::string axis,
-                                                double angle)
+std::pair<std::tuple<double, double, double>, const char *>
+Math::rotate(std::tuple<double, double, double> p,
+             std::string axis,
+             double angle)
 {
     if (axis != "x" && axis != "y" && axis != "z")
     {
-        throw std::invalid_argument("invalid axis");
+        return std::make_pair(std::tuple<double, double, double>(),
+                              "invalid axis");
     }
 
     double ra(rad(angle));
@@ -304,21 +310,24 @@ std::tuple<double, double, double> Math::rotate(std::tuple<double, double, doubl
     // Is here has any better way to solve this problem?
     if (axis == "x")
     {
-        return std::make_tuple(std::get<0>(p),
-                               cos(ra) * std::get<1>(p) - sin(ra) * std::get<2>(p),
-                               sin(ra) * std::get<1>(p) + cos(ra) * std::get<2>(p));
+        return std::make_pair(std::make_tuple(std::get<0>(p),
+                              cos(ra) * std::get<1>(p) - sin(ra) * std::get<2>(p),
+                              sin(ra) * std::get<1>(p) + cos(ra) * std::get<2>(p)),
+                              nullptr);
     }
 
     if (axis == "y")
     {
-        return std::make_tuple(cos(ra) * std::get<0>(p) + sin(ra) * std::get<2>(p),
-                               std::get<1>(p),
-                               cos(ra) * std::get<2>(p) - sin(ra) * std::get<0>(p));
+        return std::make_pair(std::make_tuple(cos(ra) * std::get<0>(p) + sin(ra) * std::get<2>(p),
+                              std::get<1>(p),
+                              cos(ra) * std::get<2>(p) - sin(ra) * std::get<0>(p)),
+                              nullptr);
     }
 
-    return std::make_tuple(cos(ra) * std::get<0>(p) - sin(ra) * std::get<1>(p),
-                      sin(ra) * std::get<0>(p) + cos(ra) * std::get<1>(p),
-                      std::get<2>(p));
+    return std::make_pair(std::make_tuple(cos(ra) * std::get<0>(p) - sin(ra) * std::get<1>(p),
+                          sin(ra) * std::get<0>(p) + cos(ra) * std::get<1>(p),
+                          std::get<2>(p)),
+                          nullptr);
 }
 
 // private member function
