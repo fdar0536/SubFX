@@ -17,7 +17,8 @@ class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
 {
 public:
 
-    AssParser(const std::string &fileName);
+    static std::pair<std::shared_ptr<AssParser>, const char *>
+    create(const std::string &fileName);
 
     std::shared_ptr<AssMeta> meta() const;
 
@@ -25,7 +26,7 @@ public:
 
     std::vector<std::shared_ptr<AssDialog>> dialogs() const;
 
-    void upgradeDialogs();
+    const char *upgradeDialogs();
 
     bool dialogIsUpgraded() const;
 
@@ -34,6 +35,22 @@ public:
     bool isWordAvailable() const;
 
     bool isCharAvailable() const;
+
+
+protected:
+
+    AssParser() :
+        Ass(),
+        Utf8(),
+        section(Idle),
+        metaData(std::make_shared<AssMeta>()),
+        styleData(std::map<std::string, std::shared_ptr<AssStyle>>()),
+        dialogParsed(false),
+        dialogData(std::vector<std::shared_ptr<AssDialog>>()),
+        sylReady(false),
+        wordReady(false),
+        charReady(false)
+    {}
 
 private:
 
@@ -50,7 +67,7 @@ private:
 
     PARSER_SECTION section;
 
-    void parseLine(std::string &);
+    const char *parseLine(std::string &);
 
     std::shared_ptr<AssMeta> metaData;
 
@@ -66,7 +83,7 @@ private:
 
     bool charReady;
 
-    void parseDialogs();
+    const char *parseDialogs();
 
     typedef struct _TEXT_SIZE
     {

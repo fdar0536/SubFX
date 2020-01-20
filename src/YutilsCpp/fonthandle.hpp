@@ -22,18 +22,16 @@ class SYMBOL_SHOW FontHandle : protected Math
 {
 public:
 
-    // constructor may throw
-    // 1. invalid_argument
-    // 2. runtime_error
-    FontHandle(std::string &family,
-               bool bold,
-               bool italic,
-               bool underline,
-               bool strikeout,
-               int size,
-               double xscale = 1,
-               double yscale = 1,
-               double hspace = 0);
+    static std::pair<std::shared_ptr<FontHandle>, const char *>
+    create(std::string &family,
+           bool bold,
+           bool italic,
+           bool underline,
+           bool strikeout,
+           int size,
+           double xscale = 1,
+           double yscale = 1,
+           double hspace = 0);
 
     ~FontHandle();
 
@@ -47,6 +45,42 @@ public:
     // 1. invalid_argument
     // 2. runtome_error
     std::string text_to_shape(std::string &text);
+
+protected:
+
+    FontHandle(double xscale, double yscale) :
+    Math(),
+    #ifdef _WIN32
+        dc(nullptr),
+        font(nullptr),
+        old_font(nullptr),
+        hspace(hspace),
+        upscale(FONT_PRECISION),
+    #else
+        surface(nullptr),
+        context(nullptr),
+        layout(nullptr),
+    #endif
+        xscale(xscale),
+        yscale(yscale)
+    {}
+
+    FontHandle() :
+    Math(),
+    #ifdef _WIN32
+        dc(nullptr),
+        font(nullptr),
+        old_font(nullptr),
+        hspace(hspace),
+        upscale(FONT_PRECISION),
+    #else
+        surface(nullptr),
+        context(nullptr),
+        layout(nullptr),
+    #endif
+        xscale(0.),
+        yscale(0.)
+    {}
 
 private:
 #ifdef _WIN32

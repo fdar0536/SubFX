@@ -22,7 +22,7 @@ protected:
     template<class T>
     static std::shared_ptr<T> createCommon()
     {
-        T *ret = new (std::nothrow) T();
+        T *ret(new (std::nothrow) T());
         if (!ret)
         {
             return std::shared_ptr<T>(nullptr);
