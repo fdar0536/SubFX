@@ -14,12 +14,12 @@
 
 using namespace Yutils;
 
-uint64_t Ass::stringToMs(std::string &ass_ms)
+std::pair<uint64_t, const char *> Ass::stringToMs(std::string &ass_ms)
 {
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(ass_ms, reg))
     {
-        throw std::invalid_argument("ASS timestamp expected");
+        return std::make_pair(0, "ASS timestamp expected");
     }
 
     using boost::lexical_cast;
@@ -42,10 +42,10 @@ uint64_t Ass::stringToMs(std::string &ass_ms)
     }
     catch (const bad_lexical_cast &) // for safety
     {
-        throw std::invalid_argument("cannot convert!");
+        return std::make_pair(0, "cannot convert!");
     }
 
-    return ret;
+    return std::make_pair(ret, nullptr);
 }
 
 std::string Ass::msToString(uint64_t ms_ass)
@@ -60,7 +60,8 @@ std::string Ass::msToString(uint64_t ms_ass)
     return std::string(buf);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Ass::stringToColorAlpha(std::string &input)
+std::pair<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>, const char *>
+Ass::stringToColorAlpha(std::string &input)
 {
     uint8_t r(0), g(0), b(0), a(0);
     std::string tmpString;
@@ -99,19 +100,22 @@ std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> Ass::stringToColorAlpha(std::stri
     }
     else
     {
-        throw std::invalid_argument("Invalid input");
+        return std::make_pair(std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>(),
+                              "Invalid input");
     }
 
-    return std::make_tuple(r, g, b, a);
+    return std::make_pair(std::make_tuple(r, g, b, a),
+                          nullptr);
 }
 
-std::string Ass::colorAlphaToString(std::vector<uint8_t> &input)
+std::pair<std::string, const char *>
+Ass::colorAlphaToString(std::vector<uint8_t> &input)
 {
     if (input.size() != 1 &&
         input.size() != 3 &&
         input.size() != 4)
     {
-        throw std::invalid_argument("Invalid input!");
+        return std::make_pair(std::string(), "Invalid input!");
     }
 
     char buf[500];
@@ -144,5 +148,5 @@ std::string Ass::colorAlphaToString(std::vector<uint8_t> &input)
     }
     } // end switch
 
-    return std::string(buf);
+    return std::make_pair(std::string(buf), nullptr);
 }

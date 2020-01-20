@@ -18,16 +18,15 @@ public:
 
     Ass() {}
 
-    // stringToMs may throw invalid_argument
-    uint64_t stringToMs(std::string &ass_ms);
+    std::pair<uint64_t, const char *> stringToMs(std::string &ass_ms);
 
     std::string msToString(uint64_t ms_ass);
 
-    // stringToColorAlpha may throw invalid_argument
-    std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> stringToColorAlpha(std::string &input);
+    std::pair<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>, const char *>
+    stringToColorAlpha(std::string &input);
 
-    // colorAlphaToString may throw invalid_argument
-    std::string colorAlphaToString(std::vector<uint8_t> &input);
+    std::pair<std::string, const char *>
+    colorAlphaToString(std::vector<uint8_t> &input);
 };
 
 }

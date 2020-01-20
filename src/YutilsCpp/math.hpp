@@ -61,7 +61,7 @@ public:
     /**
      * Calculates length of given vector.
      */
-    double distance(double x, double y, double z = 0.f);
+    double distance(double x, double y, double z = 0.);
 
     /**
      * Calculates intersection point of two lines.
