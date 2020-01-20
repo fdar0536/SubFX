@@ -1147,31 +1147,59 @@ word_reference_found:
     dialogParsed = true;
 }
 
-AssParser::TEXT_SIZE *AssParser::textSize(std::string &text,
-                                          std::shared_ptr<AssStyle> &style)
+std::pair<std::shared_ptr<AssParser::TEXT_SIZE>, const char *>
+AssParser::textSize(std::string &text,
+                    std::shared_ptr<AssStyle> &style)
 {
-    FontHandle font(FontHandle(style->fontname,
-                    style->bold,
-                    style->italic,
-                    style->underline,
-                    style->strikeout,
-                    style->fontsize,
-                    style->scale_x / 100.,
-                    style->scale_y / 100.,
-                    style->spaceing)
-    );
+    std::shared_ptr<FontHandle> font(nullptr);
+    const char *err(nullptr);
+
+    std::tie(font, err) = FontHandle::create(style->fontname,
+                                             style->bold,
+                                             style->italic,
+                                             style->underline,
+                                             style->strikeout,
+                                             style->fontsize,
+                                             style->scale_x / 100.,
+                                             style->scale_y / 100.,
+                                             style->spaceing);
+
+    if (err)
+    {
+        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
+                              err);
+    }
 
     std::map<std::string, double> tmpMap;
-    TEXT_SIZE *ret(new TEXT_SIZE);
+    std::tie(tmpMap, err) = font->text_extents(text);
+    if (err)
+    {
+        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
+                              err);
+    }
 
-    tmpMap = font.text_extents(text);
+    TEXT_SIZE *ret(new (std::nothrow) TEXT_SIZE);
+    if (!ret)
+    {
+        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
+                              "Fail to allocate memory.");
+    }
+
     ret->width = tmpMap["width"];
     ret->height = tmpMap["height"];
 
-    tmpMap = font.metrics();
+    std::tie(tmpMap, err) = font->metrics();
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
+                              err);
+    }
+
     ret->ascent = tmpMap["ascent"];
     ret->descent = tmpMap["descent"];
     ret->internal_leading = tmpMap["internal_leading"];
     ret->external_leading = tmpMap["external_leading"];
-    return ret;
+    return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(ret),
+                          nullptr);
 }

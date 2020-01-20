@@ -95,7 +95,8 @@ private:
         double external_leading;
     } TEXT_SIZE;
 
-    TEXT_SIZE *textSize(std::string &text, std::shared_ptr<AssStyle> &style);
+    std::pair<std::shared_ptr<TEXT_SIZE>, const char *>
+    textSize(std::string &text, std::shared_ptr<AssStyle> &style);
 };
 
 }
