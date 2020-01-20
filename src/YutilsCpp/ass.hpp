@@ -4,6 +4,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <memory>
 
 #include <cstdint>
 
@@ -12,11 +13,11 @@
 namespace Yutils
 {
 
-class SYMBOL_SHOW Ass
+class SYMBOL_SHOW Ass : protected ConstructCommon
 {
 public:
 
-    Ass() {}
+    static std::shared_ptr<Ass> create();
 
     std::pair<uint64_t, const char *> stringToMs(std::string &ass_ms);
 
@@ -27,6 +28,10 @@ public:
 
     std::pair<std::string, const char *>
     colorAlphaToString(std::vector<uint8_t> &input);
+
+protected:
+
+    Ass() : ConstructCommon() {}
 };
 
 }

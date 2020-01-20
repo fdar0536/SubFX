@@ -20,13 +20,7 @@ using namespace Yutils;
 
 std::shared_ptr<Math> Math::create()
 {
-    Math *ret = new (std::nothrow) Math();
-    if (!ret)
-    {
-        return std::shared_ptr<Math>(nullptr);
-    }
-
-    return std::shared_ptr<Math>(ret);
+    return createCommon<Math>();
 }
 
 // public member function

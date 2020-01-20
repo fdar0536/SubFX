@@ -14,6 +14,11 @@
 
 using namespace Yutils;
 
+std::shared_ptr<Ass> Ass::create()
+{
+    return createCommon<Ass>();
+}
+
 std::pair<uint64_t, const char *> Ass::stringToMs(std::string &ass_ms)
 {
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
