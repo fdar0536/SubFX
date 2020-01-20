@@ -30,7 +30,7 @@ public:
      * Each pair is one of the control points of a bezier curve.
      * Every four pairs describe a bezier curve.
      */
-    std::tuple<std::vector<std::pair<double, double>>, const char *>
+    std::pair<std::vector<std::pair<double, double>>, const char *>
     arc_curve(double x, double y,
               double cx, double cy,
               double angle);
@@ -46,12 +46,11 @@ public:
      *             If is3D is set to false,
      *             the third number of tuples of pts will be ignored,
      *             and the third number of returned tuple always is zero.
-     *
-     * @throw std::invalid_argument
      */
-    std::tuple<double, double, double> bezier(double pct,
-                std::vector<std::tuple<double, double, double>> &pts,
-                bool is3D = false);
+    std::pair<std::tuple<double, double, double>, const char *>
+    bezier(double pct,
+           std::vector<std::tuple<double, double, double>> &pts,
+           bool is3D = false);
 
     /**
      * Calculates the degree between vectors x1|y1|z1 and x2|y2|z3.

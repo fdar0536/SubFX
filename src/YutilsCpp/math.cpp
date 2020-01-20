@@ -30,7 +30,7 @@ std::shared_ptr<Math> Math::create()
 }
 
 // public member function
-std::tuple<std::vector<std::pair<double, double>>, const char *>
+std::pair<std::vector<std::pair<double, double>>, const char *>
 Math::arc_curve(double x, double y,
                 double cx, double cy,
                 double angle)
@@ -38,14 +38,14 @@ Math::arc_curve(double x, double y,
     std::vector<std::pair<double, double>> curves;
     if (angle < -360. || angle > 360.)
     {
-        return std::make_tuple(curves,
-                               "start & center point and valid angle (-360<=x<=360) expected");
+        return std::make_pair(curves,
+                              "start & center point and valid angle (-360<=x<=360) expected");
     }
 
     if (angle == 0.)
     {
-        return std::make_tuple(curves,
-                               "angle CANNOT be zero");
+        return std::make_pair(curves,
+                              "angle CANNOT be zero");
     }
 
     // Factor for bezier control points distance to node points
@@ -106,35 +106,38 @@ Math::arc_curve(double x, double y,
         angle_sum += 90.;
     }
 
-    return make_tuple(curves, nullptr);
+    return make_pair(curves, nullptr);
 } // end CoreMath::arc_curve
 
-std::tuple<double, double, double> Math::bezier(double pct,
-                        std::vector<std::tuple<double, double, double>> &pts,
-                        bool is3D)
+std::pair<std::tuple<double, double, double>, const char *>
+Math::bezier(double pct,
+             std::vector<std::tuple<double, double, double>> &pts,
+             bool is3D)
 {
     if (pct < 0. || pct > 1.)
     {
-        throw std::invalid_argument("pct must between 0 and 1");
+        return std::make_pair(std::tuple<double, double, double>(),
+                              "pct must between 0 and 1");
     }
 
     size_t ptsSize(pts.size());
     if (ptsSize < 2)
     {
-        throw std::invalid_argument("at least 2 points expected");
+        return std::make_pair(std::tuple<double, double, double>(),
+                              "at least 2 points expected");
     }
 
     switch (ptsSize)
     {
     case 2:
-        return bezier2(pct, pts, is3D);
+        return std::make_pair(bezier2(pct, pts, is3D), nullptr);
     case 3:
-        return bezier3(pct, pts, is3D);
+        return std::make_pair(bezier3(pct, pts, is3D), nullptr);
     case 4:
-        return bezier4(pct, pts, is3D);
+        return std::make_pair(bezier4(pct, pts, is3D), nullptr);
     }
 
-    return bezierN(pct, pts, is3D);
+    return std::make_pair(bezierN(pct, pts, is3D), nullptr);
 }
 
 double Math::degree(double x1, double y1, double z1,
@@ -148,7 +151,7 @@ double Math::degree(double x1, double y1, double z1,
     // Return with sign by clockwise direction
     if ((x1 * y2 - y1 * x2) < 0)
     {
-        return (degree * -1.);
+        return (degree * - 1.);
     }
 
     return degree;
@@ -314,9 +317,10 @@ std::tuple<double, double, double> Math::rotate(std::tuple<double, double, doubl
 }
 
 // private member function
-std::tuple<double, double, double> Math::bezier2(double pct,
-                         std::vector<std::tuple<double, double, double>> &pts,
-                                                 bool is3D)
+std::tuple<double, double, double>
+Math::bezier2(double pct,
+              std::vector<std::tuple<double, double, double>> &pts,
+              bool is3D)
 {
     double pct_inv(1 - pct);
 #if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
@@ -349,8 +353,6 @@ std::tuple<double, double, double> Math::bezier2(double pct,
 #elif defined(ENABLE_SIMD) && defined(ENABLE_AVX) // AVX
     double pctArray[] = {pct, pct, pct, pct};
     double pct_inv_array[] = {pct_inv, pct_inv, pct_inv, pct_inv};
-    // double twoArray[] = {2., 2., 2., 2.};
-
     double ctrl0[] = {std::get<0>(pts.at(0)), std::get<1>(pts.at(0)),
                       std::get<2>(pts.at(0)), 0};
     double ctrl1[] = {std::get<0>(pts.at(1)), std::get<1>(pts.at(1)),
@@ -358,7 +360,6 @@ std::tuple<double, double, double> Math::bezier2(double pct,
 
     __m256d pctArray_reg(_mm256_loadu_pd(pctArray));
     __m256d pct_inv_array_reg(_mm256_loadu_pd(pct_inv_array));
-    // __m256d twoArray_reg(_mm256_loadu_pd(twoArray));
     __m256d ctrl0_reg(_mm256_loadu_pd(ctrl0));
     __m256d ctrl1_reg(_mm256_loadu_pd(ctrl1));
 
