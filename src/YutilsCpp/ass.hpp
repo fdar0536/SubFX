@@ -13,7 +13,7 @@
 namespace Yutils
 {
 
-class SYMBOL_SHOW Ass : protected ConstructCommon
+class SYMBOL_SHOW Ass
 {
 public:
 
@@ -31,7 +31,7 @@ public:
 
 protected:
 
-    Ass() : ConstructCommon() {}
+    Ass() {}
 };
 
 }

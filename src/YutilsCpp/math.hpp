@@ -13,7 +13,7 @@
 namespace Yutils
 {
 
-class SYMBOL_SHOW Math : protected Common, protected ConstructCommon
+class SYMBOL_SHOW Math : protected Common
 {
 public:
 
@@ -156,7 +156,7 @@ public:
 
 protected:
 
-    Math() : Common(), ConstructCommon() {}
+    Math() : Common() {}
 
 private:
     std::tuple<double, double, double> bezier2(double pct,

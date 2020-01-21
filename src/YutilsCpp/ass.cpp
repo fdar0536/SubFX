@@ -16,7 +16,13 @@ using namespace Yutils;
 
 std::shared_ptr<Ass> Ass::create()
 {
-    return createCommon<Ass>();
+    Ass *ret(new (std::nothrow) Ass());
+    if (!ret)
+    {
+        return std::shared_ptr<Ass>(nullptr);
+    }
+
+    return std::shared_ptr<Ass>(ret);
 }
 
 std::pair<uint64_t, const char *> Ass::stringToMs(std::string &ass_ms)

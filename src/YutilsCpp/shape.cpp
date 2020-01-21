@@ -20,7 +20,13 @@ using namespace Yutils;
 // public member function
 std::shared_ptr<Shape> Shape::create()
 {
-    return createCommon<Shape>();
+    Shape *ret(new (std::nothrow) Shape());
+    if (!ret)
+    {
+        return std::shared_ptr<Shape>(nullptr);
+    }
+
+    return std::shared_ptr<Shape>(ret);
 }
 
 std::pair<std::tuple<double, double, double, double>, const char *>

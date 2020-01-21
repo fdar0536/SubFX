@@ -18,23 +18,4 @@
                        return x;\
                    }
 
-class ConstructCommon
-{
-protected:
-
-    ConstructCommon() {}
-
-    template<class T>
-    static std::shared_ptr<T> createCommon()
-    {
-        T *ret(new (std::nothrow) T());
-        if (!ret)
-        {
-            return std::shared_ptr<T>(nullptr);
-        }
-
-        return std::shared_ptr<T>(ret);
-    }
-};
-
 #endif // BASECOMMON_HPP
