@@ -328,106 +328,70 @@ const char *AssParser::parseLine(std::string &line)
             // color1 and alpha1
             tmpString = match[4];
             std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
 
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
             std::tie(style->color1, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
             std::tie(style->alpha1, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
 
             // color2 and alpha2
             tmpString = match[5];
             std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
             std::tie(style->color2, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
             std::tie(style->alpha2, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
 
             // color3 and alpha3
             tmpString = match[6];
             std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
             std::tie(style->color3, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
             std::tie(style->alpha3, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
 
             // color4 and alpha4
             tmpString = match[7];
             std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
             std::tie(style->color4, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
             std::tie(style->alpha4, err) = colorAlphaToString(tmpVector);
-            if (err)
-            {
-                return err;
-            }
+            TESTERR(err)
 
             styleData[match[1]] = style;
         }
@@ -451,17 +415,11 @@ const char *AssParser::parseLine(std::string &line)
 
                 tmpString = match[3];
                 std::tie(dialog->start_time, err) = stringToMs(tmpString);
-                if (err)
-                {
-                    return err;
-                }
+                TESTERR(err)
 
                 tmpString = match[4];
                 std::tie(dialog->end_time, err) = stringToMs(tmpString);
-                if (err)
-                {
-                    return err;
-                }
+                TESTERR(err)
 
                 dialog->style = match[5];
                 dialog->actor = match[6];
@@ -492,6 +450,8 @@ const char *AssParser::parseLine(std::string &line)
         break;
     }
     }
+
+    return nullptr;
 }
 
 const char *AssParser::parseDialogs()
@@ -997,7 +957,7 @@ word_reference_found:
         // Calculate character positions with all characters data already available
         if (dialog->chars.size() > 0)
         {
-            if (dialog->chars.at(0)->width != 0.
+            if (dialog->chars.at(0)->width != 0.)
             {
                 if (dialog->styleref->alignment > 6 || dialog->styleref->alignment < 4)
                 {
@@ -1008,7 +968,7 @@ word_reference_found:
 
                         // Horizontal position
                         assChar->left = cur_x;
-                        assChar->center = assChar->left + (assChar->width / 2.f);
+                        assChar->center = assChar->left + (assChar->width / 2.);
                         assChar->right = assChar->left + assChar->width;
 
                         if (((dialog->styleref->alignment - 1) % 3) == 0)
@@ -1038,7 +998,7 @@ word_reference_found:
                 }
                 else
                 {
-                    double max_width(0.f), sum_height(0.f);
+                    double max_width(0.), sum_height(0.);
                     for (size_t index = 0; index < dialog->chars.size(); ++index)
                     {
                         std::shared_ptr<AssChar> assChar(dialog->chars.at(index));
@@ -1078,7 +1038,7 @@ word_reference_found:
 
                         // Vertical position
                         assChar->top = cur_y;
-                        assChar->middle = assChar->top + (assChar->height /2.f);
+                        assChar->middle = assChar->top + (assChar->height /2.);
                         assChar->bottom = assChar->top + assChar->height;
                         assChar->y = assChar->middle;
                         cur_y += assChar->height;
@@ -1127,6 +1087,7 @@ word_reference_found:
     }
 
     dialogParsed = true;
+    return nullptr;
 }
 
 std::pair<std::shared_ptr<AssParser::TEXT_SIZE>, const char *>
