@@ -520,7 +520,7 @@ PYBIND11_MODULE(YutilsPy, m)
 
     .def("reset", &File::reset,
         py::arg("fileName"),
-        py::arg("assHeader") = ""
+        py::arg("assHeader") = "",
     "reset(fileName, assHeader)\n"
     "Same as function \"create\", but this is set new content to object.\n"
     "If failed, an error message will store in the return string.\n")
