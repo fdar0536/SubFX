@@ -15,19 +15,34 @@
 
 namespace py = pybind11;
 
-AssLauncher::AssLauncher(SubFXAssInit *assConfig) :
-    Launcher(assConfig->getLogFileName(), assConfig->getOutputFileName()),
-    resString(std::vector<std::string>()),
-    assBuf(std::vector<std::string>()),
-    totalConfigs(0),
-    currentConfig(1)
-{}
+std::pair<std::shared_ptr<AssLauncher>, const char *>
+AssLauncher::create(std::shared_ptr<SubFXAssInit> &assConfig)
+{
+    AssLauncher *ret(new (std::nothrow) AssLauncher());
+    if (!ret)
+    {
+        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
+                              "Fail to allocate memory.");
+    }
 
-int AssLauncher::exec(SubFXAssInit *assConfig)
+    const char *err(ret->LauncherInit(assConfig->getLogFileName(),
+                                      assConfig->getOutputFileName()));
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
+                              err);
+    }
+
+    return std::make_pair(std::shared_ptr<AssLauncher>(ret),
+                          nullptr);
+}
+
+int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
 {
     auto parser(assConfig->getParser());
     auto configs(assConfig->getConfigDatas());
-    auto dialogs(parser->dialogs());
+    py::list dialogs(py::cast(parser->dialogs()));
     totalConfigs = configs.size();
     for (size_t i = 0; i < totalConfigs; ++i)
     {
@@ -43,15 +58,13 @@ int AssLauncher::exec(SubFXAssInit *assConfig)
         ++currentConfig;
     }
 
-    auto meta(parser->getMetaPtr());
-    auto styles(parser->getStyleData());
+    auto meta(parser->meta());
+    auto styles(parser->styles());
 
     std::cout << "Writing output..." << std::endl;
     file->writeAssFile(meta, styles, assBuf);
     reset();
 
-    success = true;
-    lastError = "";
     return 0;
 }
 
@@ -64,7 +77,7 @@ void AssLauncher::reset()
     currentConfig = 1;
 }
 
-int AssLauncher::execConfig(SubFXAssInit *assConfig,
+int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
                             std::shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
@@ -134,8 +147,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
     if (startLine >= py::len(dialogs) ||
         endLine >= py::len(dialogs))
     {
-        success = false;
-        lastError = "Error: ";
+        std::string lastError("Error: ");
         lastError += "\"startLine\" or \"endLine\" is greater than or equal to ";
         lastError += "dialogs\' count.";
         fputs(lastError.c_str(), logFile);
@@ -147,13 +159,13 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
     size_t totalLines(endLine - startLine + 1);
     for (size_t i = startLine; i <= endLine; ++i)
     {
-        py::dict line(dialogsBak[i]);
+        py::object line(dialogsBak[i]);
         py::object resObj;
         if (modeName == "line")
         {
-            PyDict_DelItemString(line.ptr(), "syls");
-            PyDict_DelItemString(line.ptr(), "words");
-            PyDict_DelItemString(line.ptr(), "chars");
+            PyObject_DelAttrString(line.ptr(), "syls");
+            PyObject_DelAttrString(line.ptr(), "words");
+            PyObject_DelAttrString(line.ptr(), "chars");
 
             try
             {
@@ -175,10 +187,10 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
         }
         else
         {
-            py::list list(line[modeName.c_str()]);
-            PyDict_DelItemString(line.ptr(), "syls");
-            PyDict_DelItemString(line.ptr(), "words");
-            PyDict_DelItemString(line.ptr(), "chars");
+            py::list list(line.attr(modeName.c_str()));
+            PyObject_DelAttrString(line.ptr(), "syls");
+            PyObject_DelAttrString(line.ptr(), "words");
+            PyObject_DelAttrString(line.ptr(), "chars");
 
             for (size_t j = 0; j < py::len(list); ++j)
             {
@@ -251,12 +263,12 @@ void AssLauncher::reportProgress(size_t currentLine, size_t totalLines)
     std::cout<< std::setiosflags(std::ios::fixed) << std::setprecision(3);
     double progress = static_cast<double>(currentLine);
     progress /= (static_cast<double>(totalLines));
-    progress *= 100.f;
+    progress *= 100.;
     std::cout << "Current progress: " << progress;
 
     progress = static_cast<double>(currentConfig);
     progress /= static_cast<double>(totalConfigs);
-    progress *= 100.f;
+    progress *= 100.;
     std::cout << "% Total progress: " << progress;
     std::cout << "%\r" << std::flush;
 }

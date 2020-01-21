@@ -6,14 +6,6 @@
 
 #include "launcher.hpp"
 
-Launcher::Launcher(const std::string &logFile,
-                   const std::string &outputFile) :
-    success(false),
-    lastError("")
-{
-    LauncherInit(logFile, outputFile);
-}
-
 Launcher::~Launcher()
 {
     if (logFile != nullptr && logFile != stderr)
@@ -22,19 +14,9 @@ Launcher::~Launcher()
     }
 }
 
-bool Launcher::isSuccess() const
-{
-    return success;
-}
-
-std::string Launcher::getLastError() const
-{
-    return lastError;
-}
-
-// private member function
-void Launcher::LauncherInit(const std::string &logFile,
-                            const std::string &outputFile)
+// protected member function
+const char *Launcher::LauncherInit(const std::string &logFile,
+                                   const std::string &outputFile)
 {
     if (logFile == "")
     {
@@ -45,29 +27,16 @@ void Launcher::LauncherInit(const std::string &logFile,
         this->logFile = fopen(logFile.c_str(), "a");
         if (!this->logFile)
         {
-            lastError = "Cannot open log file.";
-            success = false;
-            return;
+            return "Cannot open log file.";
         }
     }
 
-    try
+    const char *err(nullptr);
+    std::tie(this->file, err) = YFile::create(outputFile);
+    if (err)
     {
-        this->file = std::make_shared<YFile>(outputFile);
-    }
-    catch (std::invalid_argument &)
-    {
-        lastError = "Cannot open output subtitle file.";
-        success = false;
-        return;
+        return err;
     }
 
-    if (this->file == nullptr)
-    {
-        lastError = "Fail to allocate memory.";
-        success = false;
-        return;
-    }
-
-    success = true;
+    return nullptr;
 }

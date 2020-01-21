@@ -1,16 +1,17 @@
 #ifndef SUBFXASSINIT_HPP
 #define SUBFXASSINIT_HPP
 
-#include "../../YutilsCpp/python/assparserpy.hpp"
+#include "../../YutilsCpp/YutilsCpp.hpp"
 #include "configparser.hpp"
 
-typedef Yutils::AssParserPy YAssParserPy;
+typedef Yutils::AssParser YAssParser;
 
 class SubFXAssInit : public ConfigParser
 {
 public:
 
-    SubFXAssInit(std::string &jsonFileName);
+    static std::pair<std::shared_ptr<SubFXAssInit>, const char *>
+    create(std::string &jsonFileName);
 
     bool isSylAvailable() const;
 
@@ -18,13 +19,18 @@ public:
 
     bool isCharAvailable() const;
 
-    std::shared_ptr<YAssParserPy> getParser() const;
+    std::shared_ptr<YAssParser> getParser() const;
+
+protected:
+
+    SubFXAssInit() :
+        ConfigParser(),
+        assParser(nullptr)
+    {}
 
 private:
 
-    void init();
-
-    std::shared_ptr<YAssParserPy> assParser;
+    std::shared_ptr<YAssParser> assParser;
 
 };
 
