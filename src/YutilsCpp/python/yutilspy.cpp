@@ -2,7 +2,7 @@
 #include "pybind11/attr.h"
 #include "pybind11/functional.h"
 
-#include "assparserpy.hpp"
+#include "../YutilsCpp.hpp"
 
 namespace py = pybind11;
 
@@ -107,14 +107,16 @@ PYBIND11_MODULE(YutilsPy, m)
     .def_static("create", &Shape::create)
 
     .def("bounding", &Shape::bounding,
-    "tuple(x0, y0, x1, y1) = bounding(shape)\n"
+    "(tuple(x0, y0, x1, y1), err) = bounding(shape)\n"
     "Calculates the bounding box of shape shape.\n"
-    "x0|y0 is the upper-left and x1|y1 the lower-right corner of the rectangle.\n")
+    "x0|y0 is the upper-left and x1|y1 the lower-right corner of the rectangle.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("filter", &Shape::filter,
-    "new_shape = filter(shape, flt)\n"
+    "(new_shape, err) = filter(shape, flt)\n"
     "Filters points of shape shape by function flt and returns a new one.\n"
     "flt receives point coordinates x and y as well as the point type and have to return a list contains 2 numbers, replacing x and y.\n"
+    "If failed, an error message will store in err.\n"
     "example:\n"
     "import YutilsPy\n"
     "shape = YutilsPy.Shape()\n"
@@ -129,33 +131,37 @@ PYBIND11_MODULE(YutilsPy, m)
     "print(shape.filter(test, flt))\n")
 
     .def("flatten", &Shape::flatten,
-    "flattened_shape = flatten(shape)\n"
+    "(flattened_shape, err) = flatten(shape)\n"
     "Converts all 3rd order bezier curves in shape shape to lines,\n"
-    "creating a new shape.\n")
+    "creating a new shape.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("move", &Shape::move,
-    "new_shape = move(shape, x, y)\n"
+    "(new_shape, err) = move(shape, x, y)\n"
     "Shifts points of shape shape horizontally by x and vertically by y,\n"
-    "creating a new shape.\n")
+    "creating a new shape.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("to_pixels", &Shape::to_pixels,
-    "pixels = to_pixels(shape)\n"
+    "(pixels, err) = to_pixels(shape)\n"
     "Renders shape shape and returns pixels.\n"
     "pixels is a list of dictionaries, each one with following fields:\n"
     "x: horizontal position\n"
     "y: vertical position\n"
-    "alpha: opacity\n");
+    "alpha: opacity\n"
+    "If failed, an error message will store in err.\n");
 
     /* in ass.hpp */
-    py::class_<Ass>(m, "Ass")
+    py::class_<Ass, std::shared_ptr<Ass>>(m, "Ass")
 
-    .def(py::init<>())
+    .def_static("create", &Ass::create)
 
     .def("stringToMs", &Ass::stringToMs,
-    "ms_ass = stringToMs(ass_ms)\n"
+    "(ms_ass, err) = stringToMs(ass_ms)\n"
     "Converts time to numeric.\n"
     "ass_ms is a string in ASS format H:MM:SS.XX (H=Hours, M=Minutes, S=Seconds, X=Milliseconds*10).\n"
-    "ms_ass is milliseconds as number.\n")
+    "ms_ass is milliseconds as number.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("msToString", &Ass::msToString,
     "ass_ms = msToString(ms_ass)\n"
@@ -164,33 +170,196 @@ PYBIND11_MODULE(YutilsPy, m)
     "ms_ass is milliseconds as number.\n")
 
     .def("stringToColorAlpha", &Ass::stringToColorAlpha,
-    "tuple(r, g, b, a) = stringToColorAlpha(input)\n"
+    "(tuple(r, g, b, a), err) = stringToColorAlpha(input)\n"
     "Converts color, alpha or color+alpha to numeric\n"
-    "input is a string as ASS color (&HBBGGRR&), alpha (&HAA&) or both (&HAABBGGRR)\n")
+    "input is a string as ASS color (&HBBGGRR&), alpha (&HAA&) or both (&HAABBGGRR)\n"
+    "If failed, an error message will store in err.\n")
 
     .def("colorAlphaToString", &Ass::colorAlphaToString,
-    "output = colorAlphaToString(input)\n"
+    "(output, err) = colorAlphaToString(input)\n"
     "input = [r, g, b] or [a]\n"
     "Converts color or alpha to ASS presentation.\n"
     "input is a list must contain 1 or 3 elements.\n"
-    "if input has 3 elements, output will be an ASS color presentation(&HBBGGRR&),\n"
-    "else output will be an ASS alpha presentation(&HAA&).");
+    "If input has 3 elements, output will be an ASS color presentation(&HBBGGRR&),\n"
+    "else output will be an ASS alpha presentation(&HAA&).\n"
+    "If failed, an error message will store in err.\n");
 
-    py::class_<AssParserPy>(m, "AssParser")
+    /* in asscommon.hpp */
+    py::class_<AssMeta, std::shared_ptr<AssMeta>>(m, "AssMeta")
+    .def(py::init())
+    .def_readwrite("wrap_style", &AssMeta::wrap_style)
+    .def_readwrite("scaled_border_and_shadow", &AssMeta::scaled_border_and_shadow)
+    .def_readwrite("play_res_x", &AssMeta::play_res_x)
+    .def_readwrite("play_res_y", &AssMeta::play_res_y)
+    .def_readwrite("colorMatrix", &AssMeta::colorMatrix);
 
-    .def(py::init<std::string &>(),
+    py::class_<AssStyle, std::shared_ptr<AssStyle>>(m, "AssStyle")
+    .def(py::init())
+    .def_readwrite("fontname", &AssStyle::fontname)
+    .def_readwrite("fontsize", &AssStyle::fontsize)
+    .def_readwrite("bold", &AssStyle::bold)
+    .def_readwrite("italic", &AssStyle::italic)
+    .def_readwrite("underline", &AssStyle::underline)
+    .def_readwrite("strikeout", &AssStyle::strikeout)
+    .def_readwrite("scale_x", &AssStyle::scale_x)
+    .def_readwrite("scale_y", &AssStyle::scale_y)
+    .def_readwrite("spaceing", &AssStyle::spaceing)
+    .def_readwrite("angle", &AssStyle::angle)
+    .def_readwrite("bolder_style", &AssStyle::bolder_style)
+    .def_readwrite("outline", &AssStyle::outline)
+    .def_readwrite("shadow", &AssStyle::shadow)
+    .def_readwrite("alignment", &AssStyle::alignment)
+    .def_readwrite("margin_l", &AssStyle::margin_l)
+    .def_readwrite("margin_r", &AssStyle::margin_r)
+    .def_readwrite("margin_v", &AssStyle::margin_v)
+    .def_readwrite("encoding", &AssStyle::encoding)
+    .def_readwrite("color1", &AssStyle::color1)
+    .def_readwrite("alpha1", &AssStyle::alpha1)
+    .def_readwrite("color2", &AssStyle::color2)
+    .def_readwrite("alpha2", &AssStyle::alpha2)
+    .def_readwrite("color3", &AssStyle::color3)
+    .def_readwrite("alpha3", &AssStyle::alpha3)
+    .def_readwrite("color4", &AssStyle::color4)
+    .def_readwrite("alpha4", &AssStyle::alpha4);
+
+    py::class_<AssTextChunked, std::shared_ptr<AssTextChunked>>(m, "AssTextChunked")
+    .def(py::init())
+    .def_readwrite("tags", &AssTextChunked::tags)
+    .def_readwrite("text", &AssTextChunked::text);
+
+    py::class_<AssSyl, std::shared_ptr<AssSyl>>(m, "AssSyl")
+    .def(py::init())
+    .def_readwrite("start_time", &AssSyl::start_time)
+    .def_readwrite("end_time", &AssSyl::end_time)
+    .def_readwrite("text", &AssSyl::text)
+    .def_readwrite("i", &AssSyl::i)
+    .def_readwrite("duration", &AssSyl::duration)
+    .def_readwrite("mid_time", &AssSyl::mid_time)
+    .def_readwrite("width", &AssSyl::width)
+    .def_readwrite("height", &AssSyl::height)
+    .def_readwrite("ascent", &AssSyl::ascent)
+    .def_readwrite("descent", &AssSyl::descent)
+    .def_readwrite("internal_leading", &AssSyl::internal_leading)
+    .def_readwrite("external_leading", &AssSyl::external_leading)
+    .def_readwrite("left", &AssSyl::left)
+    .def_readwrite("center", &AssSyl::center)
+    .def_readwrite("right", &AssSyl::right)
+    .def_readwrite("x", &AssSyl::x)
+    .def_readwrite("top", &AssSyl::top)
+    .def_readwrite("middle", &AssSyl::middle)
+    .def_readwrite("bottom", &AssSyl::bottom)
+    .def_readwrite("y", &AssSyl::y)
+    .def_readwrite("tags", &AssSyl::tags)
+    .def_readwrite("prespace", &AssSyl::prespace)
+    .def_readwrite("postspace", &AssSyl::postspace);
+
+    py::class_<AssWord, std::shared_ptr<AssWord>>(m, "AssWord")
+    .def(py::init())
+    .def_readwrite("start_time", &AssWord::start_time)
+    .def_readwrite("end_time", &AssWord::end_time)
+    .def_readwrite("text", &AssWord::text)
+    .def_readwrite("i", &AssWord::i)
+    .def_readwrite("duration", &AssWord::duration)
+    .def_readwrite("mid_time", &AssWord::mid_time)
+    .def_readwrite("width", &AssWord::width)
+    .def_readwrite("height", &AssWord::height)
+    .def_readwrite("ascent", &AssWord::ascent)
+    .def_readwrite("descent", &AssWord::descent)
+    .def_readwrite("internal_leading", &AssWord::internal_leading)
+    .def_readwrite("external_leading", &AssWord::external_leading)
+    .def_readwrite("left", &AssWord::left)
+    .def_readwrite("center", &AssWord::center)
+    .def_readwrite("right", &AssWord::right)
+    .def_readwrite("x", &AssWord::x)
+    .def_readwrite("top", &AssWord::top)
+    .def_readwrite("middle", &AssWord::middle)
+    .def_readwrite("bottom", &AssWord::bottom)
+    .def_readwrite("y", &AssWord::y)
+    .def_readwrite("prespace", &AssWord::prespace)
+    .def_readwrite("postspace", &AssWord::postspace);
+
+    py::class_<AssChar, std::shared_ptr<AssChar>>(m, "AssChar")
+    .def(py::init())
+    .def_readwrite("start_time", &AssChar::start_time)
+    .def_readwrite("end_time", &AssChar::end_time)
+    .def_readwrite("text", &AssChar::text)
+    .def_readwrite("i", &AssChar::i)
+    .def_readwrite("duration", &AssChar::duration)
+    .def_readwrite("mid_time", &AssChar::mid_time)
+    .def_readwrite("width", &AssChar::width)
+    .def_readwrite("height", &AssChar::height)
+    .def_readwrite("ascent", &AssChar::ascent)
+    .def_readwrite("descent", &AssChar::descent)
+    .def_readwrite("internal_leading", &AssChar::internal_leading)
+    .def_readwrite("external_leading", &AssChar::external_leading)
+    .def_readwrite("left", &AssChar::left)
+    .def_readwrite("center", &AssChar::center)
+    .def_readwrite("right", &AssChar::right)
+    .def_readwrite("x", &AssChar::x)
+    .def_readwrite("top", &AssChar::top)
+    .def_readwrite("middle", &AssChar::middle)
+    .def_readwrite("bottom", &AssChar::bottom)
+    .def_readwrite("y", &AssChar::y)
+    .def_readwrite("syl_i", &AssChar::syl_i)
+    .def_readwrite("word_i", &AssChar::word_i);
+
+    py::class_<AssDialog, std::shared_ptr<AssDialog>>(m, "AssDialog")
+    .def(py::init())
+    .def_readwrite("start_time", &AssDialog::start_time)
+    .def_readwrite("end_time", &AssDialog::end_time)
+    .def_readwrite("text", &AssDialog::text)
+    .def_readwrite("i", &AssDialog::i)
+    .def_readwrite("duration", &AssDialog::duration)
+    .def_readwrite("mid_time", &AssDialog::mid_time)
+    .def_readwrite("width", &AssDialog::width)
+    .def_readwrite("height", &AssDialog::height)
+    .def_readwrite("ascent", &AssDialog::ascent)
+    .def_readwrite("descent", &AssDialog::descent)
+    .def_readwrite("internal_leading", &AssDialog::internal_leading)
+    .def_readwrite("external_leading", &AssDialog::external_leading)
+    .def_readwrite("left", &AssDialog::left)
+    .def_readwrite("center", &AssDialog::center)
+    .def_readwrite("right", &AssDialog::right)
+    .def_readwrite("x", &AssDialog::x)
+    .def_readwrite("top", &AssDialog::top)
+    .def_readwrite("middle", &AssDialog::middle)
+    .def_readwrite("bottom", &AssDialog::bottom)
+    .def_readwrite("y", &AssDialog::y)
+    .def_readwrite("styleref", &AssDialog::styleref)
+    .def_readwrite("text_stripped", &AssDialog::text_stripped)
+    .def_readwrite("comment", &AssDialog::comment)
+    .def_readwrite("layer", &AssDialog::layer)
+    .def_readwrite("style", &AssDialog::style)
+    .def_readwrite("actor", &AssDialog::actor)
+    .def_readwrite("margin_l", &AssDialog::margin_l)
+    .def_readwrite("margin_r", &AssDialog::margin_r)
+    .def_readwrite("margin_v", &AssDialog::margin_v)
+    .def_readwrite("effect", &AssDialog::effect)
+    .def_readwrite("leadin", &AssDialog::leadin)
+    .def_readwrite("leadout", &AssDialog::leadout)
+    .def_readwrite("textChunked", &AssDialog::textChunked)
+    .def_readwrite("syls", &AssDialog::syls)
+    .def_readwrite("words", &AssDialog::words)
+    .def_readwrite("chars", &AssDialog::chars);
+
+    /* in assparser.hpp */
+    py::class_<AssParser, std::shared_ptr<AssParser>>(m, "AssParser")
+
+    .def_static("create", &AssParser::create,
     "Create a AssParser object.\n"
-    "input string is ass's file name.\n")
+    "input string is ass's file name.\n"
+    "If failed, an error message will store in the return string.\n")
 
-    .def("meta", &AssParserPy::meta,
-    "Returns ASS meta data as dictionary with following fields\n"
+    .def("meta", &AssParser::meta,
+    "Returns AssMeta object with following fields\n"
     "wrap_style: text line wrapping mode as number\n"
     "scaled_border_and_shadow: borders and shadows should be implicated in script-to-frame scale?\n"
     "play_res_x: script horizontal resolution\n"
     "play_res_y: script vertical resolution\n")
 
-    .def("styles", &AssParserPy::styles,
-    "Returns ASS styles as dictionary. Dictionary keys are style names, values are dictionaries with following fields:\n"
+    .def("styles", &AssParser::styles,
+    "Returns ASS styles as dictionary. Dictionary keys are style names, values "
+    "are AssStyle object with following fields:\n"
     "fontname: font face name\n"
     "fontsize: font size\n"
     "bold: bold weight?\n"
@@ -210,8 +379,8 @@ PYBIND11_MODULE(YutilsPy, m)
     "margin_v: margin from vertical screen borders\n"
     "encoding: codepage to interpret text\n")
 
-    .def("dialogs", &AssParserPy::dialogs,
-    "Returns ASS dialogs as list. Each entry is a dictionary with following fields:\n"
+    .def("dialogs", &AssParser::dialogs,
+    "Returns AssDialog objects as list with following fields:\n"
     "comment: dialog is comment?\n"
     "layer: dialog layer number\n"
     "start_time: dialog start time in milliseconds\n"
@@ -224,8 +393,9 @@ PYBIND11_MODULE(YutilsPy, m)
     "effect: dialog effect description\n"
     "text: dialog text\n")
 
-    .def("upgradeDialogs", &AssParserPy::upgradeDialogs,
-    "Add the following fields to dialogs dictionary.\n"
+    .def("upgradeDialogs", &AssParser::upgradeDialogs,
+    "Add the following fields to AssDialog object.\n"
+    "If failed, an error message will store in the return string."
     "After upgrade, you can get upgraded dialogs by calling dialogs().\n"
     "i: dialog index\n"
     "duration: dialog duration in milliseconds\n"
@@ -323,15 +493,16 @@ PYBIND11_MODULE(YutilsPy, m)
     "leadout: dialog posttime / duration from this dialog to next one (in case there's none, it's 1000.1)\n");
 
     /* in file.hpp */
-    py::class_<File>(m, "CoreFile", "This class is for handling file IO of Ass.")
-    .def(py::init<const std::string &, const std::string &>(),
+    py::class_<File>(m, "File", "This class is for handling file IO of Ass.")
+    .def_static("create", &File::create,
         py::arg("fileName"),
         py::arg("assHeader") = "",
     "Create a CoreFile object.\n"
     "fileName as its name.\n"
     "assHeader as its name, too.\n"
     "If assHeader is an empty string, the file will be opened in append mode.\n"
-    "If not, the file will be opened in write mode.\n")
+    "If not, the file will be opened in write mode.\n"
+    "If failed, an error message will store in the return string.\n")
 
     .def("writeAssFile",
          py::overload_cast<std::vector<std::string>&>(&File::writeAssFile),
@@ -339,19 +510,27 @@ PYBIND11_MODULE(YutilsPy, m)
     "Write all contents in assBuf to the file.\n"
     "assBuf is a list of strings.\n")
 
+    .def("writeAssFile",
+         py::overload_cast<std::shared_ptr<AssMeta> &,
+         std::map<std::string, std::shared_ptr<AssStyle>> &,
+         std::vector<std::string> &>(&File::writeAssFile),
+     "writeFile(meta, styles, assBuf)\n"
+     "Write all contents by providing meta, styles and assbuf."
+     "If failed, an error message will store in the return string.\n")
+
     .def("reset", &File::reset,
         py::arg("fileName"),
-        py::arg("assHeader") = ""
+        py::arg("assHeader") = "",
     "reset(fileName, assHeader)\n"
-    "Same as constructor, but this is set new content to object.\n")
+    "Same as function \"create\", but this is set new content to object.\n"
+    "If failed, an error message will store in the return string.\n")
 
     .def("isAppend", &File::isAppend,
     "It returns this object's file is in append mode or not.");
 
     /* in fonthandle.hpp */
-    py::class_<FontHandle>(m, "FontHandle")
-    .def(py::init<std::string &, bool, bool, bool,
-               bool, int, int, int, int>(),
+    py::class_<FontHandle, std::shared_ptr<FontHandle>>(m, "FontHandle")
+    .def_static("create", &FontHandle::create,
                py::arg("family"),
                py::arg("bold"),
                py::arg("italic"),
@@ -368,24 +547,28 @@ PYBIND11_MODULE(YutilsPy, m)
     "If strikeout is true, font has strikeout decoration.\n"
     "size is the font size.\n"
     "xscale and yscale can define horizontal & vertical scale.\n"
-    "hspace can define intercharacter space.\n")
+    "hspace can define intercharacter space.\n"
+    "If failed, an error message will store in the return string.\n")
 
     .def("metrics", &FontHandle::metrics,
-    "metrics = metrics()\n"
+    "(metrics, err) = metrics()\n"
     "Returns font metrics as dictionary with followings fields:\n"
     "ascent: font ascent\n"
     "descent: font descent\n"
     "internal_leading: font internal leading\n"
     "external_leading: font external leading\n"
-    "height: font maximal height\n")
+    "height: font maximal height\n"
+    "If failed, an error message will store in err.\n")
 
     .def("text_extents", &FontHandle::text_extents,
-    "extents = text_extents(text)\n"
+    "(extents, err) = text_extents(text)\n"
     "Returns extents of text with given font as dictionary with followings fields:\n"
     "width: text width\n"
-    "height: text height\n")
+    "height: text height\n"
+    "If failed, an error message will store in err.\n")
 
     .def("text_to_shape", &FontHandle::text_to_shape,
-    "shape = text_to_shape(text)\n"
-    "Converts text with given font to an ASS shape.\n");
+    "(shape, err) = text_to_shape(text)\n"
+    "Converts text with given font to an ASS shape.\n"
+    "If failed, an error message will store in err.\n");
 }

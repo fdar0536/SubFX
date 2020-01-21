@@ -15,15 +15,30 @@
 
 namespace py = pybind11;
 
-AssLauncher::AssLauncher(SubFXAssInit *assConfig) :
-    Launcher(assConfig->getLogFileName(), assConfig->getOutputFileName()),
-    resString(std::vector<std::string>()),
-    assBuf(std::vector<std::string>()),
-    totalConfigs(0),
-    currentConfig(1)
-{}
+std::pair<std::shared_ptr<AssLauncher>, const char *>
+AssLauncher::create(std::shared_ptr<SubFXAssInit> &assConfig)
+{
+    AssLauncher *ret(new (std::nothrow) AssLauncher());
+    if (!ret)
+    {
+        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
+                              "Fail to allocate memory.");
+    }
 
-int AssLauncher::exec(SubFXAssInit *assConfig)
+    const char *err(ret->LauncherInit(assConfig->getLogFileName(),
+                                      assConfig->getOutputFileName()));
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
+                              err);
+    }
+
+    return std::make_pair(std::shared_ptr<AssLauncher>(ret),
+                          nullptr);
+}
+
+int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
 {
     auto parser(assConfig->getParser());
     auto configs(assConfig->getConfigDatas());
@@ -47,11 +62,26 @@ int AssLauncher::exec(SubFXAssInit *assConfig)
     auto styles(parser->getStyleData());
 
     std::cout << "Writing output..." << std::endl;
-    file->writeAssFile(meta, styles, assBuf);
+    const char *err(file->writeAssFile(meta, styles, assBuf));
+    if (err)
+    {
+        const char *now(getCurrentTime());
+        if (now)
+        {
+            fputs(now, logFile);
+        }
+        else
+        {
+            fputs("CANNOT get current time!", logFile);
+        }
+
+        fputs(err, logFile);
+        fputs("\n", logFile);
+        return 1;
+    }
+
     reset();
 
-    success = true;
-    lastError = "";
     return 0;
 }
 
@@ -64,7 +94,7 @@ void AssLauncher::reset()
     currentConfig = 1;
 }
 
-int AssLauncher::execConfig(SubFXAssInit *assConfig,
+int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
                             std::shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
@@ -134,8 +164,7 @@ int AssLauncher::execConfig(SubFXAssInit *assConfig,
     if (startLine >= py::len(dialogs) ||
         endLine >= py::len(dialogs))
     {
-        success = false;
-        lastError = "Error: ";
+        std::string lastError("Error: ");
         lastError += "\"startLine\" or \"endLine\" is greater than or equal to ";
         lastError += "dialogs\' count.";
         fputs(lastError.c_str(), logFile);
@@ -251,12 +280,12 @@ void AssLauncher::reportProgress(size_t currentLine, size_t totalLines)
     std::cout<< std::setiosflags(std::ios::fixed) << std::setprecision(3);
     double progress = static_cast<double>(currentLine);
     progress /= (static_cast<double>(totalLines));
-    progress *= 100.f;
+    progress *= 100.;
     std::cout << "Current progress: " << progress;
 
     progress = static_cast<double>(currentConfig);
     progress /= static_cast<double>(totalConfigs);
-    progress *= 100.f;
+    progress *= 100.;
     std::cout << "% Total progress: " << progress;
     std::cout << "%\r" << std::flush;
 }

@@ -1,23 +1,33 @@
 #include "assparserpy.hpp"
-#include "pybind11/pybind11.h"
+
+#include "../../common/basecommon.hpp"
 
 namespace py = pybind11;
 
 using namespace Yutils;
 
-AssParserPy::AssParserPy(std::string &fileName) :
-    metaData(py::dict()),
-    styleData(py::dict()),
-    dialogParsed(false),
-    dialogData(py::list())
+std::pair<std::shared_ptr<AssParserPy>, const char *>
+AssParserPy::create(std::string &fileName)
 {
-    parser = std::make_shared<AssParser>(fileName);
-    if (parser == nullptr)
+    AssParserPy *ret(new (std::nothrow) AssParserPy());
+    if (!ret)
     {
-        throw std::invalid_argument("Failed to create ass parser.");
+        return std::make_pair(std::shared_ptr<AssParserPy>(nullptr),
+                              "Fail to allocate memory");
     }
 
-    initData();
+    const char *err(nullptr);
+    std::tie(ret->parser, err) = AssParser::create(fileName);
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<AssParserPy>(nullptr),
+                              err);
+    }
+
+    ret->initData();
+    return std::make_pair(std::shared_ptr<AssParserPy>(ret),
+                          nullptr);
 }
 
 py::dict AssParserPy::meta() const
@@ -35,16 +45,18 @@ py::list AssParserPy::dialogs() const
     return dialogData;
 }
 
-void AssParserPy::upgradeDialogs()
+const char *AssParserPy::upgradeDialogs()
 {
     if (dialogParsed)
     {
-        return;
+        return nullptr;
     }
 
-    parser->upgradeDialogs();
+    const char *err(parser->upgradeDialogs());
+    TESTERR(err)
     getDialogsData();
     dialogParsed = true;
+    return nullptr;
 }
 
 std::shared_ptr<AssMeta> AssParserPy::getMetaPtr() const

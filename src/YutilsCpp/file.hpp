@@ -26,8 +26,7 @@ public:
     void writeAssFile(std::vector<std::string> &assBuf);
 
     const char *writeAssFile(std::shared_ptr<AssMeta> &meta,
-                             std::map<std::string,
-                             std::shared_ptr<AssStyle>> &styles,
+                             std::map<std::string, std::shared_ptr<AssStyle>> &styles,
                              std::vector<std::string> &assBuf);
 
     const char *reset(const std::string &fileName,

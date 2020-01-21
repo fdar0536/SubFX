@@ -157,12 +157,11 @@ class AssSyl : public AssSymbol
 {
 public:
     AssSyl() :
+    AssSymbol(),
     tags(""),
     prespace(0),
     postspace(0)
-    {
-        AssSymbol();
-    }
+    {}
 
     std::string tags;
     uint32_t prespace;
@@ -173,11 +172,10 @@ class AssWord : public AssSymbol
 {
 public:
     AssWord() :
+    AssSymbol(),
     prespace(0),
     postspace(0)
-    {
-        AssSymbol();
-    }
+    {}
 
     uint32_t prespace;
     uint32_t postspace;
@@ -187,11 +185,10 @@ class AssChar : public AssSymbol
 {
 public:
     AssChar() :
+    AssSymbol(),
     syl_i(0),
     word_i(0)
-    {
-        AssSymbol();
-    }
+    {}
 
     int syl_i;
     int word_i;
@@ -201,6 +198,7 @@ class AssDialog : public AssSymbol
 {
 public:
     AssDialog() :
+    AssSymbol(),
     styleref(std::make_shared<AssStyle>()),
     text_stripped(""),
     comment(false),
@@ -217,9 +215,7 @@ public:
     syls(std::vector<std::shared_ptr<AssSyl>>()),
     words(std::vector<std::shared_ptr<AssWord>>()),
     chars(std::vector<std::shared_ptr<AssChar>>())
-    {
-        AssSymbol();
-    }
+    {}
 
     std::shared_ptr<AssStyle> styleref;
     std::string text_stripped;

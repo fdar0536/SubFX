@@ -14,27 +14,16 @@ public:
 
     virtual ~Launcher();
 
-    bool isSuccess() const;
-
-    std::string getLastError() const;
-
 protected:
 
-    Launcher(const std::string &logFile,
-             const std::string &outputFile);
-
-    bool success;
-
-    std::string lastError;
+    Launcher() {}
 
     FILE *logFile;
 
     std::shared_ptr<YFile> file;
 
-private:
-
-    void LauncherInit(const std::string &logFile,
-                      const std::string &outputFile);
+    const char *LauncherInit(const std::string &logFile,
+                             const std::string &outputFile);
 };
 
 #endif // LAUNCHER_HPP

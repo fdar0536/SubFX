@@ -2,6 +2,7 @@
 #include <regex>
 #include <map>
 
+#include "../../common/basecommon.hpp"
 #include "configparser.hpp"
 
 #ifdef _MSC_VER
@@ -10,32 +11,7 @@
 
 using json = nlohmann::json;
 
-#define GetCofigItem(x, y, z) if (!getConfigItem(x, y, z)) \
-                              { \
-                                  return; \
-                              }
-
-ConfigParser::ConfigParser(std::string &jsonFileName) :
-    subName(""),
-    logFile(""),
-    outputFile(""),
-    configDatas(std::vector<std::shared_ptr<ConfigData>>()),
-    success(false),
-    lastError("")
-{
-    parseConfig(jsonFileName);
-}
-
-bool ConfigParser::isSuccess() const
-{
-    return success;
-}
-
-std::string ConfigParser::getLastError() const
-{
-    return lastError;
-}
-
+// public member function
 std::string ConfigParser::getSubName() const
 {
     return subName;
@@ -57,17 +33,16 @@ std::vector<std::shared_ptr<ConfigData>> ConfigParser::getConfigDatas() const
 }
 
 // private member function
-void ConfigParser::parseConfig(std::string &jsonFileName)
+const char *ConfigParser::parseConfig(std::string &jsonFileName)
 {
     std::fstream inputFile;
     inputFile.open(jsonFileName, std::ios::in);
     if (inputFile.fail())
     {
-        success = false;
-        lastError = "Fail to open config file.";
-        return;
+        return "Fail to open config file.";
     }
 
+    std::string errString;
     json config;
     try
     {
@@ -76,30 +51,32 @@ void ConfigParser::parseConfig(std::string &jsonFileName)
     catch (nlohmann::detail::parse_error &e)
     {
         inputFile.close();
-        lastError = e.what();
-        success = false;
-        return;
+        errString = e.what();
+        return errString.c_str();
     }
 
     inputFile.close();
 
-    GetCofigItem(subName, config, "subtitle")
+    const char *err(nullptr);
+    err = getConfigItem(subName, config, "subtitle");
+    TESTERR(err)
 
-    GetCofigItem(logFile, config, "logFile")
+    err = getConfigItem(logFile, config, "logFile");
+    TESTERR(err)
     if (logFile == "")
     {
         logFile = "stdout";
     }
 
-    GetCofigItem(outputFile, config, "outputFile")
+    err = getConfigItem(outputFile, config, "outputFile");
+    TESTERR(err)
 
     json scripts;
-    GetCofigItem(scripts, config, "scripts")
+    err = getConfigItem(scripts, config, "scripts");
+    TESTERR(err)
     if (scripts.size() == 0)
     {
-        success = false;
-        lastError = ("No input script.");
-        return;
+        return "No input script.";
     }
 
     configDatas.reserve(50);
@@ -115,50 +92,46 @@ void ConfigParser::parseConfig(std::string &jsonFileName)
         std::shared_ptr<ConfigData> configData = std::make_shared<ConfigData>();
         if (configData == nullptr)
         {
-            lastError = "Fail to allocate memory.";
-            success = false;
-            return;
+            return "Fail to allocate memory.";
         }
 
-        GetCofigItem(configData->scriptName, scripts.at(i), "script")
+        err = getConfigItem(configData->scriptName, scripts.at(i), "script");
+        TESTERR(err)
         if (!regex_match(configData->scriptName, pyScript))
         {
-            lastError = "Invalid python script name: " + configData->scriptName;
-            success = false;
-            return;
+            errString = "Invalid python script name: " + configData->scriptName;
+            return errString.c_str();
         }
 
-        GetCofigItem(modeRes, scripts.at(i), "mode")
+        err = getConfigItem(modeRes, scripts.at(i), "mode");
+        TESTERR(err)
         if (modeRes != "line" &&
             modeRes != "word" &&
             modeRes != "syl" &&
             modeRes != "char")
         {
-            success = false;
-            lastError = ("Invalid mode: " + modeRes);
+            errString = ("Invalid mode: " + modeRes);
             configDatas.clear();
-            return;
+            return errString.c_str();
         }
 
         configData->mode = modeMap[modeRes];
 
-        GetCofigItem(configData->startLine, scripts.at(i), "startLine")
+        err = getConfigItem(configData->startLine, scripts.at(i), "startLine");
+        TESTERR(err)
         if (configData->startLine < 0)
         {
-            success = false;
-            lastError = "\"startLine\" CANNOT less than ZERO.";
             configDatas.clear();
-            return;
+            return "\"startLine\" CANNOT less than ZERO.";
         }
 
-        GetCofigItem(configData->endLine, scripts.at(i), "endLine")
+        err = getConfigItem(configData->endLine, scripts.at(i), "endLine");
+        TESTERR(err)
         if (configData->endLine >= 0 &&
             configData->startLine > configData->endLine)
         {
-            success = false;
-            lastError = "\"startLine\" is GREATER THAN \"endLine\".";
             configDatas.clear();
-            return;
+            return "\"startLine\" is GREATER THAN \"endLine\".";
         }
 
         configDatas.push_back(configData);
@@ -166,10 +139,8 @@ void ConfigParser::parseConfig(std::string &jsonFileName)
 
     if (configDatas.size() == 0)
     {
-        success = false;
-        lastError = ("No input script.");
-        return;
+        return "No input script.";
     }
 
-    success = true;
+    return nullptr;
 }

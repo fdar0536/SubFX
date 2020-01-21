@@ -1,10 +1,34 @@
 #include "subfxassinit.hpp"
 
-SubFXAssInit::SubFXAssInit(std::string &jsonFileName) :
-    ConfigParser(jsonFileName),
-    assParser(nullptr)
+// public member function
+std::pair<std::shared_ptr<SubFXAssInit>, const char *>
+SubFXAssInit::create(std::string &jsonFileName)
 {
-    init();
+    SubFXAssInit *ret(new (std::nothrow) SubFXAssInit());
+    if (!ret)
+    {
+        return std::make_pair(std::shared_ptr<SubFXAssInit>(),
+                              "Fail to allocate memory");
+    }
+
+    const char *err(ret->parseConfig(jsonFileName));
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<SubFXAssInit>(),
+                              err);
+    }
+
+    std::tie(ret->assParser, err) = AssParserPy::create(ret->subName);
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<SubFXAssInit>(),
+                              err);
+    }
+
+    return std::make_pair(std::shared_ptr<SubFXAssInit>(ret),
+                          nullptr);
 }
 
 bool SubFXAssInit::isSylAvailable() const
@@ -22,36 +46,7 @@ bool SubFXAssInit::isCharAvailable() const
     return assParser->isCharAvailable();
 }
 
-std::shared_ptr<YAssParserPy> SubFXAssInit::getParser() const
+std::shared_ptr<AssParserPy> SubFXAssInit::getParser() const
 {
     return assParser;
-}
-
-// private member function
-void SubFXAssInit::init()
-{
-    if (!success)
-    {
-        return;
-    }
-
-    try
-    {
-        assParser = std::make_shared<YAssParserPy>(subName);
-        assParser->upgradeDialogs();
-    }
-    catch (std::invalid_argument &e)
-    {
-        lastError = e.what();
-        success = false;
-        return;
-    }
-    catch (std::runtime_error &e)
-    {
-        lastError = e.what();
-        success = false;
-        return;
-    }
-
-    success = true;
 }

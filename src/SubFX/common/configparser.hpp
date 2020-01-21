@@ -37,10 +37,6 @@ class ConfigParser
 {
 public:
 
-    bool isSuccess() const;
-
-    std::string getLastError() const;
-
     std::string getSubName() const;
 
     std::string getLogFileName() const;
@@ -51,7 +47,12 @@ public:
 
 protected:
 
-    ConfigParser(std::string &jsonFileName);
+    ConfigParser() :
+        subName(""),
+        logFile(""),
+        outputFile(""),
+        configDatas(std::vector<std::shared_ptr<ConfigData>>())
+    {}
 
     std::string subName;
 
@@ -61,16 +62,10 @@ protected:
 
     std::vector<std::shared_ptr<ConfigData>> configDatas;
 
-    bool success;
-
-    std::string lastError;
-
-private:
-
-    void parseConfig(std::string &jsonFileName);
+    const char *parseConfig(std::string &jsonFileName);
 
     template<class T>
-    bool getConfigItem(T &dst, json &config, const char *entry)
+    const char *getConfigItem(T &dst, json &config, const char *entry)
     {
         try
         {
@@ -78,14 +73,12 @@ private:
         }
         catch (nlohmann::detail::type_error &e)
         {
-            lastError = e.what();
-            success = false;
-            return false;
+            std::string err(e.what());
+            return err.c_str();
         }
 
-        return true;
+        return nullptr;
     }
-
 };
 
 #endif // CONFIGPARSER_HPP

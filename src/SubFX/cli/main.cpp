@@ -10,8 +10,6 @@ namespace py = pybind11;
 
 void printHelp(char **argv);
 
-void cleanUp(AssLauncher *, SubFXAssInit *);
-
 int main(int argc, char **argv)
 {
     if (argc != 2)
@@ -29,32 +27,21 @@ int main(int argc, char **argv)
     py::scoped_interpreter guard{};
 
     std::string jsonFileName(argv[1]);
-    SubFXAssInit *assConfig = new (std::nothrow) SubFXAssInit(jsonFileName);
-    if (!assConfig)
+    std::shared_ptr<SubFXAssInit> assConfig;
+    const char *err(nullptr);
+    std::tie(assConfig, err) = SubFXAssInit::create(jsonFileName);
+
+    if (err)
     {
-        std::cerr << "Fail to allocate memory" << std::endl;
+        std::cerr << err << std::endl;
         return 1;
     }
 
-    if (!assConfig->isSuccess())
+    std::shared_ptr<AssLauncher> assLauncher(nullptr);
+    std::tie(assLauncher, err) = AssLauncher::create(assConfig);
+    if (err)
     {
-        std::cerr << assConfig->getLastError() << std::endl;
-        cleanUp(nullptr, assConfig);
-        return 1;
-    }
-
-    AssLauncher *assLauncher = new (std::nothrow) AssLauncher(assConfig);
-    if (!assLauncher)
-    {
-        std::cerr << "Fail to allocate memory" << std::endl;
-        cleanUp(nullptr, assConfig);
-        return 1;
-    }
-
-    if (!assLauncher->isSuccess())
-    {
-        std::cerr << assLauncher->getLastError() << std::endl;
-        cleanUp(assLauncher, assConfig);
+        std::cerr << err<< std::endl;
         return 1;
     }
 
@@ -65,7 +52,6 @@ int main(int argc, char **argv)
         std::cerr << std::endl;
     }
 
-    cleanUp(assLauncher, assConfig);
     return ret;
 }
 
@@ -74,17 +60,4 @@ void printHelp(char **argv)
     std::cout << argv[0] << " " << SUBFX_VERSION << " usage:" << std::endl;
     std::cout << argv[0] << " /path/to/your/configFile.json" << std::endl;
     std::cout << "\"-h\" or \"--help\": print this message and exit." << std::endl;
-}
-
-void cleanUp(AssLauncher *input1, SubFXAssInit *input2)
-{
-    if (input1)
-    {
-        delete input1;
-    }
-
-    if (input2)
-    {
-        delete input2;
-    }
 }

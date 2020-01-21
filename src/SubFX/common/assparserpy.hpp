@@ -5,22 +5,19 @@
 #pragma once
 #endif    /* _MSC_VER */
 
-#include "../YutilsCpp.hpp"
+#include "../../YutilsCpp/YutilsCpp.hpp"
 #include "pybind11/pybind11.h"
 
-#include "../../common/basecommon.hpp"
-
 namespace py = pybind11;
+using namespace Yutils;
 
-namespace Yutils
-{
-
-class SYMBOL_SHOW AssParserPy
+class AssParserPy
 {
 public:
 
     // constructor may throw invalid_argument
-    AssParserPy(std::string &fileName);
+    static std::pair<std::shared_ptr<AssParserPy>, const char *>
+    create(std::string &fileName);
 
     py::dict meta() const;
 
@@ -28,7 +25,7 @@ public:
 
     py::list dialogs() const;
 
-    void upgradeDialogs();
+    const char *upgradeDialogs();
 
     std::shared_ptr<AssMeta> getMetaPtr() const;
 
@@ -41,6 +38,15 @@ public:
     bool isWordAvailable() const;
 
     bool isCharAvailable() const;
+
+protected:
+
+    AssParserPy() :
+        metaData(py::dict()),
+        styleData(py::dict()),
+        dialogParsed(false),
+        dialogData(py::list())
+    {}
 
 private:
 
@@ -60,7 +66,5 @@ private:
 
     void getDialogsData();
 };
-
-}
 
 #endif // ASSPARSERPY_HPP

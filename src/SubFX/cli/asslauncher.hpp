@@ -12,9 +12,20 @@ class AssLauncher : public Launcher
 {
 public:
 
-    AssLauncher(SubFXAssInit *assConfig);
+    static std::pair<std::shared_ptr<AssLauncher>, const char *>
+    create(std::shared_ptr<SubFXAssInit> &assConfig);
 
-    int exec(SubFXAssInit *assConfig);
+    int exec(std::shared_ptr<SubFXAssInit> &assConfig);
+
+protected:
+
+    AssLauncher() :
+        Launcher(),
+        resString(std::vector<std::string>()),
+        assBuf(std::vector<std::string>()),
+        totalConfigs(0),
+        currentConfig(1)
+    {}
 
 private:
 
@@ -28,7 +39,7 @@ private:
 
     void reset();
 
-    int execConfig(SubFXAssInit *assConfig,
+    int execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
                    std::shared_ptr<ConfigData> &config,
                    py::list &dialogs);
 
@@ -37,8 +48,7 @@ private:
     template<class T>
     void pExecConfigError(T &error)
     {
-        lastError = error.what();
-        success = false;
+        std::string lastError(error.what());
 
         const char *now(getCurrentTime());
         if (now)
