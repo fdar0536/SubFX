@@ -13,30 +13,32 @@ PYBIND11_MODULE(YutilsPy, m)
     m.doc() = "This is core library for SubFX, a modified version of Yutils.";
 
     /* in math.hpp */
-    py::class_<Math>(m, "Math")
+    py::class_<Math, std::shared_ptr<Math>>(m, "Math")
 
-    .def(py::init<>())
+    .def_static("create", &Math::create)
 
     .def("arc_curve", &Math::arc_curve,
-    "list[tuple(cx, cy)] = arc_curve(x, y, cx, cy, angle)\n"
+    "(list[tuple(cx, cy)], err) = arc_curve(x, y, cx, cy, angle)\n"
     "Converts arc data to bezier curves.\n"
     "x & y is the arc starting point, cx & cy the arc center (= orientation point to keep the same distance to all arc points) and angle the angle in degree of the arc.\n"
     "For each 90° one curve is generated, so a maximum of 4 curves can span a circle.\n"
     "Curves are 3rd order bezier curves\n"
     "It returns a list of tuples. Each tuple is one of the control points of a bezier curve.\n"
-    "Every four tuples describe a bezier curve.")
+    "Every four tuples describe a bezier curve.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("bezier", &Math::bezier,
         py::arg("pct"),
         py::arg("pts"),
         py::arg("is3D") = false,
-    "tuple(x, y, z) = bezier(pct, pts, is3D)\n"
+    "(tuple(x, y, z), err) = bezier(pct, pts, is3D)\n"
     "Calculates a point on a bezier curve of any order."
     "pct is the position on the curve in range 0<=x<=1.\n"
     "pts is a list of tuples, each one containing 3 numbers as curve point.\n"
     "is3D is boolean indicates pts is 3D or not.\n"
     "If \"is3D\" is set to false, the third number of tuples of pts will be ignored,\n"
-    "and the third number of returned tuple always is zero.\n")
+    "and the third number of returned tuple always is zero.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("degree", &Math::degree,
     "degree = degree(x1, y1, z1, x2, y2, z2)\n"
@@ -50,21 +52,23 @@ PYBIND11_MODULE(YutilsPy, m)
     "Calculates length of given vector.\n")
 
     .def("line_intersect", &Math::line_intersect,
-    "tuple(x, y) = line_intersect(x0, y0, x1, y1, x2, y2, x3, y3, strict)\n"
+    "(tuple(x, y), err) = line_intersect(x0, y0, x1, y1, x2, y2, x3, y3, strict)\n"
     "Calculates intersection point of two lines.\n"
     "x0, y0, x1, y1 are both points of line 1, x2, y2, x3, y3 are points of line 2.\n"
     "strict is a flag, determining the intersection has to be located on the lines.\n"
     "x, y can be the intersection point.\n"
     "If both lines are parallel, x is nil(= tuple(0, 0)).\n"
-    "If strict is true and there's no intersection on the strict length lines, x is inf (std::numeric_limits<double>::infinity()).\n")
+    "If strict is true and there's no intersection on the strict length lines, x is inf (std::numeric_limits<double>::infinity()).\n"
+    "If failed, an error message will store in err.\n")
 
     .def("ortho", &Math::ortho,
     "tuple(rx, ry, rz) = ortho(x1, y1, z1, x2, y2, z2)\n"
     "Calculates the orthogonal vector to vectors x1|y1|z1 and x2|y2|z3.\n")
 
     .def("randomsteps", &Math::randomsteps,
-    "r = randomsteps(min, max, step)\n"
-    "Generates randomly a number in range min to max with gap size step between numbers.\n")
+    "(r, err) = randomsteps(min, max, step)\n"
+    "Generates randomly a number in range min to max with gap size step between numbers.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("round", &Math::round,
         py::arg("x"),
@@ -78,10 +82,11 @@ PYBIND11_MODULE(YutilsPy, m)
     "Stretches vector x|y|z to length length.\n")
 
     .def("trim", &Math::trim,
-    "r = trim(x, min, max)\n"
+    "(r, err) = trim(x, min, max)\n"
     "If x is smaller than min, returns min.\n"
     "If x is greater than max, returns max.\n"
-    "Otherwise returns x.\n")
+    "Otherwise returns x.\n"
+    "If failed, an error message will store in err.\n")
 
     .def("ellipse", &Math::ellipse,
     "tuple(new_x, new_y) = ellipse(x, y, width, height, angle)\n"
@@ -92,13 +97,14 @@ PYBIND11_MODULE(YutilsPy, m)
     "Returns randomly -1 or 1.\n")
 
     .def("rotate", &Math::rotate,
-    "rotated_point = rotate(point, axis, angle)\n"
-    "Allows to rotate a point in 3D room.\n");
+    "(rotated_point, err) = rotate(point, axis, angle)\n"
+    "Allows to rotate a point in 3D room.\n"
+    "If failed, an error message will store in err.\n");
 
     /* in shape.hpp */
-    py::class_<Shape>(m, "Shape")
+    py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape")
 
-    .def(py::init<>())
+    .def_static("create", &Shape::create)
 
     .def("bounding", &Shape::bounding,
     "tuple(x0, y0, x1, y1) = bounding(shape)\n"
