@@ -17,12 +17,14 @@
 
 using namespace Yutils;
 
-Shape::Shape()
+// public member function
+std::shared_ptr<Shape> Shape::create()
 {
-    Math();
+    return createCommon<Shape>();
 }
 
-std::tuple<double, double, double, double> Shape::bounding(std::string &shape)
+std::pair<std::tuple<double, double, double, double>, const char *>
+Shape::bounding(std::string &shape)
 {
     // Bounding data
     double x0(0.), y0(0.), x1(0.), y1(0.);
@@ -49,17 +51,24 @@ std::tuple<double, double, double, double> Shape::bounding(std::string &shape)
         }
     );
 
-    filter(shape, flt);
+    const char *err(nullptr);
+    std::tie(std::ignore, err) = filter(shape, flt);
+    if (err)
+    {
+        return std::make_pair(std::tuple<double, double, double, double>(),
+                              err);
+    }
 
-    return std::make_tuple(x0, y0, x1, y1);
+    return std::make_pair(std::make_tuple(x0, y0, x1, y1), nullptr);
 }
 
-std::string Shape::filter(std::string &shape,
-                          std::function<std::pair<double, double>(double, double, std::string &)> &flt)
+std::pair<std::string, const char *>
+Shape::filter(std::string &shape,
+              std::function<std::pair<double, double>(double, double, std::string &)> &flt)
 {
     if (!flt)
     {
-        throw std::invalid_argument("flt is empty!");
+        return std::make_pair(std::string(), "flt is empty!");
     }
 
     typedef enum _FLT_STATUS
@@ -80,7 +89,7 @@ std::string Shape::filter(std::string &shape,
         if ((static_cast<uint8_t>(tmpString.at(0)) & 0x80) != 0)
         {
             // input is not ascii
-            throw std::invalid_argument("input is out of ASCII!");
+            return std::make_pair(std::string(), "input is out of ASCII!");
         }
 
         switch (status)
@@ -96,7 +105,8 @@ std::string Shape::filter(std::string &shape,
             }
             else
             {
-                throw std::invalid_argument("shape syntax error: unexpected token in the begging of shape.");
+                return std::make_pair(std::string(),
+                                      "shape syntax error: unexpected token in the begging of shape.");
             }
 
             continue; // goto next loop
@@ -114,7 +124,7 @@ std::string Shape::filter(std::string &shape,
             {
                 std::string err(tmpString.substr(0, 1));
                 err = "shape syntax error: expect m, n, l, b, s, p or c, but get " + err + " .";
-                throw std::invalid_argument(err);
+                return std::make_pair(std::string(), err.c_str());
             }
 
             continue; // goto next loop
@@ -152,10 +162,11 @@ std::string Shape::filter(std::string &shape,
         output += (doubleToString(round(newPoints.second, FP_PRECISION)) + " ");
     } // end while (tmpString.length() != 0)
 
-    return output;
+    return std::make_pair(output, nullptr);
 }
 
-std::string Shape::flatten(std::string &shape)
+std::pair<std::string, const char *>
+Shape::flatten(std::string &shape)
 {
     typedef enum _STATUS
     {
@@ -175,7 +186,7 @@ std::string Shape::flatten(std::string &shape)
         if ((static_cast<uint8_t>(tmpString.at(0)) & 0x80) != 0)
         {
             // input is not ascii
-            throw std::invalid_argument("input is out of ASCII!");
+            return std::make_pair(std::string(), "input is out of ASCII!");
         }
 
         switch (status)
@@ -226,7 +237,10 @@ std::string Shape::flatten(std::string &shape)
                 number = sm[6];
                 sscanf(number.c_str(), "%lf", &y3);
 
-                std::vector<double> line_points(curve4_to_lines(x0, y0, x1, y1, x2, y2, x3, y3));
+                std::vector<double> line_points(curve4_to_lines(x0, y0,
+                                                                x1, y1,
+                                                                x2, y2,
+                                                                x3, y3));
 
                 for (size_t i = 0; i < line_points.size(); ++i)
                 {
@@ -251,10 +265,11 @@ std::string Shape::flatten(std::string &shape)
         }
     } // end while (tmpString.length() != 0)
 
-    return output;
+    return std::make_pair(output, nullptr);
 }
 
-std::string Shape::move(std::string &shape, double x, double y)
+std::pair<std::string, const char *>
+Shape::move(std::string &shape, double x, double y)
 {
     std::function<std::pair<double, double>(double, double, std::string &)> flt([&](
         double cx, double cy, std::string &input)
@@ -267,7 +282,8 @@ std::string Shape::move(std::string &shape, double x, double y)
     return filter(shape, flt);
 }
 
-std::vector<std::map<std::string, double>> Shape::to_pixels(std::string &shape)
+std::pair<std::vector<std::map<std::string, double>>, const char *>
+Shape::to_pixels(std::string &shape)
 {
     // Scale values for supersampled rendering
     uint8_t upscale(SUPERSAMPLING);
@@ -281,25 +297,49 @@ std::vector<std::map<std::string, double>> Shape::to_pixels(std::string &shape)
     });
 
     // Upscale shape for later downsampling
-    std::string newShape(filter(shape, flt));
-    std::tuple<double, double, double, double> tmpTuple(bounding(newShape));
+    std::string newShape;
+    const char *err(nullptr);
+    std::tie(newShape, err) = filter(shape, flt);
+    if (err)
+    {
+        return std::make_pair(std::vector<std::map<std::string, double>>(),
+                              err);
+    }
+
+    std::tuple<double, double, double, double> tmpTuple;
+    std::tie(tmpTuple, err) = bounding(newShape);
+    if (err)
+    {
+        return std::make_pair(std::vector<std::map<std::string, double>>(),
+                              err);
+    }
     double x1(std::get<0>(tmpTuple)), y1(std::get<1>(tmpTuple));
     double x2(std::get<2>(tmpTuple)), y2(std::get<3>(tmpTuple));
 
     double shift_x(-(x1 - (static_cast<int64_t>(x1) % upscale)));
     double shift_y(-(y1 - (static_cast<int64_t>(y1) % upscale)));
 
-    newShape = move(newShape, shift_x, shift_y);
+    std::tie(newShape, err) = move(newShape, shift_x, shift_y);
+    if (err)
+    {
+        return std::make_pair(std::vector<std::map<std::string, double>>(),
+                              err);
+    }
 
     // Create image
     double img_width(ceil((x2 + shift_x) * downscale) * upscale);
     double img_height(ceil((y2 + shift_y) * downscale) * upscale);
     std::vector<bool> img_data;
     img_data.resize(static_cast<size_t>(img_width * img_height));
-    fill(img_data.begin(), img_data.end(), false);
+    std::fill(img_data.begin(), img_data.end(), false);
 
     // Render shape on image
-    render_shape(img_width, img_height, img_data, newShape);
+    err = render_shape(img_width, img_height, img_data, newShape);
+    if (err)
+    {
+        return std::make_pair(std::vector<std::map<std::string, double>>(),
+                              err);
+    }
 
     // Extract pixels from image
     std::vector<std::map<std::string, double>> pixels;
@@ -332,9 +372,8 @@ std::vector<std::map<std::string, double>> Shape::to_pixels(std::string &shape)
         } // end for x
     } // end for y
 
-    return pixels;
+    return std::make_pair(pixels, nullptr);
 }
-
 
 // private member function
 std::vector<double> Shape::curve4_subdivide(double x0, double y0,
@@ -467,7 +506,7 @@ bool Shape::curve4_is_flat(double x0, double y0,
     size_t i(0), n(3);
     while (i < n)
     {
-        if (vecs.at(i).first == 0 && vecs.at(i).second == 0)
+        if (vecs.at(i).first == 0. && vecs.at(i).second == 0.)
         {
             vecs.erase(vecs.begin() + static_cast<int>(i));
             --n;
@@ -517,7 +556,11 @@ std::vector<double> Shape::curve4_to_lines(double px0, double py0,
         }
         else
         {
-            std::vector<double> resVec(curve4_subdivide(x0, y0, x1, y1, x2, y2, x3, y3, 0.5));
+            std::vector<double> resVec(curve4_subdivide(x0, y0,
+                                                        x1, y1,
+                                                        x2, y2,
+                                                        x3, y3,
+                                                        0.5));
             convert_recursive(resVec.at(0), resVec.at(1),
                               resVec.at(2), resVec.at(3),
                               resVec.at(4), resVec.at(5),
@@ -533,9 +576,11 @@ std::vector<double> Shape::curve4_to_lines(double px0, double py0,
     return pts;
 }
 
-void Shape::render_shape(double width, double height,
-                         std::vector<bool> &image,
-                         std::string &shape)
+const char
+*Shape::render_shape(double width,
+                     double height,
+                     std::vector<bool> &image,
+                     std::string &shape)
 {
     std::vector<std::tuple<double, double, double, double>> lines;
     lines.reserve(500);
@@ -606,8 +651,11 @@ void Shape::render_shape(double width, double height,
     });
 
     std::string shapeBak(shape);
-    shapeBak = flatten(shapeBak);
-    filter(shapeBak, flt);
+    const char *err;
+    std::tie(shapeBak, err) = flatten(shapeBak);
+    TESTERR(err)
+    std::tie(std::ignore, err) = filter(shapeBak, flt);
+    TESTERR(err)
 
     if (last_move.size() > 0)
     {
@@ -628,7 +676,7 @@ void Shape::render_shape(double width, double height,
     {
         std::vector<double> ret;
         ret.reserve(2);
-        if (vy != 0)
+        if (vy != 0.)
         {
             double s((y2 - y) / vy);
             if (s >= 0. && s <= 1.)
@@ -641,8 +689,11 @@ void Shape::render_shape(double width, double height,
         return ret;
     });
 
-    auto tmpTuple(bounding(shape));
-    for (double y = std::max(floor(std::get<1>(tmpTuple)), static_cast<double>(0.f));
+    std::tuple<double, double, double, double> tmpTuple;
+    double tmpDouble;
+    std::tie(tmpTuple, err) = bounding(shape);
+    TESTERR(err)
+    for (double y = std::max(floor(std::get<1>(tmpTuple)), 0.);
          y <= (std::min(ceil(std::get<3>(tmpTuple)), height) - 1);
          ++y)
     {
@@ -659,7 +710,9 @@ void Shape::render_shape(double width, double height,
                                                 y + 0.5));
             if (cx.size() != 0)
             {
-                row_stops.push_back(std::make_pair(trim(cx.at(0), 0, width),
+                std::tie(tmpDouble, err) = trim(cx.at(0), 0, width);
+                TESTERR(err)
+                row_stops.push_back(std::make_pair(tmpDouble,
                                     std::get<3>(line) > 0. ? 1. : -1.));
             }
         } //end for i
@@ -687,4 +740,6 @@ void Shape::render_shape(double width, double height,
             } // end for i
         }
     } // end for y
+
+    return nullptr;
 }

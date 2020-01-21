@@ -16,27 +16,32 @@ class SYMBOL_SHOW Shape : protected Math
 {
 public:
 
-    Shape();
+    static std::shared_ptr<Shape> create();
 
     // Calculates shape bounding box
-    // It may throw invalid_argument
-    std::tuple<double, double, double, double> bounding(std::string &);
+    std::pair<std::tuple<double, double, double, double>, const char *>
+    bounding(std::string &);
 
     // Filters shape points
-    // It may throw invalid argument
-    std::string filter(std::string &, std::function<std::pair<double, double>(double, double, std::string &)> &);
+    std::pair<std::string, const char *>
+    filter(std::string &,
+           std::function<std::pair<double, double>(double, double, std::string &)> &);
 
     // Converts shape curves to lines
-    // It may throw invalid_argument
-    std::string flatten(std::string &);
+    std::pair<std::string, const char *>
+    flatten(std::string &);
 
     // Shifts shape coordinates
-    // It may throw invalid_argument
-    std::string move(std::string &, double, double);
+    std::pair<std::string, const char *>
+    move(std::string &, double, double);
 
     // Converts shape to pixels
-    // It may throw invalid_argument
-    std::vector<std::map<std::string, double>> to_pixels(std::string &);
+    std::pair<std::vector<std::map<std::string, double>>, const char *>
+    to_pixels(std::string &);
+
+protected:
+
+    Shape() : Math() {}
 
 private:
 
@@ -65,7 +70,10 @@ private:
 
     // Renderer (on binary image with aliasing)
     // for to_pixels
-    void render_shape(double, double, std::vector<bool> &, std::string &);
+    const char *render_shape(double,
+                             double,
+                             std::vector<bool> &,
+                             std::string &);
 };
 
 }
