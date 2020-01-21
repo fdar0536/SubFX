@@ -4,6 +4,7 @@ add_executable(SubFXCLI
     asslauncher.cpp
     ../common/configparser.cpp
     ../common/subfxassinit.cpp
+    ../common/assparserpy.cpp
 )
 
 add_dependencies(SubFXCLI YutilsCpp)

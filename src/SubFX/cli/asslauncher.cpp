@@ -42,7 +42,7 @@ int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
 {
     auto parser(assConfig->getParser());
     auto configs(assConfig->getConfigDatas());
-    py::list dialogs(py::cast(parser->dialogs()));
+    auto dialogs(parser->dialogs());
     totalConfigs = configs.size();
     for (size_t i = 0; i < totalConfigs; ++i)
     {
@@ -58,8 +58,8 @@ int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
         ++currentConfig;
     }
 
-    auto meta(parser->meta());
-    auto styles(parser->styles());
+    auto meta(parser->getMetaPtr());
+    auto styles(parser->getStyleData());
 
     std::cout << "Writing output..." << std::endl;
     file->writeAssFile(meta, styles, assBuf);
@@ -159,13 +159,13 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
     size_t totalLines(endLine - startLine + 1);
     for (size_t i = startLine; i <= endLine; ++i)
     {
-        py::object line(dialogsBak[i]);
+        py::dict line(dialogsBak[i]);
         py::object resObj;
         if (modeName == "line")
         {
-            PyObject_DelAttrString(line.ptr(), "syls");
-            PyObject_DelAttrString(line.ptr(), "words");
-            PyObject_DelAttrString(line.ptr(), "chars");
+            PyDict_DelItemString(line.ptr(), "syls");
+            PyDict_DelItemString(line.ptr(), "words");
+            PyDict_DelItemString(line.ptr(), "chars");
 
             try
             {
@@ -187,10 +187,10 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
         }
         else
         {
-            py::list list(line.attr(modeName.c_str()));
-            PyObject_DelAttrString(line.ptr(), "syls");
-            PyObject_DelAttrString(line.ptr(), "words");
-            PyObject_DelAttrString(line.ptr(), "chars");
+            py::list list(line[modeName.c_str()]);
+            PyDict_DelItemString(line.ptr(), "syls");
+            PyDict_DelItemString(line.ptr(), "words");
+            PyDict_DelItemString(line.ptr(), "chars");
 
             for (size_t j = 0; j < py::len(list); ++j)
             {

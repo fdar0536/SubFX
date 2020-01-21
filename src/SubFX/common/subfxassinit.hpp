@@ -3,8 +3,7 @@
 
 #include "../../YutilsCpp/YutilsCpp.hpp"
 #include "configparser.hpp"
-
-typedef Yutils::AssParser YAssParser;
+#include "assparserpy.hpp"
 
 class SubFXAssInit : public ConfigParser
 {
@@ -19,7 +18,7 @@ public:
 
     bool isCharAvailable() const;
 
-    std::shared_ptr<YAssParser> getParser() const;
+    std::shared_ptr<AssParserPy> getParser() const;
 
 protected:
 
@@ -30,7 +29,7 @@ protected:
 
 private:
 
-    std::shared_ptr<YAssParser> assParser;
+    std::shared_ptr<AssParserPy> assParser;
 
 };
 

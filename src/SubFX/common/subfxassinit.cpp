@@ -19,7 +19,7 @@ SubFXAssInit::create(std::string &jsonFileName)
                               err);
     }
 
-    std::tie(ret->assParser, err) = YAssParser::create(ret->subName);
+    std::tie(ret->assParser, err) = AssParserPy::create(ret->subName);
     if (err)
     {
         delete ret;
@@ -46,7 +46,7 @@ bool SubFXAssInit::isCharAvailable() const
     return assParser->isCharAvailable();
 }
 
-std::shared_ptr<YAssParser> SubFXAssInit::getParser() const
+std::shared_ptr<AssParserPy> SubFXAssInit::getParser() const
 {
     return assParser;
 }
