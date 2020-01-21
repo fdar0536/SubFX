@@ -13,6 +13,11 @@
 #define SYMBOL_SHOW __attribute__((visibility("default")))
 #endif
 
+#define TESTERR(x) if (x) \
+                   { \
+                       return x;\
+                   }
+
 class ConstructCommon
 {
 protected:

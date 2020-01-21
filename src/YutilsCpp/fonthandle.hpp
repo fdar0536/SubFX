@@ -61,24 +61,10 @@ protected:
         yscale(yscale)
     {}
 
-    FontHandle() :
-    Math(),
-    #ifdef _WIN32
-        dc(nullptr),
-        font(nullptr),
-        old_font(nullptr),
-        hspace(hspace),
-        upscale(FONT_PRECISION),
-    #else
-        surface(nullptr),
-        context(nullptr),
-        layout(nullptr),
-    #endif
-        xscale(0.),
-        yscale(0.)
-    {}
-
 private:
+
+    FontHandle() {}
+
 #ifdef _WIN32
     HDC dc;
 
