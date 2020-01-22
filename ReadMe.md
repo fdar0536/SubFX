@@ -30,6 +30,10 @@ Now is under development.
 
 - No extra dependency needed
 
+#### GUI
+
+- [Qt](https://www.qt.io) 5.14 or later (5.12lts is not tested)
+
 ## TODO
 
 - [ ] Nicer name
