@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(SubFX LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SUBFX_VERSION r0.0.1)
 
 if (UNIX)
