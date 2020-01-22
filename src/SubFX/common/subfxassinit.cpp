@@ -27,6 +27,14 @@ SubFXAssInit::create(std::string &jsonFileName)
                               err);
     }
 
+    err = ret->assParser->upgradeDialogs();
+    if (err)
+    {
+        delete ret;
+        return std::make_pair(std::shared_ptr<SubFXAssInit>(),
+                              err);
+    }
+
     return std::make_pair(std::shared_ptr<SubFXAssInit>(ret),
                           nullptr);
 }
