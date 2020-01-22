@@ -1,3 +1,4 @@
 #define SUBFX_VERSION "@SUBFX_VERSION@"
+#define SUBFX_NAME "@SUBFX_NAME@"
 #cmakedefine ENABLE_SIMD
 #cmakedefine ENABLE_AVX
