@@ -116,7 +116,7 @@ void File::writeAssMeta(std::shared_ptr<AssMeta> &meta)
     file << "[Script Info]" << std::endl;
     file << "Title:" << std::endl;
     file << "ScriptType: v4.00+" << std::endl;
-    file << "WrapStyle: " << static_cast<int>(meta->wrap_style - '0') << std::endl;
+    file << "WrapStyle: " << (static_cast<int>(meta->wrap_style) - 48) << std::endl;
     file << "ScaledBorderAndShadow: " << (meta->scaled_border_and_shadow ? "yes" : "no") << std::endl;
 
     if (meta->colorMatrix != "")
