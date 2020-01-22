@@ -62,7 +62,24 @@ int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
     auto styles(parser->getStyleData());
 
     std::cout << "Writing output..." << std::endl;
-    file->writeAssFile(meta, styles, assBuf);
+    const char *err(file->writeAssFile(meta, styles, assBuf));
+    if (err)
+    {
+        const char *now(getCurrentTime());
+        if (now)
+        {
+            fputs(now, logFile);
+        }
+        else
+        {
+            fputs("CANNOT get current time!", logFile);
+        }
+
+        fputs(err, logFile);
+        fputs("\n", logFile);
+        return 1;
+    }
+
     reset();
 
     return 0;

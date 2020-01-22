@@ -21,7 +21,7 @@
 
 from math    import *
 from random  import *
-from CoreLibPy import *
+from YutilsPy import *
 import sys
 
 ######################################### Global Constant ###################################################
