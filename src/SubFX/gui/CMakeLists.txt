@@ -10,6 +10,12 @@ add_executable(SubFXGUI WIN32
     ui/mainwindow.hpp
     ui/mainwindow.cpp
     ui/mainwindow.ui
+    ui/mainpanel.cpp
+    ui/mainpanel.hpp
+    ui/mainpanel.ui
+    ui/logpanel.cpp
+    ui/logpanel.hpp
+    ui/logpanel.ui
 )
 
 add_dependencies(SubFXGUI YutilsCpp)

@@ -1,8 +1,11 @@
 #include <memory>
 
 #include "QMessageBox"
+#include "QFileDialog"
+#include "QDir"
 
 #include "config.h"
+#include "../../common/basecommon.hpp"
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
@@ -39,9 +42,24 @@ MainWindow::create(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete m_ui;
+    delete m_mainPanel;
+    delete m_logPanel;
 }
 
 // private slots
+void MainWindow::onOpenTriggled(bool)
+{
+    QString res(QFileDialog::getOpenFileName(this,
+                                             tr("Open config file"),
+                                             QDir::homePath(),
+                                             tr("JSON (*.json)")
+                ));
+    if (res == "")
+    {
+        return;
+    }
+}
+
 void MainWindow::onAboutQtTriggled(bool)
 {
     QMessageBox::aboutQt(this);
@@ -55,9 +73,19 @@ void MainWindow::onExitTriggled(bool)
 // private member function
 const char *MainWindow::init()
 {
+    const char *err(nullptr);
+    std::tie(m_mainPanel, err) = MainPanel::create(this);
+    TESTERR(err)
+    m_ui->mainTab->insertTab(0, m_mainPanel, "Main");
+
+    std::tie(m_logPanel, err) = LogPanel::create(this);
+    TESTERR(err)
+    m_ui->mainTab->insertTab(1, m_logPanel, "Log");
+
     m_title = SUBFX_NAME;
     m_title += " GUI " + QString(SUBFX_VERSION);
     setWindowTitle(m_title);
+
     connectHook();
     return nullptr;
 }
@@ -65,6 +93,11 @@ const char *MainWindow::init()
 void MainWindow::connectHook()
 {
     // menu bar
+    connect(m_ui->actionOpen,
+            SIGNAL(triggered(bool)),
+            this,
+            SLOT(onOpenTriggled(bool)));
+
     connect(m_ui->actionAboutQt,
             SIGNAL(triggered(bool)),
             this,
