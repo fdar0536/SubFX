@@ -5,6 +5,8 @@
 
 #include "QWidget"
 
+#include "../background/assinitbg.hpp"
+
 namespace Ui
 {
     class MainPanel;
@@ -21,11 +23,20 @@ public:
 
     ~MainPanel();
 
+signals:
+
+    void message(QString &);
+
+public slots:
+
+    void parseConfig(std::string &jsonFileName);
+
 protected:
 
     explicit MainPanel(QWidget *parent = nullptr) :
         QWidget(parent),
-        m_ui(nullptr)
+        m_ui(nullptr),
+        m_dirty(false)
     {}
 
 private:
@@ -33,6 +44,11 @@ private:
     MainPanel() {}
 
     Ui::MainPanel *m_ui;
+
+    bool m_dirty;
+
+    std::shared_ptr<SubFXAssInit> m_assConfig;
+
 };
 
 #endif // MAINPANEL_HPP

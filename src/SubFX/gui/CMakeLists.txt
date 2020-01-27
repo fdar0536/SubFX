@@ -16,6 +16,8 @@ add_executable(SubFXGUI WIN32
     ui/logpanel.cpp
     ui/logpanel.hpp
     ui/logpanel.ui
+    background/assinitbg.hpp
+    background/assinitbg.cpp
 )
 
 add_dependencies(SubFXGUI YutilsCpp)
