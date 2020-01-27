@@ -29,5 +29,5 @@ LIST(APPEND SubFXGUI_libs YutilsCpp)
 
 set(Qt5_libs Qt5::Widgets)
 
-target_link_libraries(SubFXGUI PRIVATE ${Qt5_libs} ${SubFXCLI_libs})
-target_include_directories(SubFXGUI PUBLIC ${SubFXCLI_includes})
+target_link_libraries(SubFXGUI PRIVATE ${Qt5_libs} ${SubFXGUI_libs})
+target_include_directories(SubFXGUI PUBLIC ${SubFXGUI_includes})

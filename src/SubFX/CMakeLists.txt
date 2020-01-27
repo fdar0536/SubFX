@@ -9,6 +9,6 @@ if (ENABLE_CLI)
     add_subdirectory(SubFX/cli)
 endif (ENABLE_CLI)
 
-if (ENABLE_CLI)
+if (ENABLE_GUI)
     add_subdirectory(SubFX/gui)
-endif (ENABLE_CLI)
+endif (ENABLE_GUI)
