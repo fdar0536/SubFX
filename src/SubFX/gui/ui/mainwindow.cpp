@@ -125,7 +125,7 @@ void MainWindow::connectHook()
 
     // for status bar
     connect(m_logPanel,
-            SIGNAL(stateChanged(QString &, int)),
+            SIGNAL(stateChanged(const QString &, int)),
             m_ui->mainStatusbar,
             SLOT(showMessage(const QString &, int)));
 }

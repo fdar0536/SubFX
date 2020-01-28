@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <cstdio>
+
 #include "launcher.hpp"
 
 Launcher::~Launcher()
@@ -32,6 +34,7 @@ const char *Launcher::LauncherInit(const std::string &logFile,
     }
 
     const char *err(nullptr);
+    remove(outputFile.c_str());
     std::tie(this->file, err) = YFile::create(outputFile);
     if (err)
     {

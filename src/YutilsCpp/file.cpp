@@ -4,7 +4,7 @@ using namespace Yutils;
 
 std::pair<std::shared_ptr<File>, const char *>
 File::create(const std::string &fileName,
-            const std::string &assHeader)
+             const std::string &assHeader)
 {
     File *ret(new (std::nothrow) File());
     if (!ret)
