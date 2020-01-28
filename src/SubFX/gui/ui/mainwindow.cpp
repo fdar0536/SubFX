@@ -1,12 +1,14 @@
 #include <memory>
 
+#include "../../common/basecommon.hpp"
+#undef B0
+#include "mainwindow.hpp"
+
 #include "QMessageBox"
 #include "QFileDialog"
 #include "QDir"
 
 #include "config.h"
-#include "../../common/basecommon.hpp"
-#include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
 MainWindow *MainWindow::create(QWidget *parent)
@@ -120,6 +122,12 @@ void MainWindow::connectHook()
             SIGNAL(triggered(bool)),
             this,
             SLOT(onExitTriggled(bool)));
+
+    // for status bar
+    connect(m_logPanel,
+            SIGNAL(stateChanged(QString &, int)),
+            m_ui->mainStatusbar,
+            SLOT(showMessage(const QString &, int)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

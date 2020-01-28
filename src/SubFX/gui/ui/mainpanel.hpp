@@ -3,9 +3,10 @@
 
 #include <utility>
 
-#include "QWidget"
-
 #include "../background/assinitbg.hpp"
+#undef B0
+
+#include "QWidget"
 
 namespace Ui
 {

@@ -11,3 +11,6 @@ AssInitBg *AssInitBg::create(QObject *parent)
 
     return ret;
 }
+
+void AssInitBg::run()
+{}

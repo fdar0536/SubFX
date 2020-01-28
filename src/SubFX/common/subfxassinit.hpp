@@ -4,6 +4,7 @@
 #include "../../YutilsCpp/YutilsCpp.hpp"
 #include "configparser.hpp"
 #include "assparserpy.hpp"
+#undef B0
 
 class SubFXAssInit : public ConfigParser
 {

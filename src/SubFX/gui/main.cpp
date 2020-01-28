@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "QApplication"
-#include "QMetaType"
 #include "pybind11/embed.h"
+#undef B0
+#include "QApplication"
 
 #include "ui/mainwindow.hpp"
 
@@ -12,8 +12,6 @@ int main(int argc, char **argv)
 {
     QApplication a(argc, argv);
     py::scoped_interpreter guard{};
-
-    qRegisterMetaType<QString>("QString&");
 
     MainWindow *w(MainWindow::create(nullptr));
     if (!w)

@@ -31,3 +31,7 @@ MainPanel::~MainPanel()
         delete m_ui;
     }
 }
+
+// public slots
+void MainPanel::parseConfig(std::string &)
+{}

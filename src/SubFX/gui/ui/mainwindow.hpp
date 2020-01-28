@@ -3,12 +3,13 @@
 
 #include <utility>
 
+#include "mainpanel.hpp"
+#include "logpanel.hpp"
+#undef B0
+
 #include "QString"
 #include "QMainWindow"
 #include "QCloseEvent"
-
-#include "mainpanel.hpp"
-#include "logpanel.hpp"
 
 namespace Ui
 {

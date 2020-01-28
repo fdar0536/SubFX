@@ -3,7 +3,7 @@
 
 #ifdef _MSC_VER
 #pragma once
-#endif    /* _MSC_VER */
+#endif /* _MSC_VER */
 
 #include "../../YutilsCpp/YutilsCpp.hpp"
 #include "pybind11/pybind11.h"

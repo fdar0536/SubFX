@@ -1,5 +1,6 @@
 #include "QDateTime"
 #include "QFileDialog"
+#include "QMessageBox"
 
 #include "logpanel.hpp"
 #include "ui_logpanel.h"
@@ -56,17 +57,25 @@ void LogPanel::addLog(QString &msg)
 // private slots
 void LogPanel::onSaveBtnClicked(bool)
 {
-    QString save_path = QFileDialog::getSaveFileName(this,
+    QString savePath = QFileDialog::getSaveFileName(this,
                                                      "Save log",
                                                      m_lastSavePath,
                                                      "log(*.log)");
-    if (save_path == "")
+    if (savePath == "")
     {
         return;
     }
 
-    FILE *logFile;
-    logFile = fopen(save_path.toStdString().c_str(), "w");
+    FILE *logFile(nullptr);
+    logFile = fopen(savePath.toStdString().c_str(), "w");
+    if (!logFile)
+    {
+        QMessageBox::critical(this,
+                              tr("Error"),
+                              tr("Fail to open file."));
+        return;
+    }
+
     int index(0);
     for (index = 0; index < m_ui->logList->count(); ++index)
     {
@@ -75,6 +84,7 @@ void LogPanel::onSaveBtnClicked(bool)
     }
 
     fclose(logFile);
+    m_lastSavePath = savePath;
     QString msg(tr("The log is saved successfully."));
     emit stateChanged(msg);
 }

@@ -1,10 +1,11 @@
 #ifndef ASSINITBG_HPP
 #define ASSINITBG_HPP
 
+#include "../common/subfxassinit.hpp"
+#undef B0
+
 #include "QRunnable"
 #include "QObject"
-
-#include "../common/subfxassinit.hpp"
 
 class AssInitBg : public QObject, public QRunnable
 {
