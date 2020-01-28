@@ -23,6 +23,8 @@ public:
 
 signals:
 
+    void message(QString &);
+
 protected:
 
     explicit AssInitBg(QObject *parent = nullptr) :

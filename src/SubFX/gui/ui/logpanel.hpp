@@ -20,6 +20,10 @@ public:
 
     ~LogPanel();
 
+public slots:
+
+    void addLog(QString &);
+
 protected:
 
     explicit LogPanel(QWidget *parent = nullptr) :
