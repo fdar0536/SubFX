@@ -19,15 +19,21 @@
    </item>
    <item row="1" column="0">
     <widget class="QPushButton" name="saveBtn">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
-      <string>Save</string>
+      <string>Save log</string>
      </property>
     </widget>
    </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="cleanBtn">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
-      <string>Clean</string>
+      <string>Clean log</string>
      </property>
     </widget>
    </item>

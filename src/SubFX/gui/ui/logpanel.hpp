@@ -20,6 +20,10 @@ public:
 
     ~LogPanel();
 
+    void setLastSavePath(QString &);
+
+    QString getLastSavePath() const;
+
 signals:
 
     void stateChanged(QString &);
@@ -32,18 +36,23 @@ protected:
 
     explicit LogPanel(QWidget *parent = nullptr) :
         QWidget(parent),
-        m_ui(nullptr)
+        m_ui(nullptr),
+        m_lastSavePath("")
     {}
 
 private slots:
 
     void onSaveBtnClicked(bool);
 
+    void onCleanBtnClicked(bool);
+
 private:
 
     LogPanel() {}
 
     Ui::LogPanel *m_ui;
+
+    QString m_lastSavePath;
 
     QString getDateTime();
 };
