@@ -15,12 +15,10 @@ int main(int argc, char **argv)
 
     qRegisterMetaType<QString>("QString&");
 
-    MainWindow *w(nullptr);
-    const char *err(nullptr);
-    std::tie(w, err) = MainWindow::create(nullptr);
-    if (err)
+    MainWindow *w(MainWindow::create(nullptr));
+    if (!w)
     {
-        std::cerr << err << std::endl;
+        std::cerr << "Fail to allocate memory." << std::endl;
         return 1;
     }
 

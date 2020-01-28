@@ -5,8 +5,9 @@
 
 #include "QWidget"
 
-namespace Ui {
-class LogPanel;
+namespace Ui
+{
+    class LogPanel;
 }
 
 class LogPanel : public QWidget
@@ -15,10 +16,13 @@ class LogPanel : public QWidget
 
 public:
 
-    static std::pair<LogPanel *, const char *>
-    create(QWidget *parent = nullptr);
+    static LogPanel *create(QWidget *parent = nullptr);
 
     ~LogPanel();
+
+signals:
+
+    void stateChanged(QString &);
 
 public slots:
 
@@ -31,11 +35,17 @@ protected:
         m_ui(nullptr)
     {}
 
+private slots:
+
+    void onSaveBtnClicked(bool);
+
 private:
 
     LogPanel() {}
 
     Ui::LogPanel *m_ui;
+
+    QString getDateTime();
 };
 
 #endif // LOGPANEL_HPP

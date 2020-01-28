@@ -18,8 +18,7 @@ class MainPanel : public QWidget
 
 public:
 
-    static std::pair<MainPanel *, const char *>
-    create(QWidget *parent = nullptr);
+    static MainPanel *create(QWidget *parent = nullptr);
 
     ~MainPanel();
 

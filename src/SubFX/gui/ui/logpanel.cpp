@@ -1,31 +1,47 @@
+#include "QDateTime"
+
 #include "logpanel.hpp"
 #include "ui_logpanel.h"
 
-std::pair<LogPanel *, const char *>
-LogPanel::create(QWidget *parent)
+LogPanel *LogPanel::create(QWidget *parent)
 {
     LogPanel *ret(new (std::nothrow) LogPanel(parent));
     if (!ret)
     {
-        return std::make_pair(nullptr,
-                              "Fail to allocate memory");
+        return nullptr;
     }
 
     Ui::LogPanel *ui(new (std::nothrow) Ui::LogPanel());
     if (!ui)
     {
         delete ret;
-        return std::make_pair(nullptr,
-                              "Fail to allocate memory");
+        return nullptr;
     }
 
     ret->m_ui = ui;
     ret->m_ui->setupUi(ret);
 
-    return std::make_pair(ret, nullptr);
+    return ret;
 }
 
 LogPanel::~LogPanel()
 {
-    delete m_ui;
+    if (m_ui)
+    {
+        delete m_ui;
+    }
+}
+
+// public slots
+void LogPanel::addLog(QString &msg)
+{
+    QString tmp(getDateTime() + msg);
+    m_ui->logList->addItem(tmp);
+}
+
+// private member function
+QString LogPanel::getDateTime()
+{
+    QDateTime time(QDateTime::currentDateTime());
+    return (time.toString("yyyy/MM/dd AP hh:mm:ss:zzz") + " ");
 }

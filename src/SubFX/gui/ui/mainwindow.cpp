@@ -9,41 +9,49 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-std::pair<MainWindow *, const char *>
-MainWindow::create(QWidget *parent)
+MainWindow *MainWindow::create(QWidget *parent)
 {
     MainWindow *ret(new (std::nothrow) MainWindow(parent));
     if (!ret)
     {
-        return std::make_pair(nullptr,
-                              "Fail to allocate memory");
+        return nullptr;
     }
 
     Ui::MainWindow *ui(new (std::nothrow) Ui::MainWindow());
     if (!ui)
     {
         delete ret;
-        return std::make_pair(nullptr,
-                              "Fail to allocate memory");
+        return nullptr;
     }
 
     ret->m_ui = ui;
     ret->m_ui->setupUi(ret);
-    const char *err(ret->init());
+    int err(ret->init());
     if (err)
     {
         delete ret;
-        return std::make_pair(nullptr, err);
+        return nullptr;
     }
 
-    return std::make_pair(ret, nullptr);
+    return ret;
 }
 
 MainWindow::~MainWindow()
 {
-    delete m_ui;
-    delete m_mainPanel;
-    delete m_logPanel;
+    if (m_ui)
+    {
+        delete m_ui;
+    }
+
+    if (m_mainPanel)
+    {
+        delete m_mainPanel;
+    }
+
+    if (m_logPanel)
+    {
+        delete m_logPanel;
+    }
 }
 
 // private slots
@@ -71,15 +79,20 @@ void MainWindow::onExitTriggled(bool)
 }
 
 // private member function
-const char *MainWindow::init()
+int MainWindow::init()
 {
-    const char *err(nullptr);
-    std::tie(m_mainPanel, err) = MainPanel::create(this);
-    TESTERR(err)
+    m_mainPanel = MainPanel::create(this);
+    if (!m_mainPanel)
+    {
+        return 1;
+    }
     m_ui->mainTab->insertTab(0, m_mainPanel, "Main");
 
-    std::tie(m_logPanel, err) = LogPanel::create(this);
-    TESTERR(err)
+    m_logPanel = LogPanel::create(this);
+    if (!m_logPanel)
+    {
+        return 1;
+    }
     m_ui->mainTab->insertTab(1, m_logPanel, "Log");
 
     m_title = SUBFX_NAME;
@@ -87,7 +100,7 @@ const char *MainWindow::init()
     setWindowTitle(m_title);
 
     connectHook();
-    return nullptr;
+    return 0;
 }
 
 void MainWindow::connectHook()

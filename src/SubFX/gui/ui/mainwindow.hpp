@@ -21,8 +21,7 @@ class MainWindow : public QMainWindow
 
 public:
 
-    static std::pair<MainWindow *, const char *>
-    create(QWidget *parent = nullptr);
+    static MainWindow *create(QWidget *parent = nullptr);
 
     ~MainWindow() override;
 
@@ -57,7 +56,7 @@ private:
 
     LogPanel *m_logPanel;
 
-    const char *init();
+    int init();
 
     void connectHook();
 
