@@ -187,8 +187,8 @@ std::istream &AssParser::safeGetline(std::istream &is, std::string &buf)
 std::string AssParser::checkBom(std::string &in)
 {
     // utf-8 bom
-    if (static_cast<uint8_t>(in.at(0)) != 0xef &&
-        static_cast<uint8_t>(in.at(1)) != 0xbb &&
+    if (static_cast<uint8_t>(in.at(0)) != 0xef ||
+        static_cast<uint8_t>(in.at(1)) != 0xbb ||
         static_cast<uint8_t>(in.at(2)) != 0xbf)
     {
         return in;
