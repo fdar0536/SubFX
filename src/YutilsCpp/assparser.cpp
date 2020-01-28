@@ -50,8 +50,23 @@ AssParser::create(const std::string &fileName)
     ret->dialogData.reserve(1000);
     std::string tmpString;
     const char *err(nullptr);
+    uint8_t flag(1);
     while(!ret->safeGetline(assFile, tmpString).eof())
     {
+        if (flag)
+        {
+            // for safety
+            if (tmpString.size() == 0)
+            {
+                delete ret;
+                return std::make_pair(std::shared_ptr<AssParser>(nullptr),
+                                      "Fail when parse line.");
+            }
+
+            flag = 0;
+            tmpString = ret->checkBom(tmpString);
+        }
+
         err = ret->parseLine(tmpString);
         if (err)
         {
@@ -167,6 +182,20 @@ std::istream &AssParser::safeGetline(std::istream &is, std::string &buf)
             buf += static_cast<char>(c);
         }
     }
+}
+
+std::string AssParser::checkBom(std::string &in)
+{
+    // utf-8 bom
+    if (static_cast<uint8_t>(in.at(0)) != 0xef &&
+        static_cast<uint8_t>(in.at(1)) != 0xbb &&
+        static_cast<uint8_t>(in.at(2)) != 0xbf)
+    {
+        return in;
+    }
+
+    std::cerr << "Warning: Remove utf-8 bom." << std::endl;
+    return in.substr(3);
 }
 
 const char *AssParser::parseLine(std::string &line)

@@ -67,6 +67,8 @@ private:
 
     PARSER_SECTION section;
 
+    std::string checkBom(std::string &);
+
     const char *parseLine(std::string &);
 
     std::shared_ptr<AssMeta> metaData;
