@@ -69,7 +69,7 @@ private:
 
     std::string checkBom(std::string &);
 
-    const char *parseLine(std::string &);
+    const char *parseLine(std::string &, uint8_t *flags);
 
     std::shared_ptr<AssMeta> metaData;
 

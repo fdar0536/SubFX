@@ -51,6 +51,7 @@ AssParser::create(const std::string &fileName)
     std::string tmpString;
     const char *err(nullptr);
     uint8_t flag(1);
+    uint8_t flags[] = {0, 0, 0, 0};
     while(!ret->safeGetline(assFile, tmpString).eof())
     {
         if (flag)
@@ -67,7 +68,7 @@ AssParser::create(const std::string &fileName)
             tmpString = ret->checkBom(tmpString);
         }
 
-        err = ret->parseLine(tmpString);
+        err = ret->parseLine(tmpString, flags);
         if (err)
         {
             delete ret;
@@ -198,7 +199,7 @@ std::string AssParser::checkBom(std::string &in)
     return in.substr(3);
 }
 
-const char *AssParser::parseLine(std::string &line)
+const char *AssParser::parseLine(std::string &line, uint8_t *flags)
 {
     if (regex_match(line, boost::regex("^\\[.*\\]$")))
     {
@@ -207,15 +208,33 @@ const char *AssParser::parseLine(std::string &line)
         std::string res(line.substr(1, line.length() - 2));
         if (res == "Script Info")
         {
+            if (flags[Script_Info])
+            {
+                return "Input is not a valid ass file.";
+            }
+
             section = Script_Info;
+            ++flags[Script_Info];
         }
         else if (res == "V4+ Styles")
         {
+            if (flags[V4_Styles])
+            {
+                return "Input is not a valid ass file.";
+            }
+
             section = V4_Styles;
+            ++flags[V4_Styles];
         }
         else if (res == "Events")
         {
+            if (flags[Events])
+            {
+                return "Input is not a valid ass file.";
+            }
+
             section = Events;
+            ++flags[Events];
         }
 
         return nullptr;
