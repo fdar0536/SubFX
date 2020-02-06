@@ -26,11 +26,17 @@ signals:
 
     void message(QString &);
 
+    void stateChanged(const QString &, int = 0);
+
+    void parseSuccess();
+
 protected:
 
     explicit AssInitBg(QObject *parent = nullptr) :
         QObject(parent),
-        QRunnable()
+        QRunnable(),
+        m_jsonFileName(""),
+        m_assConfig(nullptr)
     {}
 
 private:

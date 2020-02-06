@@ -1,4 +1,5 @@
 #include <memory>
+#include <iostream>
 
 #include "../../common/basecommon.hpp"
 #undef B0
@@ -68,6 +69,11 @@ void MainWindow::onOpenTriggled(bool)
     {
         return;
     }
+
+    std::cout << res.toStdString() << std::endl;
+
+    std::string resString(res.toStdString());
+    m_mainPanel->parseConfig(resString);
 }
 
 void MainWindow::onAboutQtTriggled(bool)
@@ -128,6 +134,17 @@ void MainWindow::connectHook()
             SIGNAL(stateChanged(const QString &, int)),
             m_ui->mainStatusbar,
             SLOT(showMessage(const QString &, int)));
+
+    connect(m_mainPanel,
+            SIGNAL(stateChanged(const QString &, int)),
+            m_ui->mainStatusbar,
+            SLOT(showMessage(const QString &, int)));
+
+    // for log
+    connect(m_mainPanel,
+            SIGNAL(message(QString &)),
+            m_logPanel,
+            SLOT(addLog(QString &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

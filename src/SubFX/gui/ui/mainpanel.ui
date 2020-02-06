@@ -14,9 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0" rowspan="5" colspan="2">
-    <widget class="QListWidget" name="scriptList"/>
-   </item>
    <item row="8" column="3">
     <widget class="QSpinBox" name="startLine"/>
    </item>
@@ -94,6 +91,9 @@
    </item>
    <item row="12" column="5">
     <widget class="QPushButton" name="abortBtn">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Abort</string>
      </property>
@@ -136,10 +136,16 @@
    </item>
    <item row="12" column="3">
     <widget class="QPushButton" name="startBtn">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Start</string>
      </property>
     </widget>
+   </item>
+   <item row="5" column="0" rowspan="5" colspan="2">
+    <widget class="QListWidget" name="scriptList"/>
    </item>
   </layout>
  </widget>

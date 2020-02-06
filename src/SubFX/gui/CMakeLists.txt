@@ -7,6 +7,9 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(SubFXGUI WIN32
     main.cpp
+    ../common/configparser.cpp
+    ../common/subfxassinit.cpp
+    ../common/assparserpy.cpp
     ui/mainwindow.hpp
     ui/mainwindow.cpp
     ui/mainwindow.ui
