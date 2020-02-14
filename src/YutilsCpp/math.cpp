@@ -7,6 +7,7 @@
 #include "boost/math/constants/constants.hpp"
 
 #include "math.hpp"
+#include "config.h"
 
 #ifdef ENABLE_SIMD
 #ifdef ENABLE_AVX

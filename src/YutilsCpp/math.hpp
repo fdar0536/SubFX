@@ -5,12 +5,10 @@
 #include <string>
 #include <memory>
 
-#include "../common/basecommon.h"
 #include "common.hpp"
 
 namespace Yutils
 {
-
 class SYMBOL_SHOW Math : public Common
 {
 public:
@@ -32,7 +30,7 @@ public:
     arc_curve(double x, double y,
               double cx, double cy,
               double angle,
-              std::string &errMsg = std::string());
+              std::string &errMsg);
 
     /**
      * Calculates a point on a bezier curve of any order.
@@ -49,7 +47,7 @@ public:
     std::tuple<double, double, double>
     bezier(double pct,
            std::vector<std::tuple<double, double, double>> &pts,
-           bool is3D = false, std::string &errMsg = std::string());
+           bool is3D, std::string &errMsg);
 
     /**
      * Calculates the degree between vectors x1|y1|z1 and x2|y2|z3.
@@ -78,7 +76,7 @@ public:
                    double x2, double y2,
                    double x3, double y3,
                    bool strict,
-                   std::string &errMsg = std::string());
+                   std::string &errMsg);
 
     /**
      * @brief Get orthogonal vector of 2 given vectors.
@@ -98,7 +96,7 @@ public:
      * Generates randomly a number in range min to max with gap size step between numbers.
      */
     double randomsteps(double min, double max, double step,
-                       std::string &errMsg = std::string());
+                       std::string &errMsg);
 
     /**
      * @brief Rounds number.
@@ -126,7 +124,7 @@ public:
      * Otherwise returns x.
      */
     double trim(double x, double min, double max,
-                std::string &errMsg = std::string());
+                std::string &errMsg);
 
     /**
      * Calculates a point on ellipse with given angle,
@@ -153,7 +151,7 @@ public:
     rotate(std::tuple<double, double, double> p,
            std::string axis,
            double angle,
-           std::string &errMsg = std::string());
+           std::string &errMsg);
 
 protected:
 
@@ -178,5 +176,4 @@ private:
 
     double fac(double n);
 };
-
 }

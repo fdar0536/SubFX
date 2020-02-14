@@ -3,6 +3,8 @@
 #include <string>
 #include <utility>
 
+#include "../common/basecommon.h"
+
 #define FP_PRECISION 3 // Floating point precision by numbers behind point (for shape points)
 #define SUPERSAMPLING 8 // Anti-aliasing precision for shape to pixels conversion
 
@@ -11,11 +13,12 @@
 namespace Yutils
 {
 
-class Common
+class SYMBOL_SHOW Common
 {
+
 protected:
 
-    Common();
+    Common(void);
 
     std::pair<double, double> rotate2d(double, double, double);
 
@@ -29,6 +32,7 @@ protected:
     double random(double min, double max);
 
     std::string doubleToString(double input);
+
 };
 
 } // end namespace Yutils

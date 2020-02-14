@@ -33,6 +33,13 @@ target_include_directories(YutilsCpp PUBLIC ${YutilsCpp_includes})
 # python
 option(ENABLE_PYTHON "Enable python binding" OFF)
 
+option(BUILD_TESTING_CASES "Build testing cases" ON)
+
 if (ENABLE_PYTHON)
     include(YutilsCpp/python/CMakeLists.txt)
 endif (ENABLE_PYTHON)
+
+if (BUILD_TESTING_CASES)
+    include(YutilsCpp/test/CMakeLists.txt)
+endif (BUILD_TESTING_CASES)
+
