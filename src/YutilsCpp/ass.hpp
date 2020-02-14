@@ -1,5 +1,4 @@
-#ifndef ASS_HPP
-#define ASS_HPP
+#pragma once
 
 #include <string>
 #include <tuple>
@@ -33,5 +32,3 @@ protected:
     Ass() {}
 };
 }
-
-#endif // ASS_HPP
