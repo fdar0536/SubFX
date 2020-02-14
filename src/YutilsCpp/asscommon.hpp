@@ -1,5 +1,4 @@
-#ifndef ASSCOMMON_HPP
-#define ASSCOMMON_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -14,7 +13,6 @@
 
 namespace Yutils
 {
-
 class AssMeta
 {
 public:
@@ -234,7 +232,4 @@ public:
     std::vector<std::shared_ptr<AssWord>> words;
     std::vector<std::shared_ptr<AssChar>> chars;
 };
-
 }
-
-#endif // ASSCOMMON_HPP
