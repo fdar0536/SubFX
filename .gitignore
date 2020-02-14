@@ -1,12 +1,17 @@
 src/build
 src/build/*
 src/*.o
+src/.vs
+src/.vs/*
 src/test
 src/test/*
 src/.vscode 
 src/.vscode/*
 src/testCpp
 src/*.user
+src/*.user*
+src/out
+src/out/*
 build*
 build*/*
 *.json

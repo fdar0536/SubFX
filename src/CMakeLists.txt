@@ -51,7 +51,12 @@ else () # Windows
 
         add_link_options(-Wl,--unresolved-symbols=report-all)
     else () # msvc or icc
-        add_compile_options(/W4)
+        add_compile_options(/W4 /WX /wd4819)
+        if(ENABLE_SIMD)
+            if (ENABLE_AVX)
+                add_compile_options(/arch:AVX)
+            endif (ENABLE_AVX)
+        endif(ENABLE_SIMD)
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 
