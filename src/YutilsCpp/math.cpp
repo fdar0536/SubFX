@@ -23,29 +23,30 @@ std::shared_ptr<Math> Math::create()
     Math *ret(new (std::nothrow) Math());
     if (!ret)
     {
-        return std::shared_ptr<Math>(nullptr);
+        return nullptr;
     }
 
     return std::shared_ptr<Math>(ret);
 }
 
 // public member function
-std::pair<std::vector<std::pair<double, double>>, const char *>
+std::vector<std::pair<double, double>>
 Math::arc_curve(double x, double y,
                 double cx, double cy,
-                double angle)
+                double angle,
+                std::string &errMsg)
 {
     std::vector<std::pair<double, double>> curves;
     if (angle < -360. || angle > 360.)
     {
-        return std::make_pair(curves,
-                              "start & center point and valid angle (-360<=x<=360) expected");
+        errMsg = "start & center point and valid angle"
+            "(-360<=x<=360) expected";
+        return curves;
     }
 
     if (angle == 0.)
     {
-        return std::make_pair(curves,
-                              "angle CANNOT be zero");
+        errMsg = "angle CANNOT be zero";
     }
 
     // Factor for bezier control points distance to node points
@@ -106,38 +107,38 @@ Math::arc_curve(double x, double y,
         angle_sum += 90.;
     }
 
-    return make_pair(curves, nullptr);
+    return curves;
 } // end CoreMath::arc_curve
 
-std::pair<std::tuple<double, double, double>, const char *>
+std::tuple<double, double, double>
 Math::bezier(double pct,
              std::vector<std::tuple<double, double, double>> &pts,
-             bool is3D)
+             bool is3D, std::string &errMsg)
 {
     if (pct < 0. || pct > 1.)
     {
-        return std::make_pair(std::tuple<double, double, double>(),
-                              "pct must between 0 and 1");
+        errMsg = "pct must between 0 and 1";
+        return std::tuple<double, double, double>();
     }
 
     size_t ptsSize(pts.size());
     if (ptsSize < 2)
     {
-        return std::make_pair(std::tuple<double, double, double>(),
-                              "at least 2 points expected");
+        errMsg = "at least 2 points expected";
+        return std::tuple<double, double, double>();
     }
 
     switch (ptsSize)
     {
     case 2:
-        return std::make_pair(bezier2(pct, pts, is3D), nullptr);
+        return bezier2(pct, pts, is3D);
     case 3:
-        return std::make_pair(bezier3(pct, pts, is3D), nullptr);
+        return bezier3(pct, pts, is3D);
     case 4:
-        return std::make_pair(bezier4(pct, pts, is3D), nullptr);
+        return bezier4(pct, pts, is3D);
     }
 
-    return std::make_pair(bezierN(pct, pts, is3D), nullptr);
+    return bezierN(pct, pts, is3D);
 }
 
 double Math::degree(double x1, double y1, double z1,
@@ -162,12 +163,13 @@ double Math::distance(double x, double y, double z)
     return sqrt(x * x + y * y + z * z);
 }
 
-std::pair<std::pair<double, double>, const char *>
+std::pair<double, double>
 Math::line_intersect(double x0, double y0,
                      double x1, double y1,
                      double x2, double y2,
                      double x3, double y3,
-                     bool strict)
+                     bool strict,
+                     std::string &errMsg)
 {
     // Get line vectors & check valid lengths
     double x10(x0 - x1);
@@ -178,16 +180,15 @@ Math::line_intersect(double x0, double y0,
     if ((x10 == 0. && y10 == 0.) ||
         (x32 == 0. && y32 == 0.))
     {
-        return std::make_pair(std::pair<double, double>(),
-                              "lines mustn't have zero length");
+        errMsg = "lines mustn't have zero length";
+        return std::pair<double, double>();
     }
 
     // Calculate determinant and check for parallel lines
     double det = x10 * y32 - y10 * x32;
     if (det == 0.)
     {
-        return std::make_pair(std::pair<double, double>(),
-                              nullptr);
+        return std::pair<double, double>();
     }
 
     // Calculate line intersection (endless line lengths)
@@ -204,13 +205,12 @@ Math::line_intersect(double x0, double y0,
 
         if (s < 0. || s > 1. || t < 0. || t > 1.)
         {
-            return std::make_pair(std::make_pair(std::numeric_limits<double>::infinity(),
-                                                 std::numeric_limits<double>::infinity()),
-                                  nullptr);
+            return std::make_pair(std::numeric_limits<double>::infinity(),
+                                  std::numeric_limits<double>::infinity());
         }
     }
 
-    return std::make_pair(std::make_pair(ix, iy), nullptr);
+    return std::make_pair(ix, iy);
 }
 
 std::tuple<double, double, double> Math::ortho(double x1, double y1,double z1,
@@ -221,17 +221,16 @@ std::tuple<double, double, double> Math::ortho(double x1, double y1,double z1,
                            x1 * y2 - y1 * x2);
 }
 
-std::pair<double, const char *> Math::randomsteps(double min,
-                                                  double max,
-                                                  double step)
+double Math::randomsteps(double min, double max, double step,
+                         std::string &errMsg)
 {
     if (max < min || step <= 0)
     {
-        return std::make_pair(0., "Invalid input!");
+        errMsg = "Invalid input!";
+        return 0.;
     }
 
-    return std::make_pair(std::min(min + random(0, ceil((max - min) / step)) * step, max),
-                          nullptr);
+    return std::min(min + random(0, ceil((max - min) / step)) * step, max);
 }
 
 double Math::round(double x, double dec)
@@ -259,15 +258,16 @@ std::tuple<double, double, double> Math::stretch(double x, double y,
     return std::make_tuple(x * factor, y * factor, z * factor);
 }
 
-std::pair<double, const char *> Math::trim(double x, double min, double max)
+double Math::trim(double x, double min, double max,
+                  std::string &errMsg)
 {
     if (max < min)
     {
-        return std::make_pair(0., "Invalid input!");
+        errMsg = "Invalid input!";
+        return 0.;
     }
 
-    return std::make_pair((x < min ? min : (x > max ? max : x)),
-                          nullptr);
+    return (x < min ? min : (x > max ? max : x));
 }
 
 std::pair<double, double> Math::ellipse(double x, double y,
@@ -294,15 +294,16 @@ double Math::randomway()
     return (ret < 0. ? -1. : 1.);
 }
 
-std::pair<std::tuple<double, double, double>, const char *>
+std::tuple<double, double, double>
 Math::rotate(std::tuple<double, double, double> p,
              std::string axis,
-             double angle)
+             double angle,
+             std::string &errMsg)
 {
     if (axis != "x" && axis != "y" && axis != "z")
     {
-        return std::make_pair(std::tuple<double, double, double>(),
-                              "invalid axis");
+        errMsg = "invalid axis";
+        return std::tuple<double, double, double>();
     }
 
     double ra(rad(angle));
@@ -310,24 +311,27 @@ Math::rotate(std::tuple<double, double, double> p,
     // Is here has any better way to solve this problem?
     if (axis == "x")
     {
-        return std::make_pair(std::make_tuple(std::get<0>(p),
-                              cos(ra) * std::get<1>(p) - sin(ra) * std::get<2>(p),
-                              sin(ra) * std::get<1>(p) + cos(ra) * std::get<2>(p)),
-                              nullptr);
+        return std::make_tuple(std::get<0>(p),
+                               cos(ra) * std::get<1>(p) -
+                               sin(ra) * std::get<2>(p),
+                               sin(ra) * std::get<1>(p) +
+                               cos(ra) * std::get<2>(p));
     }
 
     if (axis == "y")
     {
-        return std::make_pair(std::make_tuple(cos(ra) * std::get<0>(p) + sin(ra) * std::get<2>(p),
-                              std::get<1>(p),
-                              cos(ra) * std::get<2>(p) - sin(ra) * std::get<0>(p)),
-                              nullptr);
+        return std::make_tuple(cos(ra) * std::get<0>(p) +
+                               sin(ra) * std::get<2>(p),
+                               std::get<1>(p),
+                               cos(ra) * std::get<2>(p) -
+                               sin(ra) * std::get<0>(p));
     }
 
-    return std::make_pair(std::make_tuple(cos(ra) * std::get<0>(p) - sin(ra) * std::get<1>(p),
-                          sin(ra) * std::get<0>(p) + cos(ra) * std::get<1>(p),
-                          std::get<2>(p)),
-                          nullptr);
+    return std::make_tuple(cos(ra) * std::get<0>(p) -
+                           sin(ra) * std::get<1>(p),
+                           sin(ra) * std::get<0>(p) +
+                           cos(ra) * std::get<1>(p),
+                           std::get<2>(p));
 }
 
 // private member function

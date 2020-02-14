@@ -1,5 +1,4 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#pragma once
 
 #include <string>
 #include <utility>
@@ -33,5 +32,3 @@ protected:
 };
 
 } // end namespace Yutils
-
-#endif // COMMON_HPP

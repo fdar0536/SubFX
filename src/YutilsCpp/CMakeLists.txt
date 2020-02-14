@@ -6,13 +6,13 @@ if (UNIX)
 endif (UNIX)
 
 add_library(YutilsCpp SHARED
-    YutilsCpp/ass.cpp
-    YutilsCpp/assparser.cpp
+    # YutilsCpp/ass.cpp
+    # YutilsCpp/assparser.cpp
     YutilsCpp/common.cpp
-    YutilsCpp/file.cpp
-    YutilsCpp/fonthandle.cpp
+    # YutilsCpp/file.cpp
+    # YutilsCpp/fonthandle.cpp
     YutilsCpp/math.cpp
-    YutilsCpp/shape.cpp
+    # YutilsCpp/shape.cpp
     YutilsCpp/utf8.cpp
 )
 
@@ -31,7 +31,7 @@ target_link_libraries(YutilsCpp ${YutilsCpp_libs})
 target_include_directories(YutilsCpp PUBLIC ${YutilsCpp_includes})
 
 # python
-option(ENABLE_PYTHON "Enable python binding" ON)
+option(ENABLE_PYTHON "Enable python binding" OFF)
 
 if (ENABLE_PYTHON)
     include(YutilsCpp/python/CMakeLists.txt)

@@ -1,7 +1,8 @@
-#ifndef BASECOMMON_HPP
-#define BASECOMMON_HPP
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif    /* _MSC_VER */
 
-#include <memory>
+#pragma once
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
@@ -13,9 +14,15 @@
 #define SYMBOL_SHOW __attribute__((visibility("default")))
 #endif
 
-#define TESTERR(x) if (x) \
-                   { \
-                       return x;\
-                   }
+#define TESTERR(x) \
+    if (x) \
+    { \
+        return x;\
+    }
 
-#endif // BASECOMMON_HPP
+#define PRINT_ERR_MSG(x, y) \
+    if (x) \
+    { \
+        sprintf(x, "%s", y); \
+    }
+

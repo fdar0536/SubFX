@@ -11,9 +11,9 @@
 
 #include "common.hpp"
 
-using namespace boost::math::double_constants;
-
 using namespace Yutils;
+
+using namespace boost::math::double_constants;
 
 Common::Common()
 {
