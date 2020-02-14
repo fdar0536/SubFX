@@ -6,7 +6,7 @@ if (UNIX)
 endif (UNIX)
 
 add_library(YutilsCpp SHARED
-    # YutilsCpp/ass.cpp
+    YutilsCpp/ass.cpp
     # YutilsCpp/assparser.cpp
     YutilsCpp/common.cpp
     # YutilsCpp/file.cpp

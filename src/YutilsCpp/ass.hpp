@@ -8,32 +8,30 @@
 
 #include <cstdint>
 
-#include "../common/basecommon.hpp"
+#include "../common/basecommon.h"
 
 namespace Yutils
 {
-
 class SYMBOL_SHOW Ass
 {
 public:
 
     static std::shared_ptr<Ass> create();
 
-    std::pair<uint64_t, const char *> stringToMs(std::string &ass_ms);
+    uint64_t stringToMs(std::string &ass_ms, std::string &errMsg);
 
     std::string msToString(uint64_t ms_ass);
 
-    std::pair<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>, const char *>
-    stringToColorAlpha(std::string &input);
+    std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
+    stringToColorAlpha(std::string &input, std::string &errMsg);
 
-    std::pair<std::string, const char *>
-    colorAlphaToString(std::vector<uint8_t> &input);
+    std::string
+    colorAlphaToString(std::vector<uint8_t> &input, std::string &errMsg);
 
 protected:
 
     Ass() {}
 };
-
 }
 
 #endif // ASS_HPP

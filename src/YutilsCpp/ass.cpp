@@ -25,12 +25,13 @@ std::shared_ptr<Ass> Ass::create()
     return std::shared_ptr<Ass>(ret);
 }
 
-std::pair<uint64_t, const char *> Ass::stringToMs(std::string &ass_ms)
+uint64_t Ass::stringToMs(std::string &ass_ms, std::string &errMsg)
 {
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(ass_ms, reg))
     {
-        return std::make_pair(0, "ASS timestamp expected");
+        errMsg = "ASS timestamp expected";
+        return 0;
     }
 
     using boost::lexical_cast;
@@ -53,10 +54,11 @@ std::pair<uint64_t, const char *> Ass::stringToMs(std::string &ass_ms)
     }
     catch (const bad_lexical_cast &) // for safety
     {
-        return std::make_pair(0, "cannot convert!");
+        errMsg = "Cannot convert!";
+        return 0;
     }
 
-    return std::make_pair(ret, nullptr);
+    return ret;
 }
 
 std::string Ass::msToString(uint64_t ms_ass)
@@ -71,8 +73,8 @@ std::string Ass::msToString(uint64_t ms_ass)
     return std::string(buf);
 }
 
-std::pair<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>, const char *>
-Ass::stringToColorAlpha(std::string &input)
+std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
+Ass::stringToColorAlpha(std::string &input, std::string &errMsg)
 {
     uint8_t r(0), g(0), b(0), a(0);
     std::string tmpString;
@@ -111,22 +113,22 @@ Ass::stringToColorAlpha(std::string &input)
     }
     else
     {
-        return std::make_pair(std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>(),
-                              "Invalid input");
+        errMsg = "Invalid input";
+        return std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>();
     }
 
-    return std::make_pair(std::make_tuple(r, g, b, a),
-                          nullptr);
+    return std::make_tuple(r, g, b, a);
 }
 
-std::pair<std::string, const char *>
-Ass::colorAlphaToString(std::vector<uint8_t> &input)
+std::string
+Ass::colorAlphaToString(std::vector<uint8_t> &input, std::string &errMsg)
 {
     if (input.size() != 1 &&
         input.size() != 3 &&
         input.size() != 4)
     {
-        return std::make_pair(std::string(), "Invalid input!");
+        errMsg = "Invalid input!";
+        return std::string();
     }
 
     char buf[500];
@@ -159,5 +161,5 @@ Ass::colorAlphaToString(std::vector<uint8_t> &input)
     }
     } // end switch
 
-    return std::make_pair(std::string(buf), nullptr);
+    return std::string(buf);
 }
