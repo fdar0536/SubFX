@@ -1,5 +1,4 @@
-#ifndef ASSPARSER_HPP
-#define ASSPARSER_HPP
+#pragma once
 
 #include <string>
 #include <vector>
@@ -8,17 +7,16 @@
 #include "ass.hpp"
 #include "asscommon.hpp"
 #include "utf8.hpp"
-#include "../common/basecommon.hpp"
+#include "../common/basecommon.h"
 
 namespace Yutils
 {
-
 class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
 {
 public:
 
-    static std::pair<std::shared_ptr<AssParser>, const char *>
-    create(const std::string &fileName);
+    static std::shared_ptr<AssParser>
+    create(const std::string &fileName, std::string &errMsg);
 
     std::shared_ptr<AssMeta> meta() const;
 
@@ -26,16 +24,15 @@ public:
 
     std::vector<std::shared_ptr<AssDialog>> dialogs() const;
 
-    const char *upgradeDialogs();
+    void extendDialogs(std::string &errMsg);
 
-    bool dialogIsUpgraded() const;
+    bool dialogIsExtended() const;
 
     bool isSylAvailable() const;
 
     bool isWordAvailable() const;
 
     bool isCharAvailable() const;
-
 
 protected:
 
@@ -100,7 +97,4 @@ private:
     std::pair<std::shared_ptr<TEXT_SIZE>, const char *>
     textSize(std::string &text, std::shared_ptr<AssStyle> &style);
 };
-
 }
-
-#endif // ASSPARSER_HPP

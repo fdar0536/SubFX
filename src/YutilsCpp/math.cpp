@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <limits>
+#include <stdexcept>
 
 #include <cmath>
 
@@ -19,7 +20,7 @@
 
 using namespace Yutils;
 
-std::shared_ptr<Math> Math::create()
+std::shared_ptr<Math> Math::create() NOTHROW
 {
     Math *ret(new (std::nothrow) Math());
     if (!ret)
@@ -34,20 +35,18 @@ std::shared_ptr<Math> Math::create()
 std::vector<std::pair<double, double>>
 Math::arc_curve(double x, double y,
                 double cx, double cy,
-                double angle,
-                std::string &errMsg)
+                double angle) THROW
 {
     std::vector<std::pair<double, double>> curves;
     if (angle < -360. || angle > 360.)
     {
-        errMsg = "start & center point and valid angle"
-            "(-360<=x<=360) expected";
-        return curves;
+        throw std::invalid_argument("start & center point and valid angle"
+                                    "(-360<=x<=360) expected");
     }
 
     if (angle == 0.)
     {
-        errMsg = "angle CANNOT be zero";
+        throw std::invalid_argument("angle CANNOT be zero");
     }
 
     // Factor for bezier control points distance to node points
@@ -114,19 +113,17 @@ Math::arc_curve(double x, double y,
 std::tuple<double, double, double>
 Math::bezier(double pct,
              std::vector<std::tuple<double, double, double>> &pts,
-             bool is3D, std::string &errMsg)
+             bool is3D) THROW
 {
     if (pct < 0. || pct > 1.)
     {
-        errMsg = "pct must between 0 and 1";
-        return std::tuple<double, double, double>();
+        throw std::invalid_argument("pct must between 0 and 1");
     }
 
     size_t ptsSize(pts.size());
     if (ptsSize < 2)
     {
-        errMsg = "at least 2 points expected";
-        return std::tuple<double, double, double>();
+        throw std::invalid_argument("at least 2 points expected");
     }
 
     switch (ptsSize)
@@ -143,7 +140,7 @@ Math::bezier(double pct,
 }
 
 double Math::degree(double x1, double y1, double z1,
-                    double x2, double y2, double z2)
+                    double x2, double y2, double z2) NOTHROW
 {
     using namespace boost::math::double_constants;
     double degree = distance(x1, y1, z1) * distance(x2, y2, z2);
@@ -159,7 +156,7 @@ double Math::degree(double x1, double y1, double z1,
     return degree;
 }
 
-double Math::distance(double x, double y, double z)
+double Math::distance(double x, double y, double z) NOTHROW
 {
     return sqrt(x * x + y * y + z * z);
 }
@@ -169,8 +166,7 @@ Math::line_intersect(double x0, double y0,
                      double x1, double y1,
                      double x2, double y2,
                      double x3, double y3,
-                     bool strict,
-                     std::string &errMsg)
+                     bool strict) THROW
 {
     // Get line vectors & check valid lengths
     double x10(x0 - x1);
@@ -181,8 +177,7 @@ Math::line_intersect(double x0, double y0,
     if ((x10 == 0. && y10 == 0.) ||
         (x32 == 0. && y32 == 0.))
     {
-        errMsg = "lines mustn't have zero length";
-        return std::pair<double, double>();
+        throw std::invalid_argument("lines mustn't have zero length");
     }
 
     // Calculate determinant and check for parallel lines
@@ -214,27 +209,26 @@ Math::line_intersect(double x0, double y0,
     return std::make_pair(ix, iy);
 }
 
-std::tuple<double, double, double> Math::ortho(double x1, double y1,double z1,
-                                               double x2, double y2, double z2)
+std::tuple<double, double, double>
+Math::ortho(double x1, double y1, double z1,
+            double x2, double y2, double z2) NOTHROW
 {
     return std::make_tuple(y1 * z2 - z1 * y2,
                            z1 * x2 - x1 * z2,
                            x1 * y2 - y1 * x2);
 }
 
-double Math::randomsteps(double min, double max, double step,
-                         std::string &errMsg)
+double Math::randomsteps(double min, double max, double step) THROW
 {
     if (max < min || step <= 0)
     {
-        errMsg = "Invalid input!";
-        return 0.;
+        throw std::invalid_argument("");
     }
 
     return std::min(min + random(0, ceil((max - min) / step)) * step, max);
 }
 
-double Math::round(double x, double dec)
+double Math::round(double x, double dec) NOTHROW
 {
     // Return number rounded to wished decimal size
     if (dec != 0. && dec >= 1.)
@@ -246,8 +240,8 @@ double Math::round(double x, double dec)
     return floor(x + 0.5);
 }
 
-std::tuple<double, double, double> Math::stretch(double x, double y,
-                                                 double z, double length)
+std::tuple<double, double, double>
+Math::stretch(double x, double y, double z, double length) NOTHROW
 {
     double cur_length(distance(x, y, z));
     if (cur_length == 0.)
@@ -259,13 +253,11 @@ std::tuple<double, double, double> Math::stretch(double x, double y,
     return std::make_tuple(x * factor, y * factor, z * factor);
 }
 
-double Math::trim(double x, double min, double max,
-                  std::string &errMsg)
+double Math::trim(double x, double min, double max) THROW
 {
     if (max < min)
     {
-        errMsg = "Invalid input!";
-        return 0.;
+        throw std::invalid_argument("");
     }
 
     return (x < min ? min : (x > max ? max : x));
@@ -273,14 +265,14 @@ double Math::trim(double x, double min, double max,
 
 std::pair<double, double> Math::ellipse(double x, double y,
                                         double w, double h,
-                                        double a)
+                                        double a) NOTHROW
 {
     double ra(rad(a));
     return std::make_pair(x + w / 2. * sin(ra),
                           y + h / 2. * cos(ra));
 }
 
-double Math::randomway()
+double Math::randomway() NOTHROW
 {
     double ret;
     while(1)
@@ -298,13 +290,11 @@ double Math::randomway()
 std::tuple<double, double, double>
 Math::rotate(std::tuple<double, double, double> p,
              std::string axis,
-             double angle,
-             std::string &errMsg)
+             double angle) THROW
 {
     if (axis != "x" && axis != "y" && axis != "z")
     {
-        errMsg = "invalid axis";
-        return std::tuple<double, double, double>();
+        throw std::invalid_argument("invalid axis");
     }
 
     double ra(rad(angle));
@@ -339,7 +329,7 @@ Math::rotate(std::tuple<double, double, double> p,
 std::tuple<double, double, double>
 Math::bezier2(double pct,
               std::vector<std::tuple<double, double, double>> &pts,
-              bool is3D)
+              bool is3D) NOTHROW
 {
     double pct_inv(1 - pct);
 #if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
@@ -409,7 +399,7 @@ Math::bezier2(double pct,
 
 std::tuple<double, double, double> Math::bezier3(double pct,
                          std::vector<std::tuple<double, double, double>> &pts,
-                                                 bool is3D)
+                                                 bool is3D) NOTHROW
 {
     double pct_inv(1 - pct);
 #if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
@@ -512,7 +502,7 @@ std::tuple<double, double, double> Math::bezier3(double pct,
 
 std::tuple<double, double, double> Math::bezier4(double pct,
                          std::vector<std::tuple<double, double, double>> &pts,
-                                                 bool is3D)
+                                                 bool is3D) NOTHROW
 {
     double pct_inv(1 - pct);
 #if defined(ENABLE_SIMD) && !defined(ENABLE_AVX) // SSE
@@ -640,7 +630,7 @@ std::tuple<double, double, double> Math::bezier4(double pct,
 
 std::tuple<double, double, double> Math::bezierN(double pct,
                          std::vector<std::tuple<double, double, double>> &pts,
-                                                 bool is3D)
+                                                 bool is3D) NOTHROW
 {
     double pct_inv(1 - pct);
     size_t ni(pts.size() - 1);
@@ -716,7 +706,7 @@ std::tuple<double, double, double> Math::bezierN(double pct,
 #endif
 }
 
-double Math::fac(double n)
+double Math::fac(double n) NOTHROW
 {
     double k = 1.;
     for (double i = 2.; i <= n; ++i)

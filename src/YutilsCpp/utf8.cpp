@@ -2,7 +2,7 @@
 
 using namespace Yutils;
 
-uint32_t Utf8::utf8StringLen(std::string &input)
+uint32_t Utf8::utf8StringLen(std::string &input) NOTHROW
 {
     uint32_t len(0);
     for (size_t i = 0; i < input.length(); ++i)
@@ -13,7 +13,8 @@ uint32_t Utf8::utf8StringLen(std::string &input)
     return len;
 }
 
-std::vector<std::string> Utf8::utf8StringSplit(std::string &input)
+std::vector<std::string>
+Utf8::utf8StringSplit(std::string &input) NOTHROW
 {
     std::vector<std::string> ret;
     ret.reserve(20);

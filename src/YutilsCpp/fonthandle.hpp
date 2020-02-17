@@ -1,5 +1,4 @@
-#ifndef FONTHANDLE_HPP
-#define FONTHANDLE_HPP
+#pragma once
 
 #include <string>
 #include <map>
@@ -11,36 +10,36 @@
 #endif
 
 #include "math.hpp"
-#include "../common/basecommon.hpp"
+#include "../common/basecommon.h"
 
 #define FONT_PRECISION 64
 
 namespace Yutils
 {
-
 class SYMBOL_SHOW FontHandle : protected Math
 {
 public:
 
-    static std::pair<std::shared_ptr<FontHandle>, const char *>
+    std::shared_ptr<FontHandle>
     create(std::string &family,
            bool bold,
            bool italic,
            bool underline,
            bool strikeout,
            int size,
-           double xscale = 1,
-           double yscale = 1,
-           double hspace = 0);
+           double xscale,
+           double yscale,
+           double hspace,
+           std::string &errMsg);
 
     ~FontHandle();
 
-    std::pair<std::map<std::string, double>, const char *> metrics();
+    std::map<std::string, double> metrics(std::string &errMsg);
 
-    std::pair<std::map<std::string, double>, const char *>
-    text_extents(std::string &text);
+    std::map<std::string, double>
+    text_extents(std::string &text, std::string &errMsg);
 
-    std::pair<std::string, const char *> text_to_shape(std::string &text);
+    std::string text_to_shape(std::string &text, std::string &errMsg);
 
 protected:
 
@@ -91,7 +90,4 @@ private:
 
     double downscale;
 };
-
 }
-
-#endif // FONTHANDLE_HPP

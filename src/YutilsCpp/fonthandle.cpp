@@ -15,7 +15,7 @@
 
 using namespace Yutils;
 
-std::pair<std::shared_ptr<FontHandle>, const char *>
+std::shared_ptr<FontHandle>
 FontHandle::create(std::string &family,
                    bool bold,
                    bool italic,
@@ -24,19 +24,19 @@ FontHandle::create(std::string &family,
                    int size,
                    double xscale,
                    double yscale,
-                   double hspace)
+                   double hspace,
+                   std::string &errMsg)
 {
     if (size <= 0)
     {
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "size cannot lower than 0");
+        errMsg = "size cannot lower than 0";
+        return nullptr;
     }
 
     FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale));
     if (!ret)
     {
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "Fail to allocate memory.");
+        return nullptr;
     }
 
 #ifndef _WIN32
@@ -49,17 +49,15 @@ FontHandle::create(std::string &family,
     if (wcslen(family_dst.c_str()) > 31)
     {
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "family name too long");
+        errMsg = "family name too long";
+        return nullptr;
     }
 
     dc = CreateCompatibleDC(nullptr);
     if (!dc)
     {
-        DeleteDC(dc);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create DC");
+        return nullptr;
     }
 
     int res = SetMapMode(dc, MM_TEXT);
@@ -67,8 +65,7 @@ FontHandle::create(std::string &family,
     {
         DeleteDC(dc);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "Fail to SetMapMode");
+        return nullptr;
     }
 
     res = SetBkMode(dc, TRANSPARENT);
@@ -76,8 +73,7 @@ FontHandle::create(std::string &family,
     {
         DeleteDC(dc);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "Fail to SetBkMode");
+        return nullptr;
     }
 
     font = CreateFontW(
@@ -101,8 +97,7 @@ FontHandle::create(std::string &family,
     {
         DeleteDC(dc);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create font");
+        return nullptr;
     }
 
     old_font = SelectObject(dc, font);
@@ -112,8 +107,7 @@ FontHandle::create(std::string &family,
     if (!ret->surface)
     {
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create cairo_surface_t");
+        return nullptr;
     }
 
     ret->context = cairo_create(ret->surface);
@@ -121,8 +115,7 @@ FontHandle::create(std::string &family,
     {
         cairo_surface_destroy(ret->surface);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create cairo_t");
+        return nullptr;
     }
 
     ret->layout = pango_cairo_create_layout(ret->context);
@@ -131,8 +124,7 @@ FontHandle::create(std::string &family,
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create PangoLayout");
+        return nullptr;
     }
 
     //set font to layout
@@ -143,15 +135,16 @@ FontHandle::create(std::string &family,
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create PangoFontDescription");
+        return nullptr;
     }
 
     pango_font_description_set_family(font_desc, family.c_str());
     pango_font_description_set_weight(font_desc,
-                                      bold ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
+                                      bold ? PANGO_WEIGHT_BOLD :
+                                      PANGO_WEIGHT_NORMAL);
     pango_font_description_set_style(font_desc,
-                                     italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+                                     italic ? PANGO_STYLE_ITALIC :
+                                     PANGO_STYLE_NORMAL);
     pango_font_description_set_absolute_size(font_desc,
                                              size * PANGO_SCALE * upscale);
     pango_layout_set_font_description(ret->layout, font_desc);
@@ -164,15 +157,15 @@ FontHandle::create(std::string &family,
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create PangoAttrList");
+        return nullptr;
     }
 
     pango_attr_list_insert(attr,
-        pango_attr_underline_new(
-            underline ? PANGO_UNDERLINE_SINGLE : PANGO_UNDERLINE_NONE));
+                           pango_attr_underline_new(
+                           underline ? PANGO_UNDERLINE_SINGLE :
+                           PANGO_UNDERLINE_NONE));
     pango_attr_list_insert(attr,
-                            pango_attr_strikethrough_new(strikeout));
+                           pango_attr_strikethrough_new(strikeout));
     pango_attr_list_insert(attr,
                            pango_attr_letter_spacing_new(
                            static_cast<int>(hspace) * PANGO_SCALE * upscale));
@@ -190,21 +183,23 @@ FontHandle::create(std::string &family,
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
         delete ret;
-        return std::make_pair(std::shared_ptr<FontHandle>(nullptr),
-                              "CANNOT create PangoFontMetrics");
+        return nullptr;
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(metrics)));
     double descent(static_cast<double>(pango_font_metrics_get_descent(metrics)));
 
-    ret->fonthack_scale = size / ((ascent + descent) / static_cast<double>(PANGO_SCALE) * ret->downscale);
+    ret->fonthack_scale = size /
+                         ((ascent + descent) /
+                           static_cast<double>(PANGO_SCALE) *
+                           ret->downscale);
 
     pango_font_metrics_unref(metrics);
     pango_attr_list_unref(attr);
     pango_font_description_free(font_desc);
 #endif
 
-    return std::make_pair(std::shared_ptr<FontHandle>(ret), nullptr);
+    return std::shared_ptr<FontHandle>(ret);
 }
 
 FontHandle::~FontHandle()
@@ -221,21 +216,21 @@ FontHandle::~FontHandle()
 }
 
 // public member function
-std::pair<std::map<std::string, double>, const char *> FontHandle::metrics()
+std::map<std::string, double> FontHandle::metrics(std::string &errMsg)
 {
 #ifdef _WIN32
     TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
     if (!fontMetrics)
     {
-        return std::make_pair(std::map<std::string, double>(),
-                              "CANNOT create TEXTMETRICW");
+        errMsg = "CANNOT create TEXTMETRICW";
+        return std::map<std::string, double>();
     }
 
     if (GetTextMetricsW(dc, fontMetrics) == 0)
     {
         delete fontMetrics;
-        return std::make_pair(std::map<std::string, double>(),
-                              "Fail to GetTextMetricsW");
+        errMsg = "Fail to GetTextMetricsW";
+        return std::map<std::string, double>();
     }
 
     std::map<std::string, double> ret;
@@ -255,8 +250,8 @@ std::pair<std::map<std::string, double>, const char *> FontHandle::metrics()
 
     if (!fontMetrics)
     {
-        return std::make_pair(std::map<std::string, double>(),
-                              "CANNOT create PangoFontMetrics");
+        erMsg = "CANNOT create PangoFontMetrics";
+        return std::map<std::string, double>();
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(fontMetrics)));
@@ -271,31 +266,32 @@ std::pair<std::map<std::string, double>, const char *> FontHandle::metrics()
     ret["ascent"] = ascent * yscale * fonthack_scale;
     ret["descent"] = descent * yscale * fonthack_scale;
     ret["internal_leading"] = 0.;
-    ret["external_leading"] = pango_layout_get_spacing(layout) / PANGO_SCALE * downscale * yscale * fonthack_scale;
+    ret["external_leading"] = pango_layout_get_spacing(layout) /
+                              PANGO_SCALE * downscale * yscale * fonthack_scale;
 #endif
 
-    return std::make_pair(ret, nullptr);
+    return ret;
 }
 
-std::pair<std::map<std::string, double>, const char *>
-FontHandle::text_extents(std::string &text)
+std::map<std::string, double>
+FontHandle::text_extents(std::string &text, std::string &errMsg)
 {
 #ifdef _WIN32
-    wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
+    std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen = wcslen(textDst.c_str());
 
     SIZE *size(new (std::nothrow) SIZE);
     if (!size)
     {
-        return std::make_pair(std::map<std::string, double>(),
-                              "CANNOT allocate SIZE");
+        errMsg = "CANNOT allocate SIZE";
+        return std::map<std::string, double>();
     }
 
     if (GetTextExtentPoint32W(dc, textDst.c_str(), textLen, size) == 0)
     {
         delete size;
-        return std::make_pair(std::map<std::string, double>(),
-                              "Fail to GetTextExtentPoint32W");
+        errMsg = "Fail to GetTextExtentPoint32W";
+        return std::map<std::string, double>();
     }
     std::map<std::string, double> ret;
 
@@ -308,8 +304,8 @@ FontHandle::text_extents(std::string &text)
     PangoRectangle *rect(new (std::nothrow) PangoRectangle);
     if (!rect)
     {
-        return std::make_pair(std::map<std::string, double>(),
-                              "CANNOT create PangoRectangle");
+        errMsg = "CANNOT create PangoRectangle";
+        return std::map<std::string, double>();
     }
 
     pango_layout_get_pixel_extents(layout, nullptr, rect);
@@ -320,19 +316,19 @@ FontHandle::text_extents(std::string &text)
     delete rect;
 #endif
 
-    return std::make_pair(ret, nullptr);
+    return ret;
 }
 
-std::pair<std::string, const char *>
-FontHandle::text_to_shape(std::string &text)
+std::string
+FontHandle::text_to_shape(std::string &text, std::string &errMsg)
 {
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        return std::make_pair(std::string(),
-                              "text too long");
+        errMsg = "text too long";
+        return std::string();
     }
 
     INT *charWidths(nullptr);
@@ -341,8 +337,8 @@ FontHandle::text_to_shape(std::string &text)
         charWidths = new (std::nothrow) INT[textLen];
         if (!charWidths)
         {
-            return std::make_pair(std::string(),
-                                  "CANNOT allocate INT array");
+            errMsg = "CANNOT allocate INT array";
+            return std::string();
         }
 
         SIZE *size(new (std::nothrow) SIZE);
@@ -381,7 +377,6 @@ FontHandle::text_to_shape(std::string &text)
         return std::make_pair(std::string(),
                               "Fail to BeginPath");
     }
-
 
     if (ExtTextOutW(dc, 0, 0, 0x0, nullptr, textDst.c_str(), textLen, charWidths) == 0)
     {

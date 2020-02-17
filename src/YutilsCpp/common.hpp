@@ -12,27 +12,23 @@
 
 namespace Yutils
 {
-
 class SYMBOL_SHOW Common
 {
-
 protected:
 
-    Common(void);
+    Common(void) NOTHROW;
 
-    std::pair<double, double> rotate2d(double, double, double);
+    std::pair<double, double> rotate2d(double, double, double) NOTHROW;
 
     // math.rad
-    double rad(double angle);
+    double rad(double angle) NOTHROW;
 
     // math.deg
-    double deg(double r);
+    double deg(double r) NOTHROW;
 
     // math.random
-    double random(double min, double max);
+    double random(double min, double max) NOTHROW;
 
-    std::string doubleToString(double input);
-
+    std::string doubleToString(double input) NOTHROW;
 };
-
 } // end namespace Yutils

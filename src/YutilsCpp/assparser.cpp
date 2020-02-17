@@ -1,7 +1,3 @@
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif    /* _MSC_VER */
-
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -29,22 +25,21 @@ using boost::bad_lexical_cast;
 
 using namespace Yutils;
 
-std::pair<std::shared_ptr<AssParser>, const char *>
-AssParser::create(const std::string &fileName)
+std::shared_ptr<AssParser>
+AssParser::create(const std::string &fileName, std::string &errMsg)
 {
     std::fstream assFile;
     assFile.open(fileName, std::fstream::in);
     if (assFile.fail())
     {
-        return std::make_pair(std::shared_ptr<AssParser>(nullptr),
-                              "CANNOT open file.");
+        errMsg = "CANNOT open file.";
+        return nullptr;
     }
 
     AssParser *ret(new (std::nothrow) AssParser());
     if (!ret)
     {
-        return std::make_pair(std::shared_ptr<AssParser>(nullptr),
-                              "Fail to allocate memory.");
+        return nullptr;
     }
 
     ret->dialogData.reserve(1000);
@@ -60,9 +55,8 @@ AssParser::create(const std::string &fileName)
             if (tmpString.size() == 0)
             {
                 delete ret;
-                return std::make_pair(std::shared_ptr<AssParser>(nullptr),
-                                      "Fail when parse line.");
-            }
+                errMsg = "Fail when parse line.";
+                return nullptr;
 
             flag = 0;
             tmpString = ret->checkBom(tmpString);
@@ -72,8 +66,8 @@ AssParser::create(const std::string &fileName)
         if (err)
         {
             delete ret;
-            return std::make_pair(std::shared_ptr<AssParser>(nullptr),
-                                  err);
+            errMsg = err;
+            return nullptr;
         }
     }
 
@@ -83,8 +77,8 @@ AssParser::create(const std::string &fileName)
     if (ret->dialogData.size() == 0)
     {
         delete ret;
-        return std::make_pair(std::shared_ptr<AssParser>(nullptr),
-                              "This ass file has no dialog data.");
+        errMsg = "This ass file has no dialog data.";
+        return nullptr;
     }
 
     if (ret->metaData->play_res_x == 0 ||
@@ -106,8 +100,7 @@ AssParser::create(const std::string &fileName)
     }
 
     ret->section = Idle;
-    return std::make_pair(std::shared_ptr<AssParser>(ret),
-                          nullptr);
+    return std::shared_ptr<AssParser>(ret);
 }
 
 std::shared_ptr<AssMeta> AssParser::meta() const

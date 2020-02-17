@@ -15,8 +15,11 @@ class SYMBOL_SHOW Ass
 {
 public:
 
-    static std::shared_ptr<Ass> create();
+    static std::shared_ptr<Ass> create() NOTHROW;
 
+    /*
+     *
+     */
     uint64_t stringToMs(std::string &ass_ms, std::string &errMsg);
 
     std::string msToString(uint64_t ms_ass);

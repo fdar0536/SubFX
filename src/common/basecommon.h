@@ -14,15 +14,10 @@
 #define SYMBOL_SHOW __attribute__((visibility("default")))
 #endif
 
-#define TESTERR(x) \
-    if (x) \
-    { \
-        return x;\
-    }
-
-#define PRINT_ERR_MSG(x, y) \
-    if (x) \
-    { \
-        sprintf(x, "%s", y); \
-    }
-
+#ifdef __cplusplus
+#define THROW noexcept(false)
+#define NOTHROW noexcept
+#else
+#define THROW
+#define NOTHROW
+#endif
