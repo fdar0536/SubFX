@@ -616,6 +616,7 @@ FontHandle::text_to_shape(std::string &text) THROW
 #endif
 
     std::stringstream s;
-    std::copy(shape.begin(), shape.end(), std::ostream_iterator<std::string>(s, " "));
+    std::copy(shape.begin(), shape.end(),
+              std::ostream_iterator<std::string>(s, " "));
     return s.str();
 }
