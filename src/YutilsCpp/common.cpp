@@ -34,7 +34,7 @@ double Common::rad(double angle) NOTHROW
 
 double Common::deg(double r) NOTHROW
 {
-    return (r * 180. / pi);
+    return (r * 180. / PI);
 }
 
 double Common::random(double min, double max) NOTHROW

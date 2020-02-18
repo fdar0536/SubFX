@@ -15,7 +15,7 @@ class SYMBOL_SHOW Ass
 {
 public:
 
-    static std::shared_ptr<Ass> create() NOTHROW;
+    static std::shared_ptr<Ass> create();
 
     uint64_t stringToMs(std::string &ass_ms, std::string &errMsg);
 

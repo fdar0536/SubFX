@@ -29,54 +29,50 @@ int TestMath::testArcCurve()
     size_t j;
     for (i = 0; i < 3; ++i)
     {
-        ret = m_math->arc_curve(0., 1.0,
-                                1.5, 2.0,
-                                testData[i],
-                                errMsg);
+
         if (i != 2)
         {
-            if (errMsg.empty())
+            try
             {
-                printf("Failed in arc_curve's case %d.",
-                       i);
-                return 1;
+                ret = m_math->arc_curve(0., 1.0,
+                                        1.5, 2.0,
+                                        testData[i]);
             }
+            catch (std::invalid_argument &)
+            {
+                ret.clear();
+                continue;
+            }
+
+            printf("Failed in arc_curve's case %d.", i);
+            return 1;
         }
         else
         {
+            ret = m_math->arc_curve(0., 1.0,
+                                    1.5, 2.0,
+                                    testData[i]);
             if (!ret.size())
             {
-                printf("Failed in arc_curve's case %d.",
-                       i);
+                printf("Failed in arc_curve's case %d.", i);
                 return 1;
             }
 
-            for (j = 0;
-                 j < ret.size();
-                 ++j)
+            for (j = 0; j < ret.size(); ++j)
             {
-                printf("%lf, %lf\n",
-                       ret.at(j).first,
-                       ret.at(j).second);
+                printf("%lf, %lf\n", ret.at(j).first, ret.at(j).second);
             }
+            ret.clear();
         } // end if (i != 2)
-
-        ret.clear();
-        errMsg.clear();
     } // end for (i = 0; i < 3; ++i)
 
     puts("arc_curve is pass");
     return 0;
 } // end testArcCurve
 
-#define TESTBEZIERINTERNAL(a, b, c, d, e) \
+#define TESTBEZIERINTERNAL(a, b, c, d) \
     input.push_back(std::make_tuple(b, c, d)); \
-    m_math->bezier(a, input, 1, errMsg); \
-    if (!errMsg.empty()) \
-    { \
-        printf("Fail in case %d\n", e); \
-        return 1; \
-    }
+    m_math->bezier(a, input, 1);
 
 int TestMath::testBezier()
 {
@@ -84,33 +80,34 @@ int TestMath::testBezier()
     puts("Testing bezier");
     std::tuple<double, double, double> ret;
     std::vector<std::tuple<double, double, double>> input;
-    std::string errMsg("");
 
     // case 1
-    ret = m_math->bezier(1.2, input, 1, errMsg);
-    if (errMsg.empty())
+    try
     {
-        puts("Failed in case 1");
-        return 1;
+        ret = m_math->bezier(1.2, input, 1);
     }
-    errMsg.clear();
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
+    }
 
     // case 2
-    ret = m_math->bezier(0., input, 1, errMsg);
-    if (errMsg.empty())
+    try
     {
-        puts("Fail in case 2");
-        return 1;
+        ret = m_math->bezier(0., input, 1);
     }
-    errMsg.clear();
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
+    }
 
     // case 3 to 6
     input.reserve(5);
     input.push_back(std::make_tuple(0.8, 0.6, 2.));
-    TESTBEZIERINTERNAL(0.6,   0.99,  0.7,  0.3, 3)
-    TESTBEZIERINTERNAL(0.39,  0.64, 0.88, 0.57, 4)
-    TESTBEZIERINTERNAL(0.31,  0.48, 0.46, 0.79, 5)
-    TESTBEZIERINTERNAL(0.24,   0.1, 0.89, 0.43, 6)
+    TESTBEZIERINTERNAL(0.6,   0.99,  0.7,  0.3)
+    TESTBEZIERINTERNAL(0.39,  0.64, 0.88, 0.57)
+    TESTBEZIERINTERNAL(0.31,  0.48, 0.46, 0.79)
+    TESTBEZIERINTERNAL(0.24,   0.1, 0.89, 0.43)
 
     puts("bezier is pass");
     return 0;
@@ -137,27 +134,22 @@ int TestMath::testDistance()
 int TestMath::testLineIntersect()
 {
     puts("Testing line_intersect");
-    std::string errMsg("");
 
     // 2 cases
     // case 1
-    m_math->line_intersect(0., 0., 0., 0.,
-                           0., 0., 0., 0., 1, errMsg);
-    if (errMsg.empty())
+    try
     {
-        puts("Fail in case 1");
-        return 1;
+        m_math->line_intersect(0., 0., 0., 0.,
+                               0., 0., 0., 0., 1);
     }
-    errMsg.clear();
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
+    }
 
     // case 2
     m_math->line_intersect(1., 3., 5., 7.,
-                           2., 8., 6., 12., 1, errMsg);
-    if (!errMsg.empty())
-    {
-        puts("Fail in case 2");
-        return 1;
-    }
+                           2., 8., 6., 12., 1);
 
     puts("line_intersect is pass");
     return 0;
@@ -176,27 +168,21 @@ int TestMath::testOrtho()
 int TestMath::testRandomsteps()
 {
     puts("Testing randomsteps");
-    std::string errMsg("");
 
     // 2 cases
     // case 1
-    m_math->randomsteps(5., 3., -1., errMsg);
-    if (errMsg.empty())
+
+    try
     {
-        puts("Fail in case 1");
-        return 1;
+        m_math->randomsteps(5., 3., -1.);
     }
-    errMsg.clear();
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
+    }
 
     // case 2
-    double ret = m_math->randomsteps(2., 3., 0.5, errMsg);
-    if (!errMsg.empty())
-    {
-        puts("Fail in case 2");
-        return 1;
-    }
-
-    printf("%lf\n", ret);
+    printf("%lf\n", m_math->randomsteps(2., 3., 0.5));
 
     puts("randomsteps is pass");
     return 0;
@@ -229,27 +215,20 @@ int TestMath::testStretch()
 int TestMath::testTrim()
 {
     puts("Testing trim");
-    std::string errMsg("");
 
     // 2 cases
     // case 1
-    m_math->trim(3., 5., 2., errMsg);
-    if (errMsg.empty())
+    try
     {
-        puts("Fail in case 1");
-        return 1;
+        m_math->trim(3., 5., 2.);
     }
-    errMsg.clear();
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
+    }
 
     // case 2
-    double ret = m_math->trim(3., 0.5, 2., errMsg);
-    if (!errMsg.empty())
-    {
-        puts("Fail in case 2");
-        return 1;
-    }
-
-    printf("%lf\n", ret);
+    printf("%lf\n", m_math->trim(3., 0.5, 2.));
 
     puts("trim is pass");
     return 0;
@@ -281,19 +260,19 @@ int TestMath::testRandomway()
 int TestMath::testRotate()
 {
     puts("Testing rotate");
-    std::string errMsg("");
     std::tuple<double, double, double> input;
 
-    // 5 cases
+    // 4 cases
     // case 1
-    m_math->rotate(input, "", 2., errMsg);
-    if (errMsg.empty())
+    try
     {
-        puts("Fail in case 1");
-        return 1;
+        m_math->rotate(input, "", 2.);
+    }
+    catch (std::invalid_argument &e)
+    {
+        puts(e.what());
     }
 
-    errMsg.clear();
     input = std::make_tuple(3., 4., 5.);
 
     // case 2 to 4
@@ -301,12 +280,7 @@ int TestMath::testRotate()
     int i;
     for (i = 0; i < 3; ++i)
     {
-        m_math->rotate(input, strings[i], 2., errMsg);
-        if (!errMsg.empty())
-        {
-            printf("Fail in case %d\n", i + 2);
-            return 1;
-        }
+        m_math->rotate(input, strings[i], 2.);
     }
 
     puts("rotate is pass");
