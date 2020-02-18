@@ -5,8 +5,6 @@
 
 #include <cmath>
 
-#include "boost/math/constants/constants.hpp"
-
 #include "math.hpp"
 #include "config.h"
 
@@ -143,7 +141,6 @@ Math::bezier(double pct,
 double Math::degree(double x1, double y1, double z1,
                     double x2, double y2, double z2) NOTHROW
 {
-    using namespace boost::math::double_constants;
     double degree = distance(x1, y1, z1) * distance(x2, y2, z2);
     degree = acos((x1 * x2 + y1 * y2 + z1 * z2) / degree);
     degree = deg(degree);

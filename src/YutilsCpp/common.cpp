@@ -7,13 +7,12 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "boost/math/constants/constants.hpp"
-
 #include "common.hpp"
 
-using namespace Yutils;
+#define PI \
+    3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651e+00
 
-using namespace boost::math::double_constants;
+using namespace Yutils;
 
 Common::Common() NOTHROW
 {
@@ -30,7 +29,7 @@ Common::rotate2d(double x, double y, double angle) NOTHROW
 
 double Common::rad(double angle) NOTHROW
 {
-    return (angle * pi / 180.);
+    return (angle * PI / 180.);
 }
 
 double Common::deg(double r) NOTHROW
