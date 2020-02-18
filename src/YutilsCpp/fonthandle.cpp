@@ -40,7 +40,7 @@ FontHandle::create(std::string &family,
 #ifndef _WIN32
     int upscale(FONT_PRECISION);
 #endif
-    ret->downscale = (1. / static_cast<double>(upscale));
+    ret->downscale = (1. / static_cast<double>(ret->upscale));
 
 #ifdef _WIN32
     std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
@@ -50,31 +50,31 @@ FontHandle::create(std::string &family,
         throw std::invalid_argument("family name too long");
     }
 
-    dc = CreateCompatibleDC(nullptr);
-    if (!dc)
+    ret->dc = CreateCompatibleDC(nullptr);
+    if (!ret->dc)
     {
         delete ret;
         return nullptr;
     }
 
-    int res = SetMapMode(dc, MM_TEXT);
+    int res = SetMapMode(ret->dc, MM_TEXT);
     if (res == 0)
     {
-        DeleteDC(dc);
+        DeleteDC(ret->dc);
         delete ret;
         return nullptr;
     }
 
-    res = SetBkMode(dc, TRANSPARENT);
+    res = SetBkMode(ret->dc, TRANSPARENT);
     if (res == 0)
     {
-        DeleteDC(dc);
+        DeleteDC(ret->dc);
         delete ret;
         return nullptr;
     }
 
-    font = CreateFontW(
-        size * upscale, // nHeight
+    ret->font = CreateFontW(
+        size * ret->upscale, // nHeight
         0,    // nWidth
         0,    // nEscapement
         0,    // nOrientation
@@ -90,14 +90,14 @@ FontHandle::create(std::string &family,
         family_dst.c_str()
     );
 
-    if (!font)
+    if (!ret->font)
     {
-        DeleteDC(dc);
+        DeleteDC(ret->dc);
         delete ret;
         return nullptr;
     }
 
-    old_font = SelectObject(dc, font);
+    ret->old_font = SelectObject(ret->dc, ret->font);
 #else
     // This is almost copypasta from Youka/Yutils
     ret->surface = cairo_image_surface_create(CAIRO_FORMAT_A8, 1, 1);
@@ -280,7 +280,8 @@ FontHandle::text_extents(std::string &text) NOTHROW
         return std::map<std::string, double>();
     }
 
-    if (GetTextExtentPoint32W(dc, textDst.c_str(), textLen, size) == 0)
+    if (GetTextExtentPoint32W(dc, textDst.c_str(),
+                              static_cast<int>(textLen), size) == 0)
     {
         delete size;
         return std::map<std::string, double>();
@@ -337,7 +338,7 @@ FontHandle::text_to_shape(std::string &text) THROW
             return std::string();
         }
 
-        int space(hspace * upscale);
+        int space(static_cast<int>(hspace * upscale));
         for (size_t i = 0; i <= (textLen - 1); ++i)
         {
             if (GetTextExtentPoint32W(dc, textDst.c_str() + i, 1, size) == 0)
@@ -364,7 +365,8 @@ FontHandle::text_to_shape(std::string &text) THROW
         return std::string();
     }
 
-    if (ExtTextOutW(dc, 0, 0, 0x0, nullptr, textDst.c_str(), textLen, charWidths) == 0)
+    if (ExtTextOutW(dc, 0, 0, 0x0, nullptr, textDst.c_str(),
+                    static_cast<UINT>(textLen), charWidths) == 0)
     {
         if (!charWidths)
         {

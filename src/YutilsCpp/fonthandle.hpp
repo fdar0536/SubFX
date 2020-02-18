@@ -20,7 +20,7 @@ class SYMBOL_SHOW FontHandle : protected Math
 {
 public:
 
-    std::shared_ptr<FontHandle>
+    static std::shared_ptr<FontHandle>
     create(std::string &family,
            bool bold,
            bool italic,
