@@ -68,7 +68,8 @@ Math::arc_curve(double x, double y,
 
     while (angle_sum < angle)
     {
-        cur_angle_pct = std::min((angle - angle_sum), static_cast<double>(90.)) / 90.;
+        cur_angle_pct = std::min((angle - angle_sum),
+                                 static_cast<double>(90.)) / 90.;
         std::tie(rx3, ry3) = rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
 
         // arc start to end vector

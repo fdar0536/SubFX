@@ -4,7 +4,7 @@ A scripting tool for creating karaoke subtitle effects.
 
 Now is under development.
 
-## Dependency
+## Dependencies
 
 ### YutilsCpp
 
