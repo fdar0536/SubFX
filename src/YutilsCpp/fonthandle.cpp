@@ -24,16 +24,14 @@ FontHandle::create(std::string &family,
                    int size,
                    double xscale,
                    double yscale,
-                   double hspace,
-                   std::string &errMsg)
+                   double hspace) THROW
 {
     if (size <= 0)
     {
-        errMsg = "size cannot lower than 0";
-        return nullptr;
+        throw std::invalid_argument("size cannot lower than 0");
     }
 
-    FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale));
+    FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale, hspace));
     if (!ret)
     {
         return nullptr;
@@ -49,8 +47,7 @@ FontHandle::create(std::string &family,
     if (wcslen(family_dst.c_str()) > 31)
     {
         delete ret;
-        errMsg = "family name too long";
-        return nullptr;
+        throw std::invalid_argument("family name too long");
     }
 
     dc = CreateCompatibleDC(nullptr);
@@ -216,20 +213,18 @@ FontHandle::~FontHandle()
 }
 
 // public member function
-std::map<std::string, double> FontHandle::metrics(std::string &errMsg)
+std::map<std::string, double> FontHandle::metrics() NOTHROW
 {
 #ifdef _WIN32
     TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
     if (!fontMetrics)
     {
-        errMsg = "CANNOT create TEXTMETRICW";
         return std::map<std::string, double>();
     }
 
     if (GetTextMetricsW(dc, fontMetrics) == 0)
     {
         delete fontMetrics;
-        errMsg = "Fail to GetTextMetricsW";
         return std::map<std::string, double>();
     }
 
@@ -250,7 +245,6 @@ std::map<std::string, double> FontHandle::metrics(std::string &errMsg)
 
     if (!fontMetrics)
     {
-        erMsg = "CANNOT create PangoFontMetrics";
         return std::map<std::string, double>();
     }
 
@@ -274,7 +268,7 @@ std::map<std::string, double> FontHandle::metrics(std::string &errMsg)
 }
 
 std::map<std::string, double>
-FontHandle::text_extents(std::string &text, std::string &errMsg)
+FontHandle::text_extents(std::string &text) NOTHROW
 {
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
@@ -283,14 +277,12 @@ FontHandle::text_extents(std::string &text, std::string &errMsg)
     SIZE *size(new (std::nothrow) SIZE);
     if (!size)
     {
-        errMsg = "CANNOT allocate SIZE";
         return std::map<std::string, double>();
     }
 
     if (GetTextExtentPoint32W(dc, textDst.c_str(), textLen, size) == 0)
     {
         delete size;
-        errMsg = "Fail to GetTextExtentPoint32W";
         return std::map<std::string, double>();
     }
     std::map<std::string, double> ret;
@@ -304,7 +296,6 @@ FontHandle::text_extents(std::string &text, std::string &errMsg)
     PangoRectangle *rect(new (std::nothrow) PangoRectangle);
     if (!rect)
     {
-        errMsg = "CANNOT create PangoRectangle";
         return std::map<std::string, double>();
     }
 
@@ -320,15 +311,14 @@ FontHandle::text_extents(std::string &text, std::string &errMsg)
 }
 
 std::string
-FontHandle::text_to_shape(std::string &text, std::string &errMsg)
+FontHandle::text_to_shape(std::string &text) THROW
 {
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        errMsg = "text too long";
-        return std::string();
+        throw std::invalid_argument("text too long");
     }
 
     INT *charWidths(nullptr);
@@ -337,7 +327,6 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         charWidths = new (std::nothrow) INT[textLen];
         if (!charWidths)
         {
-            errMsg = "CANNOT allocate INT array";
             return std::string();
         }
 
@@ -345,8 +334,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         if (!size)
         {
             delete[] charWidths;
-            return std::make_pair(std::string(),
-                                  "CANNOT allocate SIZE");
+            return std::string();
         }
 
         int space(hspace * upscale);
@@ -356,8 +344,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
             {
                 delete[] charWidths;
                 delete size;
-                return std::make_pair(std::string(),
-                                      "Fail to GetTextExtentPoint32W");
+                return std::string();
             }
 
             charWidths[i] = size->cx + space;
@@ -374,8 +361,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         }
 
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              "Fail to BeginPath");
+        return std::string();
     }
 
     if (ExtTextOutW(dc, 0, 0, 0x0, nullptr, textDst.c_str(), textLen, charWidths) == 0)
@@ -386,8 +372,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         }
 
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              "Fail to ExtTextOutW");
+        return std::string();
     }
 
     if (EndPath(dc) == 0)
@@ -398,8 +383,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         }
 
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              "Fail to EndPath");
+        return std::string();
     }
 
     int points_n(GetPath(dc, nullptr, nullptr, 0));
@@ -411,8 +395,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         }
 
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              nullptr);
+        return std::string();
     }
 
     POINT *points(new (std::nothrow) POINT[points_n]);
@@ -424,8 +407,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
         }
 
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              "Fail to allocate POINT array");
+        return std::string();
     }
 
     BYTE *types(new (std::nothrow) BYTE[points_n]);
@@ -438,8 +420,7 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
 
         delete[] points;
         AbortPath(dc);
-        return std::make_pair(std::string(),
-                              "Fail to allocate BYTE array");
+        return std::string();
     }
 
     GetPath(dc, points, types, points_n);
@@ -547,16 +528,14 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
     cairo_path_t *path(cairo_copy_path(context));
     if (!path)
     {
-        return std::make_pair(std::string(),
-                              "CANNOT create cairo_path_t");
+        return std::string();
     }
 
     if (path->status != CAIRO_STATUS_SUCCESS)
     {
         cairo_new_path(context);
         cairo_path_destroy(path);
-        return std::make_pair(std::string(),
-                              nullptr);
+        return std::string();
     }
 
     std::vector<std::string> shape;
@@ -636,5 +615,5 @@ FontHandle::text_to_shape(std::string &text, std::string &errMsg)
 
     std::stringstream s;
     std::copy(shape.begin(), shape.end(), std::ostream_iterator<std::string>(s, " "));
-    return std::make_pair(s.str(), nullptr);
+    return s.str();
 }

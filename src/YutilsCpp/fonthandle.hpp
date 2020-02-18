@@ -27,23 +27,22 @@ public:
            bool underline,
            bool strikeout,
            int size,
-           double xscale,
-           double yscale,
-           double hspace,
-           std::string &errMsg);
+           double xscale = 1.,
+           double yscale = 1.,
+           double hspace = 0.) THROW;
 
     ~FontHandle();
 
-    std::map<std::string, double> metrics(std::string &errMsg);
+    std::map<std::string, double> metrics() NOTHROW;
 
     std::map<std::string, double>
-    text_extents(std::string &text, std::string &errMsg);
+    text_extents(std::string &text) NOTHROW;
 
-    std::string text_to_shape(std::string &text, std::string &errMsg);
+    std::string text_to_shape(std::string &text) THROW;
 
 protected:
 
-    FontHandle(double xscale, double yscale) :
+    FontHandle(double xscale, double yscale, double hspace) :
     Math(),
     #ifdef _WIN32
         dc(nullptr),

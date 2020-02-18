@@ -10,7 +10,7 @@ add_library(YutilsCpp SHARED
     # YutilsCpp/assparser.cpp
     YutilsCpp/common.cpp
     # YutilsCpp/file.cpp
-    # YutilsCpp/fonthandle.cpp
+    YutilsCpp/fonthandle.cpp
     YutilsCpp/math.cpp
     # YutilsCpp/shape.cpp
     YutilsCpp/utf8.cpp
