@@ -14,7 +14,7 @@
 
 using namespace Yutils;
 
-std::shared_ptr<Ass> Ass::create()
+std::shared_ptr<Ass> Ass::create() NOTHROW
 {
     Ass *ret(new (std::nothrow) Ass());
     if (!ret)
@@ -25,13 +25,12 @@ std::shared_ptr<Ass> Ass::create()
     return std::shared_ptr<Ass>(ret);
 }
 
-uint64_t Ass::stringToMs(std::string &ass_ms, std::string &errMsg)
+uint64_t Ass::stringToMs(std::string &ass_ms) THROW
 {
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(ass_ms, reg))
     {
-        errMsg = "ASS timestamp expected";
-        return 0;
+        throw std::invalid_argument("ASS timestamp expected");
     }
 
     using boost::lexical_cast;
@@ -54,14 +53,13 @@ uint64_t Ass::stringToMs(std::string &ass_ms, std::string &errMsg)
     }
     catch (const bad_lexical_cast &) // for safety
     {
-        errMsg = "Cannot convert!";
-        return 0;
+        throw std::invalid_argument("Cannot convert!");
     }
 
     return ret;
 }
 
-std::string Ass::msToString(uint64_t ms_ass)
+std::string Ass::msToString(uint64_t ms_ass) NOTHROW
 {
     uint32_t hr(static_cast<int>(floor(ms_ass / 3600000)) % 10); //hour
     uint32_t mins(static_cast<uint32_t>(floor(ms_ass % 3600000 / 60000))); // minutes
@@ -74,7 +72,7 @@ std::string Ass::msToString(uint64_t ms_ass)
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
-Ass::stringToColorAlpha(std::string &input, std::string &errMsg)
+Ass::stringToColorAlpha(std::string &input) THROW
 {
     uint8_t r(0), g(0), b(0), a(0);
     std::string tmpString;
@@ -113,22 +111,20 @@ Ass::stringToColorAlpha(std::string &input, std::string &errMsg)
     }
     else
     {
-        errMsg = "Invalid input";
-        return std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>();
+        throw std::invalid_argument("Invalid input");
     }
 
     return std::make_tuple(r, g, b, a);
 }
 
 std::string
-Ass::colorAlphaToString(std::vector<uint8_t> &input, std::string &errMsg)
+Ass::colorAlphaToString(std::vector<uint8_t> &input) THROW
 {
     if (input.size() != 1 &&
         input.size() != 3 &&
         input.size() != 4)
     {
-        errMsg = "Invalid input!";
-        return std::string();
+        throw std::invalid_argument("Invalid input!");
     }
 
     char buf[500];
