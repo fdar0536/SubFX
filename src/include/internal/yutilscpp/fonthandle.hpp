@@ -10,7 +10,7 @@
 #endif
 
 #include "math.hpp"
-#include "../common/basecommon.h"
+#include "../basecommon.h"
 
 #define FONT_PRECISION 64
 

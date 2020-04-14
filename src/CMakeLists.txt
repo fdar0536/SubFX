@@ -60,10 +60,14 @@ else () # Windows
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 
+enable_testing()
 include(YutilsCpp/CMakeLists.txt)
 
 configure_file(config.h.in config.h @ONLY)
-include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(Before SYSTEM
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 # frontend
 if (ENABLE_PYTHON)

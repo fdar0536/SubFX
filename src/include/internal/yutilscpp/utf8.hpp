@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-#include "../common/basecommon.h"
+#include "../basecommon.h"
 
 namespace Yutils
 {

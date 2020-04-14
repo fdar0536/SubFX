@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-#include "math.hpp"
+#include "YutilsCpp"
 #include "config.h"
 
 #ifdef ENABLE_SIMD

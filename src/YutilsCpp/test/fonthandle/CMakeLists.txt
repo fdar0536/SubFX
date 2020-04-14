@@ -4,3 +4,4 @@ add_executable(testFontHandle
 
 add_dependencies(testFontHandle YutilsCpp)
 target_link_libraries(testFontHandle YutilsCpp)
+add_test(YutilsCppFontHandle testFontHandle)

@@ -5,3 +5,4 @@ add_executable(testYMath
 
 add_dependencies(testYMath YutilsCpp)
 target_link_libraries(testYMath YutilsCpp)
+add_test(YutilsCppMath testYMath)

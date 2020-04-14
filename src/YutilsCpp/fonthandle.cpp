@@ -11,7 +11,7 @@
 #include "boost/locale.hpp"
 #endif
 
-#include "fonthandle.hpp"
+#include "YutilsCpp"
 
 using namespace Yutils;
 

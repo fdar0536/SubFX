@@ -1,0 +1,16 @@
+#pragma once
+
+#include "internal/yutilscpp/ass.hpp"
+
+// fonthandle.hpp contains math.hpp and common.hpp
+#include "internal/yutilscpp/fonthandle.hpp"
+
+
+// assparser.hpp contains ass.hpp and utf8.hpp
+#include "internal/yutilscpp/assparser.hpp"
+
+/*
+#include "file.hpp"
+
+#include "shape.hpp"
+*/

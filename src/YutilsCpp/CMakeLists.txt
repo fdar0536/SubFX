@@ -5,15 +5,25 @@ if (UNIX)
     LIST(APPEND YutilsCpp_libs ${PANGOCAIRO_LIBRARIES})
 endif (UNIX)
 
+set(YUTILSCPP_INCLUDE_PREFIX include/internal/yutilscpp)
+
 add_library(YutilsCpp SHARED
+    ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
     YutilsCpp/ass.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
     # YutilsCpp/assparser.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp
     YutilsCpp/common.cpp
     # YutilsCpp/file.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
     YutilsCpp/fonthandle.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
     YutilsCpp/math.cpp
     # YutilsCpp/shape.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp
     YutilsCpp/utf8.cpp
+    include/YutilsCpp
+    include/internal/basecommon.h
 )
 
 #ICU

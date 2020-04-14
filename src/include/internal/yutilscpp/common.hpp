@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-#include "../common/basecommon.h"
+#include "../basecommon.h"
 
 #define FP_PRECISION 3 // Floating point precision by numbers behind point (for shape points)
 #define SUPERSAMPLING 8 // Anti-aliasing precision for shape to pixels conversion
