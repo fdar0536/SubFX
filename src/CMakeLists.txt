@@ -89,6 +89,6 @@ include(YutilsCpp/CMakeLists.txt)
 configure_file(config.h.in config.h @ONLY)
 
 # frontend
-if (ENABLE_PYTHON)
-    include(SubFX/CMakeLists.txt)
-endif (ENABLE_PYTHON)
+#if (ENABLE_PYTHON)
+#    include(SubFX/CMakeLists.txt)
+#endif (ENABLE_PYTHON)
