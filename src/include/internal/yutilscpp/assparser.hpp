@@ -16,7 +16,7 @@ class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
 public:
 
     static std::shared_ptr<AssParser>
-    create(const std::string &fileName, std::string &errMsg);
+    create(const std::string &fileName) THROW;
 
     std::shared_ptr<AssMeta> meta() const;
 
@@ -24,7 +24,7 @@ public:
 
     std::vector<std::shared_ptr<AssDialog>> dialogs() const;
 
-    void extendDialogs(std::string &errMsg);
+    void extendDialogs();
 
     bool dialogIsExtended() const;
 
@@ -52,7 +52,7 @@ protected:
 private:
 
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
-    std::istream &safeGetline(std::istream &is, std::string &t);
+    std::istream &safeGetline(std::istream &is, std::string &t) NOTHROW;
 
     typedef enum _PARSER_SECTION
     {
@@ -64,9 +64,9 @@ private:
 
     PARSER_SECTION section;
 
-    std::string checkBom(std::string &);
+    std::string checkBom(std::string &) NOTHROW;
 
-    const char *parseLine(std::string &, uint8_t *flags);
+    void parseLine(std::string &, uint8_t *flags) THROW;
 
     std::shared_ptr<AssMeta> metaData;
 

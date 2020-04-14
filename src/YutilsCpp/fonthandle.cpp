@@ -28,7 +28,7 @@ FontHandle::create(std::string &family,
 {
     if (size <= 0)
     {
-        throw std::invalid_argument("size cannot lower than 0");
+        throw std::invalid_argument("FontHandle::create: size cannot lower than 0");
     }
 
     FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale, hspace));
@@ -320,7 +320,7 @@ FontHandle::text_to_shape(std::string &text) THROW
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        throw std::invalid_argument("text too long");
+        throw std::invalid_argument("text_to_shape: text is too long");
     }
 
     INT *charWidths(nullptr);

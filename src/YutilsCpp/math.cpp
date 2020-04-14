@@ -38,13 +38,13 @@ Math::arc_curve(double x, double y,
     std::vector<std::pair<double, double>> curves;
     if (angle < -360. || angle > 360.)
     {
-        throw std::invalid_argument("start & center point and valid angle"
-                                    "(-360<=x<=360) expected");
+        throw std::invalid_argument("arc_curve: start & center point and "
+                                    "valid angle (-360<=x<=360) expected");
     }
 
     if (angle == 0.)
     {
-        throw std::invalid_argument("angle CANNOT be zero");
+        throw std::invalid_argument("arc_curve: angle CANNOT be zero");
     }
 
     // Factor for bezier control points distance to node points
@@ -56,7 +56,7 @@ Math::arc_curve(double x, double y,
 
     double cw = (angle > 0. ? 1. : -1.);
 
-    // 把do while loop轉換成while loop
+    // convert do-while-loop to while-loop
     size_t curves_n(4);
     curves.reserve(curves_n);
     double angle_sum(0.);
@@ -116,13 +116,13 @@ Math::bezier(double pct,
 {
     if (pct < 0. || pct > 1.)
     {
-        throw std::invalid_argument("pct must between 0 and 1");
+        throw std::invalid_argument("bezier: pct must between 0 and 1");
     }
 
     size_t ptsSize(pts.size());
     if (ptsSize < 2)
     {
-        throw std::invalid_argument("at least 2 points expected");
+        throw std::invalid_argument("bezier: at least 2 points expected");
     }
 
     switch (ptsSize)
@@ -175,7 +175,8 @@ Math::line_intersect(double x0, double y0,
     if ((x10 == 0. && y10 == 0.) ||
         (x32 == 0. && y32 == 0.))
     {
-        throw std::invalid_argument("lines mustn't have zero length");
+        throw std::invalid_argument("line_intersect: lines mustn't have "
+                                    "zero length");
     }
 
     // Calculate determinant and check for parallel lines
@@ -220,7 +221,7 @@ double Math::randomsteps(double min, double max, double step) THROW
 {
     if (max < min || step <= 0)
     {
-        throw std::invalid_argument("");
+        throw std::invalid_argument("randomsteps: Invalid input!");
     }
 
     return std::min(min + random(0, ceil((max - min) / step)) * step, max);
@@ -255,7 +256,7 @@ double Math::trim(double x, double min, double max) THROW
 {
     if (max < min)
     {
-        throw std::invalid_argument("");
+        throw std::invalid_argument("trim: Invalid input!");
     }
 
     return (x < min ? min : (x > max ? max : x));
@@ -292,7 +293,7 @@ Math::rotate(std::tuple<double, double, double> p,
 {
     if (axis != "x" && axis != "y" && axis != "z")
     {
-        throw std::invalid_argument("invalid axis");
+        throw std::invalid_argument("rotate: invalid axis");
     }
 
     double ra(rad(angle));

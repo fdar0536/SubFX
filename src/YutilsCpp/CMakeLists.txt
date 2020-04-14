@@ -30,7 +30,8 @@ add_library(YutilsCpp SHARED
     ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
     YutilsCpp/ass.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
-    # YutilsCpp/assparser.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
+    YutilsCpp/assparser.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp
     YutilsCpp/common.cpp
     # YutilsCpp/file.cpp
@@ -81,6 +82,7 @@ set_target_properties(YutilsCpp
     PRIVATE_HEADER
     "${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\

@@ -30,7 +30,7 @@ uint64_t Ass::stringToMs(std::string &ass_ms) THROW
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(ass_ms, reg))
     {
-        throw std::invalid_argument("ASS timestamp expected");
+        throw std::invalid_argument("stringToMs: ASS timestamp expected");
     }
 
     using boost::lexical_cast;
@@ -53,7 +53,7 @@ uint64_t Ass::stringToMs(std::string &ass_ms) THROW
     }
     catch (const bad_lexical_cast &) // for safety
     {
-        throw std::invalid_argument("Cannot convert!");
+        throw std::invalid_argument("stringToMs: Cannot convert!");
     }
 
     return ret;
@@ -111,7 +111,7 @@ Ass::stringToColorAlpha(std::string &input) THROW
     }
     else
     {
-        throw std::invalid_argument("Invalid input");
+        throw std::invalid_argument("stringToColorAlpha: Invalid input");
     }
 
     return std::make_tuple(r, g, b, a);
@@ -124,7 +124,7 @@ Ass::colorAlphaToString(std::vector<uint8_t> &input) THROW
         input.size() != 3 &&
         input.size() != 4)
     {
-        throw std::invalid_argument("Invalid input!");
+        throw std::invalid_argument("colorAlphaToString: Invalid input!");
     }
 
     char buf[500];

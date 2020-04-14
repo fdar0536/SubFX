@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 #include <cstdio>
 #include <cinttypes>
@@ -17,8 +18,7 @@
 #include "boost/regex.hpp"
 #include "boost/regex/icu.hpp"
 
-#include "assparser.hpp"
-#include "fonthandle.hpp"
+#include "YutilsCpp"
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -26,14 +26,13 @@ using boost::bad_lexical_cast;
 using namespace Yutils;
 
 std::shared_ptr<AssParser>
-AssParser::create(const std::string &fileName, std::string &errMsg)
+AssParser::create(const std::string &fileName) THROW
 {
     std::fstream assFile;
     assFile.open(fileName, std::fstream::in);
     if (assFile.fail())
     {
-        errMsg = "CANNOT open file.";
-        return nullptr;
+        throw std::invalid_argument("CANNOT open file.");
     }
 
     AssParser *ret(new (std::nothrow) AssParser());
@@ -55,14 +54,15 @@ AssParser::create(const std::string &fileName, std::string &errMsg)
             if (tmpString.size() == 0)
             {
                 delete ret;
-                errMsg = "Fail when parse line.";
-                return nullptr;
+                throw std::invalid_argument("Is input an empty file?");
+            }
 
             flag = 0;
             tmpString = ret->checkBom(tmpString);
         }
 
-        err = ret->parseLine(tmpString, flags);
+        // here may be throw exception
+        ret->parseLine(tmpString, flags);
         if (err)
         {
             delete ret;
@@ -118,7 +118,7 @@ std::vector<std::shared_ptr<AssDialog>> AssParser::dialogs() const
     return dialogData;
 }
 
-const char *AssParser::upgradeDialogs()
+void AssParser::extendDialogs()
 {
     if (dialogParsed)
     {
@@ -149,7 +149,7 @@ bool AssParser::isCharAvailable() const
 }
 
 // private member function
-std::istream &AssParser::safeGetline(std::istream &is, std::string &buf)
+std::istream &AssParser::safeGetline(std::istream &is, std::string &buf) NOTHROW
 {
     buf.clear();
     buf.reserve(5120);
@@ -178,7 +178,7 @@ std::istream &AssParser::safeGetline(std::istream &is, std::string &buf)
     }
 }
 
-std::string AssParser::checkBom(std::string &in)
+std::string AssParser::checkBom(std::string &in) NOTHROW
 {
     // utf-8 bom
     if (static_cast<uint8_t>(in.at(0)) != 0xef ||
@@ -192,7 +192,7 @@ std::string AssParser::checkBom(std::string &in)
     return in.substr(3);
 }
 
-const char *AssParser::parseLine(std::string &line, uint8_t *flags)
+void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
 {
     if (regex_match(line, boost::regex("^\\[.*\\]$")))
     {
@@ -203,7 +203,7 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
         {
             if (flags[Script_Info])
             {
-                return "Input is not a valid ass file.";
+                throw std::invalid_argument("Input is not a valid ass file.");
             }
 
             section = Script_Info;
@@ -213,7 +213,7 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
         {
             if (flags[V4_Styles])
             {
-                return "Input is not a valid ass file.";
+                throw std::invalid_argument("Input is not a valid ass file.");
             }
 
             section = V4_Styles;
@@ -223,14 +223,14 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
         {
             if (flags[Events])
             {
-                return "Input is not a valid ass file.";
+                throw std::invalid_argument("Input is not a valid ass file.");
             }
 
             section = Events;
             ++flags[Events];
         }
 
-        return nullptr;
+        return;
     }
 
     switch (section)
@@ -245,11 +245,12 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
             }
             catch (const bad_lexical_cast &)
             {
-                return "Syntax error in\n"
-                       "\"Script info\" -> \"WrapStyle\"";
+                throw std::invalid_argument("Syntax error in\n"
+                       "\"Script info\" -> \"WrapStyle\"");
             }
         }
-        else if (regex_match(line, boost::regex("^ScaledBorderAndShadow: ([Yy]es|[Nn]o)$")))
+        else if (regex_match(line, boost::regex("^ScaledBorderAndShadow:"
+                                                " ([Yy]es|[Nn]o)$")))
         {
             std::string res(line.substr(23));
             metaData->scaled_border_and_shadow = (res == "Yes" || res == "yes");
@@ -262,8 +263,8 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
             }
             catch (const bad_lexical_cast &)
             {
-                return "Syntax error in\n"
-                       "\"Script info\" -> \"PlayResX\"";
+                throw std::invalid_argument("Syntax error in\n"
+                       "\"Script info\" -> \"PlayResX\"");
             }
         }
         else if (regex_match(line, boost::regex("^PlayResY: \\d+$")))
@@ -274,8 +275,8 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
             }
             catch (const bad_lexical_cast &)
             {
-                return "Syntax error in\n"
-                       "\"Script info\" -> \"PlayResY\"";
+                throw std::invalid_argument("Syntax error in\n"
+                       "\"Script info\" -> \"PlayResY\"");
             }
         }
         else if (regex_match(line, boost::regex("^YCbCr Matrix: (.*)")))
@@ -288,18 +289,23 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
     case V4_Styles:
     {
         boost::u32regex reg(boost::make_u32regex(
-            "^Style: (.*),(.*),(\\d+),(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),(-?[01]),(-?[01]),(-?[01]),(-?[01]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(-?\\d+\\.?\\d*),(-?\\d+\\.?\\d*),([13]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),([1-9]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+)$"));
+            "^Style: (.*),(.*),(\\d+),(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),"
+            "(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),(-?[01]),(-?[01]),(-?[01]),"
+            "(-?[01]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(-?\\d+\\.?\\d*),"
+            "(-?\\d+\\.?\\d*),([13]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),([1-9]),"
+            "(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+)$"));
         boost::smatch match;
         if(boost::u32regex_search(line, match, reg))
         {
             std::shared_ptr<AssStyle> style(std::make_shared<AssStyle>());
             try
             {
-                style->encoding = lexical_cast<int>(match[static_cast<int>(match.size()) - 1]);
+                style->encoding =
+                        lexical_cast<int>(match[static_cast<int>(match.size()) - 1]);
             }
             catch (...)
             {
-                return "Error in parsing style's encoding.";
+                throw std::invalid_argument("Error in parsing style's encoding.");
             }
 
             if (style->encoding <= 255)
@@ -357,82 +363,71 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
                 }
                 catch (...)
                 {
-                    return "Error when parsing style.";
+                    throw std::invalid_argument("Error when parsing style.");
                 }
             }
 
             std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> tmpTuple;
             std::vector<uint8_t> tmpVector;
             std::string tmpString;
-            const char *err;
 
+            // stringToColorAlpha may throw exception
+            // but ignore here
             // color1 and alpha1
             tmpString = match[4];
-            std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            TESTERR(err)
+            tmpTuple = stringToColorAlpha(tmpString);
 
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            std::tie(style->color1, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->color1 = colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            std::tie(style->alpha1, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->alpha1 = colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color2 and alpha2
             tmpString = match[5];
-            std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            TESTERR(err)
+            tmpTuple = stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            std::tie(style->color2, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->color2 = colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            std::tie(style->alpha2, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->alpha2 = colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color3 and alpha3
             tmpString = match[6];
-            std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            TESTERR(err)
+            tmpTuple = stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            std::tie(style->color3, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->color3 = colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            std::tie(style->alpha3, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->alpha3 = colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color4 and alpha4
             tmpString = match[7];
-            std::tie(tmpTuple, err) = stringToColorAlpha(tmpString);
-            TESTERR(err)
+            tmpTuple = stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            std::tie(style->color4, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->color4 = colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            std::tie(style->alpha4, err) = colorAlphaToString(tmpVector);
-            TESTERR(err)
+            style->alpha4 = colorAlphaToString(tmpVector);
 
             styleData[match[1]] = style;
         }
@@ -440,12 +435,19 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
     }
     case Events:
     {
-        boost::u32regex reg(boost::make_u32regex("^(.+): (\\d+),(\\d:\\d\\d:\\d\\d\\.\\d\\d),(\\d:\\d\\d:\\d\\d\\.\\d\\d),(.+),(.*),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(|.*),(.*)$"));
+        boost::u32regex reg(boost::make_u32regex("^(.+): (\\d+),"
+                                                 "(\\d:\\d\\d:\\d\\d\\.\\d\\d),"
+                                                 "(\\d:\\d\\d:\\d\\d\\.\\d\\d),"
+                                                 "(.+),(.*),(\\d+\\.?\\d*),"
+                                                 "(\\d+\\.?\\d*),(\\d+\\.?\\d*),"
+                                                 "(|.*),(.*)$"));
         boost::smatch match;
         if(boost::u32regex_search(line, match, reg))
         {
             std::shared_ptr<AssDialog> dialog(std::make_shared<AssDialog>());
-            const char *err(nullptr);
+
+            // stringToMs may throw exception
+            // but ignore here
             try
             {
                 std::string tmpString = match[1];
@@ -455,12 +457,10 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
                 dialog->layer = lexical_cast<uint32_t>(tmpString);
 
                 tmpString = match[3];
-                std::tie(dialog->start_time, err) = stringToMs(tmpString);
-                TESTERR(err)
+                dialog->start_time = stringToMs(tmpString);
 
                 tmpString = match[4];
-                std::tie(dialog->end_time, err) = stringToMs(tmpString);
-                TESTERR(err)
+                dialog->end_time = stringToMs(tmpString);
 
                 dialog->style = match[5];
                 dialog->actor = match[6];
@@ -479,9 +479,9 @@ const char *AssParser::parseLine(std::string &line, uint8_t *flags)
 
                 dialogData.push_back(dialog);
             }
-            catch (...)
+            catch (const bad_lexical_cast &)
             {
-                return "Error when parsing dialog";
+                throw std::invalid_argument("Error when parsing dialog");
             }
         }
         break;
