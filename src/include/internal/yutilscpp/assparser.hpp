@@ -18,21 +18,21 @@ public:
     static std::shared_ptr<AssParser>
     create(const std::string &fileName) THROW;
 
-    std::shared_ptr<AssMeta> meta() const;
+    std::shared_ptr<AssMeta> meta() const NOTHROW;
 
-    std::map<std::string, std::shared_ptr<AssStyle>> styles() const;
+    std::map<std::string, std::shared_ptr<AssStyle>> styles() const NOTHROW;
 
-    std::vector<std::shared_ptr<AssDialog>> dialogs() const;
+    std::vector<std::shared_ptr<AssDialog>> dialogs() const NOTHROW;
 
-    void extendDialogs();
+    void extendDialogs() THROW;
 
-    bool dialogIsExtended() const;
+    bool dialogIsExtended() const NOTHROW;
 
-    bool isSylAvailable() const;
+    bool isSylAvailable() const NOTHROW;
 
-    bool isWordAvailable() const;
+    bool isWordAvailable() const NOTHROW;
 
-    bool isCharAvailable() const;
+    bool isCharAvailable() const NOTHROW;
 
 protected:
 
@@ -82,9 +82,9 @@ private:
 
     bool charReady;
 
-    const char *parseDialogs();
+    void parseDialogs() THROW;
 
-    typedef struct _TEXT_SIZE
+    typedef struct TEXT_SIZE
     {
         double width;
         double height;
@@ -94,7 +94,7 @@ private:
         double external_leading;
     } TEXT_SIZE;
 
-    std::pair<std::shared_ptr<TEXT_SIZE>, const char *>
-    textSize(std::string &text, std::shared_ptr<AssStyle> &style);
+    std::shared_ptr<TEXT_SIZE>
+    textSize(std::string &text, std::shared_ptr<AssStyle> &style) THROW;
 };
 }

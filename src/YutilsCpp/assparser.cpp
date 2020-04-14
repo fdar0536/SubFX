@@ -32,7 +32,7 @@ AssParser::create(const std::string &fileName) THROW
     assFile.open(fileName, std::fstream::in);
     if (assFile.fail())
     {
-        throw std::invalid_argument("CANNOT open file.");
+        throw std::invalid_argument("AssParser::create: CANNOT open file.");
     }
 
     AssParser *ret(new (std::nothrow) AssParser());
@@ -43,7 +43,6 @@ AssParser::create(const std::string &fileName) THROW
 
     ret->dialogData.reserve(1000);
     std::string tmpString;
-    const char *err(nullptr);
     uint8_t flag(1);
     uint8_t flags[] = {0, 0, 0, 0};
     while(!ret->safeGetline(assFile, tmpString).eof())
@@ -54,7 +53,8 @@ AssParser::create(const std::string &fileName) THROW
             if (tmpString.size() == 0)
             {
                 delete ret;
-                throw std::invalid_argument("Is input an empty file?");
+                throw std::invalid_argument("AssParser::create: Is input "
+                                            "an empty file?");
             }
 
             flag = 0;
@@ -63,12 +63,6 @@ AssParser::create(const std::string &fileName) THROW
 
         // here may be throw exception
         ret->parseLine(tmpString, flags);
-        if (err)
-        {
-            delete ret;
-            errMsg = err;
-            return nullptr;
-        }
     }
 
     assFile.close();
@@ -77,8 +71,8 @@ AssParser::create(const std::string &fileName) THROW
     if (ret->dialogData.size() == 0)
     {
         delete ret;
-        errMsg = "This ass file has no dialog data.";
-        return nullptr;
+        throw std::invalid_argument("AssParser::create: This ass file has no "
+                                    "dialog data.");
     }
 
     if (ret->metaData->play_res_x == 0 ||
@@ -103,47 +97,47 @@ AssParser::create(const std::string &fileName) THROW
     return std::shared_ptr<AssParser>(ret);
 }
 
-std::shared_ptr<AssMeta> AssParser::meta() const
+std::shared_ptr<AssMeta> AssParser::meta() const NOTHROW
 {
     return metaData;
 }
 
-std::map<std::string, std::shared_ptr<AssStyle>> AssParser::styles() const
+std::map<std::string, std::shared_ptr<AssStyle>> AssParser::styles() const NOTHROW
 {
     return styleData;
 }
 
-std::vector<std::shared_ptr<AssDialog>> AssParser::dialogs() const
+std::vector<std::shared_ptr<AssDialog>> AssParser::dialogs() const NOTHROW
 {
     return dialogData;
 }
 
-void AssParser::extendDialogs()
+void AssParser::extendDialogs() THROW
 {
     if (dialogParsed)
     {
-        return nullptr;
+        return;
     }
 
-    return parseDialogs();
+    parseDialogs();
 }
 
-bool AssParser::dialogIsUpgraded() const
+bool AssParser::dialogIsExtended() const NOTHROW
 {
     return dialogParsed;
 }
 
-bool AssParser::isSylAvailable() const
+bool AssParser::isSylAvailable() const NOTHROW
 {
     return sylReady;
 }
 
-bool AssParser::isWordAvailable() const
+bool AssParser::isWordAvailable() const NOTHROW
 {
     return wordReady;
 }
 
-bool AssParser::isCharAvailable() const
+bool AssParser::isCharAvailable() const NOTHROW
 {
     return charReady;
 }
@@ -203,7 +197,8 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         {
             if (flags[Script_Info])
             {
-                throw std::invalid_argument("Input is not a valid ass file.");
+                throw std::invalid_argument("parseLine: Input is not a "
+                                            "valid ass file.");
             }
 
             section = Script_Info;
@@ -213,7 +208,8 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         {
             if (flags[V4_Styles])
             {
-                throw std::invalid_argument("Input is not a valid ass file.");
+                throw std::invalid_argument("parseLine: Input is not a "
+                                            "valid ass file.");
             }
 
             section = V4_Styles;
@@ -223,7 +219,8 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         {
             if (flags[Events])
             {
-                throw std::invalid_argument("Input is not a valid ass file.");
+                throw std::invalid_argument("parseLine: Input is not a "
+                                            "valid ass file.");
             }
 
             section = Events;
@@ -245,7 +242,7 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("Syntax error in\n"
+                throw std::invalid_argument("parseLine: Syntax error in\n"
                        "\"Script info\" -> \"WrapStyle\"");
             }
         }
@@ -263,7 +260,7 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("Syntax error in\n"
+                throw std::invalid_argument("parseLine: Syntax error in\n"
                        "\"Script info\" -> \"PlayResX\"");
             }
         }
@@ -275,7 +272,7 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("Syntax error in\n"
+                throw std::invalid_argument("parseLine: Syntax error in\n"
                        "\"Script info\" -> \"PlayResY\"");
             }
         }
@@ -305,7 +302,8 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (...)
             {
-                throw std::invalid_argument("Error in parsing style's encoding.");
+                throw std::invalid_argument("parseLine: Error in parsing "
+                                            "style's encoding.");
             }
 
             if (style->encoding <= 255)
@@ -363,7 +361,8 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
                 }
                 catch (...)
                 {
-                    throw std::invalid_argument("Error when parsing style.");
+                    throw std::invalid_argument("parseLine: Error when parsing"
+                                                " style.");
                 }
             }
 
@@ -481,7 +480,7 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("Error when parsing dialog");
+                throw std::invalid_argument("parseLine: Error when parsing dialog");
             }
         }
         break;
@@ -491,11 +490,9 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         break;
     }
     }
-
-    return nullptr;
 }
 
-const char *AssParser::parseDialogs()
+void AssParser::parseDialogs() THROW
 {
     double space_width(0.);
     for (size_t i = 0; i < dialogData.size(); ++i)
@@ -507,7 +504,8 @@ const char *AssParser::parseDialogs()
         dialog->styleref = styleData[dialog->style];
         if (dialog->styleref == nullptr)
         {
-            std::cerr << "Waring: dialog " << dialog->i << " fallback to default style.";
+            std::cerr << "Waring: dialog " << dialog->i;
+            std::cerr << " fallback to default style.";
             std::cerr << std::endl;
             dialog->styleref = std::make_shared<AssStyle>();
         }
@@ -518,16 +516,7 @@ const char *AssParser::parseDialogs()
             ""
         );
 
-        std::shared_ptr<TEXT_SIZE> textsize(nullptr);
-        const char *err(nullptr);
-        std::tie(textsize, err) = textSize(dialog->text_stripped,
-                                           dialog->styleref);
-        if (err)
-        {
-            std::string tmpString = "Fail to upgrade dialogs in dialog ";
-            tmpString += lexical_cast<std::string>(dialog->i);
-            return tmpString.c_str();
-        }
+        auto textsize(textSize(dialog->text_stripped, dialog->styleref));
 
         dialog->width = textsize->width;
         dialog->height = textsize->height;
@@ -539,21 +528,26 @@ const char *AssParser::parseDialogs()
         // Horizontal position
         if (((dialog->styleref->alignment - 1) % 3) == 0)
         {
-            dialog->left = (dialog->margin_l != 0. ? dialog->margin_l : dialog->styleref->margin_l);
+            dialog->left = (dialog->margin_l != 0. ?
+                        dialog->margin_l :
+                        dialog->styleref->margin_l);
             dialog->center = dialog->left + (dialog->width / 2.);
             dialog->right = dialog->left + dialog->width;
             dialog->x = dialog->left;
         }
         else if (((dialog->styleref->alignment - 2) % 3) == 0)
         {
-            dialog->left = static_cast<double>(metaData->play_res_x >> 1) - (dialog->width / 2.);
+            dialog->left = static_cast<double>(metaData->play_res_x >> 1) -
+                    (dialog->width / 2.);
             dialog->center = dialog->left + (dialog->width / 2.);
             dialog->right = dialog->left + dialog->width;
             dialog->x = dialog->center;
         }
         else
         {
-            dialog->left = metaData->play_res_x - (dialog->margin_r != 0. ? dialog->margin_r : dialog->styleref->margin_r) - dialog->width;
+            dialog->left = metaData->play_res_x - (dialog->margin_r != 0. ?
+                        dialog->margin_r :
+                        dialog->styleref->margin_r) - dialog->width;
             dialog->center = dialog->left + (dialog->width / 2.);
             dialog->right = dialog->left + dialog->width;
             dialog->x = dialog->right;
@@ -562,34 +556,33 @@ const char *AssParser::parseDialogs()
         // Vertical position
         if (dialog->styleref->alignment > 6)
         {
-            dialog->top = (dialog->margin_v != 0. ? dialog->margin_v : dialog->styleref->margin_v);
+            dialog->top = (dialog->margin_v != 0. ?
+                        dialog->margin_v :
+                        dialog->styleref->margin_v);
             dialog->middle = dialog->top + (dialog->height / 2.);
             dialog->bottom = dialog->top + dialog->height;
             dialog->y = dialog->top;
         }
         else if (dialog->styleref->alignment > 3)
         {
-            dialog->top = static_cast<double>(metaData->play_res_y >> 1) - (dialog->height / 2.);
+            dialog->top = static_cast<double>(metaData->play_res_y >> 1) -
+                    (dialog->height / 2.);
             dialog->middle = dialog->top + (dialog->height / 2.);
             dialog->bottom = dialog->top + dialog->height;
             dialog->y = dialog->middle;
         }
         else
         {
-            dialog->top = metaData->play_res_y - (dialog->margin_v != 0. ? dialog->margin_v : dialog->styleref->margin_v) - dialog->height;
+            dialog->top = metaData->play_res_y - (dialog->margin_v != 0. ?
+                        dialog->margin_v :
+                        dialog->styleref->margin_v) - dialog->height;
             dialog->middle = dialog->top + (dialog->height / 2.);
             dialog->bottom = dialog->top + dialog->height;
             dialog->y = dialog->bottom;
         }
 
         std::string tmpString(" ");
-        std::tie(textsize, err) = textSize(tmpString, dialog->styleref);
-        if (err)
-        {
-            tmpString = "Fail to upgrade dialogs in dialog ";
-            tmpString += lexical_cast<std::string>(dialog->i);
-            return tmpString.c_str();
-        }
+        textsize = textSize(tmpString, dialog->styleref);
 
         space_width = textsize->width;
         textsize = nullptr;
@@ -601,7 +594,8 @@ const char *AssParser::parseDialogs()
         boost::smatch match;
         while (boost::u32regex_search(tmpString, match, u32reg))
         {
-            std::shared_ptr<AssTextChunked> textChunked(std::make_shared<AssTextChunked>());
+            std::shared_ptr<AssTextChunked>
+                    textChunked(std::make_shared<AssTextChunked>());
 
             if (match.prefix() != "")
             {
@@ -625,7 +619,8 @@ const char *AssParser::parseDialogs()
         boost::u32regex u32regs(boost::make_u32regex("(\\s*)(\\S*)(\\s*)"));
         for (size_t index = 0; index < dialog->textChunked.size(); ++index)
         {
-            if (boost::u32regex_search(dialog->textChunked.at(index)->tags, match, u32reg))
+            if (boost::u32regex_search(dialog->textChunked.at(index)->tags,
+                                       match, u32reg))
             {
                 std::shared_ptr<AssSyl> syl(std::make_shared<AssSyl>());
                 uint64_t kdur(0);
@@ -637,7 +632,8 @@ const char *AssParser::parseDialogs()
                 catch (...)
                 {
                     dialog->syls.clear();
-                    return "Error when getting syl's duration.";
+                    throw std::invalid_argument("parseDialogs: Error when "
+                                                "getting syl's duration.");
                 }
 
                 syl->i = static_cast<uint32_t>(index);
@@ -668,12 +664,7 @@ const char *AssParser::parseDialogs()
                     syl->text = dialog->textChunked.at(index)->text;
                 }
 
-                std::tie(textsize, err) = textSize(syl->text, dialog->styleref);
-                if (err)
-                {
-                    dialog->syls.clear();
-                    return "Error when getting syl's data.";
-                }
+                textsize = textSize(syl->text, dialog->styleref);
 
                 syl->width = textsize->width;
                 syl->height = textsize->height;
@@ -747,7 +738,8 @@ const char *AssParser::parseDialogs()
                         sum_height += syl->height;
                     } //end for index
 
-                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.));
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) -
+                                 (sum_height / 2.));
                     double x_fix(0.);
                     for (size_t index = 0; index < dialog->syls.size(); ++index)
                     {
@@ -762,7 +754,9 @@ const char *AssParser::parseDialogs()
                         }
                         else if (dialog->styleref->alignment == 5)
                         {
-                            syl->left = static_cast<double>(metaData->play_res_x >> 1) - (syl->width / 2.);
+                            syl->left = static_cast<double>(
+                                        metaData->play_res_x >> 1) -
+                                    (syl->width / 2.);
                             syl->center = syl->left + (syl->width / 2.);
                             syl->right = syl->left + syl->width;
                             syl->x = syl->center;
@@ -798,12 +792,7 @@ const char *AssParser::parseDialogs()
             std::shared_ptr<AssWord> word(std::make_shared<AssWord>());
 
             word->text = match[2];
-            std::tie(textsize, err) = textSize(word->text, dialog->styleref);
-            if (err)
-            {
-                dialog->words.clear();
-                return "Error when paring words.";
-            }
+            textsize = textSize(word->text, dialog->styleref);
 
             tmpString = match[1];
             word->prespace = utf8StringLen(tmpString);
@@ -884,14 +873,15 @@ const char *AssParser::parseDialogs()
                         sum_height += word->height;
                     } //end for index;
 
-                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.));
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) -
+                                 (sum_height / 2.));
                     double x_fix(0.);
                     for (size_t index = 0; index < dialog->words.size(); ++index)
                     {
                         std::shared_ptr<AssWord> word(dialog->words.at(index));
 
                         // Horizontal position
-                        x_fix = ((max_width - word->width)/ 2.);
+                        x_fix = ((max_width - word->width) / 2.);
                         if (dialog->styleref->alignment == 4)
                         {
                             word->left = dialog->left + x_fix;
@@ -901,7 +891,9 @@ const char *AssParser::parseDialogs()
                         }
                         else if (dialog->styleref->alignment == 5)
                         {
-                            word->left = static_cast<double>(metaData->play_res_x >> 1) - (word->width / 2.);
+                            word->left = static_cast<double>(
+                                        metaData->play_res_x >> 1) -
+                                    (word->width / 2.);
                             word->center = word->left + (word->width / 2.);
                             word->right = word->left + word->width;
                             word->x = word->center;
@@ -943,7 +935,9 @@ const char *AssParser::parseDialogs()
             for (size_t index = 0; index < dialog->syls.size(); ++index)
             {
                 std::shared_ptr<AssSyl> syl(dialog->syls.at(index));
-                uint32_t maxLoop(syl->prespace + utf8StringLen(syl->text) + syl->postspace);
+                uint32_t maxLoop(syl->prespace +
+                                 utf8StringLen(syl->text) +
+                                 syl->postspace);
                 for (size_t sIndex = 0; sIndex < maxLoop; ++sIndex)
                 {
                     if (charIndex == assChar->i)
@@ -964,7 +958,9 @@ syl_reference_found:
             for (size_t index = 0; index < dialog->words.size(); ++index)
             {
                 std::shared_ptr<AssWord> word(dialog->words.at(index));
-                uint32_t maxLoop(word->prespace + utf8StringLen(word->text) + word->postspace);
+                uint32_t maxLoop(word->prespace +
+                                 utf8StringLen(word->text) +
+                                 word->postspace);
                 for (size_t wIndex = 0; wIndex < maxLoop; ++wIndex)
                 {
                     if (charIndex == assChar->i)
@@ -977,12 +973,7 @@ syl_reference_found:
             } // end for index
 
 word_reference_found:
-            std::tie(textsize, err) = textSize(assChar->text, dialog->styleref);
-            if (err)
-            {
-                dialog->chars.clear();
-                return "Error when parsing chars.";
-            }
+            textsize = textSize(assChar->text, dialog->styleref);
 
             assChar->width = textsize->width;
             assChar->height = textsize->height;
@@ -1000,7 +991,8 @@ word_reference_found:
         {
             if (dialog->chars.at(0)->width != 0.)
             {
-                if (dialog->styleref->alignment > 6 || dialog->styleref->alignment < 4)
+                if (dialog->styleref->alignment > 6 ||
+                    dialog->styleref->alignment < 4)
                 {
                     double cur_x(dialog->left);
                     for (size_t index = 0; index < dialog->chars.size(); ++index)
@@ -1047,7 +1039,8 @@ word_reference_found:
                         sum_height += assChar->height;
                     } // end for index
 
-                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) - (sum_height / 2.));
+                    double cur_y(static_cast<double>(metaData->play_res_y >> 1) -
+                                 (sum_height / 2.));
                     double x_fix(0.);
                     for (size_t index = 0; index < dialog->chars.size(); ++index)
                     {
@@ -1064,7 +1057,9 @@ word_reference_found:
                         }
                         else if (dialog->styleref->alignment == 5)
                         {
-                            assChar->left = static_cast<double>(metaData->play_res_x >> 1) - (assChar->width / 2.);
+                            assChar->left = static_cast<double>(
+                                        metaData->play_res_x >> 1) -
+                                    (assChar->width / 2.);
                             assChar->center = assChar->left + (assChar->width / 2.);
                             assChar->right = assChar->left + assChar->width;
                             assChar->x = assChar->center;
@@ -1103,8 +1098,12 @@ word_reference_found:
     for (size_t i = 0; i < dialogData.size(); ++i)
     {
         std::shared_ptr<AssDialog> dialog(dialogData.at(i));
-        dialog->leadin = (i == 0 ? 1000.1 : (dialog->start_time - dialogData.at(i - 1)->end_time));
-        dialog->leadout = (i == last ? 1000.1 : (dialogData.at(i + 1)->start_time - dialog->end_time));
+        dialog->leadin = (i == 0 ?
+                          1000.1 :
+                          (dialog->start_time - dialogData.at(i - 1)->end_time));
+        dialog->leadout = (i == last ?
+                           1000.1 :
+                           (dialogData.at(i + 1)->start_time - dialog->end_time));
     }
 
     // here maybe have a better solution
@@ -1128,62 +1127,51 @@ word_reference_found:
     }
 
     dialogParsed = true;
-    return nullptr;
 }
 
-std::pair<std::shared_ptr<AssParser::TEXT_SIZE>, const char *>
+std::shared_ptr<AssParser::TEXT_SIZE>
 AssParser::textSize(std::string &text,
                     std::shared_ptr<AssStyle> &style)
 {
-    std::shared_ptr<FontHandle> font(nullptr);
-    const char *err(nullptr);
-
-    std::tie(font, err) = FontHandle::create(style->fontname,
-                                             style->bold,
-                                             style->italic,
-                                             style->underline,
-                                             style->strikeout,
-                                             style->fontsize,
-                                             style->scale_x / 100.,
-                                             style->scale_y / 100.,
-                                             style->spaceing);
-
-    if (err)
+    auto font(FontHandle::create(style->fontname,
+                                 style->bold,
+                                 style->italic,
+                                 style->underline,
+                                 style->strikeout,
+                                 style->fontsize,
+                                 style->scale_x / 100.,
+                                 style->scale_y / 100.,
+                                 style->spaceing));
+    if (font == nullptr)
     {
-        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
-                              err);
+        throw std::runtime_error("textSize: Fail to create FontHandle");
     }
 
-    std::map<std::string, double> tmpMap;
-    std::tie(tmpMap, err) = font->text_extents(text);
-    if (err)
+    auto tmpMap(font->text_extents(text));
+    if (tmpMap.empty())
     {
-        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
-                              err);
+        throw std::runtime_error("textSize: Fail to get text properties");
     }
 
     TEXT_SIZE *ret(new (std::nothrow) TEXT_SIZE);
     if (!ret)
     {
-        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
-                              "Fail to allocate memory.");
+        throw std::runtime_error("textSize: Fail to allocate memory.");
     }
 
     ret->width = tmpMap["width"];
     ret->height = tmpMap["height"];
 
-    std::tie(tmpMap, err) = font->metrics();
-    if (err)
+    tmpMap = font->metrics();
+    if (tmpMap.empty())
     {
         delete ret;
-        return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(nullptr),
-                              err);
+        throw std::runtime_error("textSize: Fail to get font metrics");
     }
 
     ret->ascent = tmpMap["ascent"];
     ret->descent = tmpMap["descent"];
     ret->internal_leading = tmpMap["internal_leading"];
     ret->external_leading = tmpMap["external_leading"];
-    return std::make_pair(std::shared_ptr<AssParser::TEXT_SIZE>(ret),
-                          nullptr);
+    return std::shared_ptr<AssParser::TEXT_SIZE>(ret);
 }
