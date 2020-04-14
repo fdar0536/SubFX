@@ -39,8 +39,9 @@ FontHandle::create(std::string &family,
 
 #ifndef _WIN32
     int upscale(FONT_PRECISION);
-#endif
+#else
     ret->downscale = (1. / static_cast<double>(ret->upscale));
+#endif
 
 #ifdef _WIN32
     std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));

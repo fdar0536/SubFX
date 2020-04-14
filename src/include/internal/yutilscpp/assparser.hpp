@@ -7,7 +7,7 @@
 #include "ass.hpp"
 #include "asscommon.hpp"
 #include "utf8.hpp"
-#include "../common/basecommon.h"
+#include "../basecommon.h"
 
 namespace Yutils
 {

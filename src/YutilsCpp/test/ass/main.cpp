@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "../../YutilsCpp.hpp"
+#include "YutilsCpp"
 
 #define StringToColorAlpha(x, y) \
     x = ass->stringToColorAlpha(y); \

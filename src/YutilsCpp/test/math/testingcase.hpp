@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../YutilsCpp.hpp"
+#include "YutilsCpp"
 
 class TestMath
 {

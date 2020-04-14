@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 project(SubFX LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(SUBFX_VERSION r0.0.1)
 set(SUBFX_NAME SubFX)
 
@@ -64,10 +65,6 @@ enable_testing()
 include(YutilsCpp/CMakeLists.txt)
 
 configure_file(config.h.in config.h @ONLY)
-include_directories(Before SYSTEM
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
 
 # frontend
 if (ENABLE_PYTHON)

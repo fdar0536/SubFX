@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "../../YutilsCpp.hpp"
+#include "YutilsCpp"
 
 int main()
 {

@@ -1,8 +1,27 @@
 if (UNIX)
-    include(FindPkgConfig)
-    pkg_check_modules(PANGOCAIRO REQUIRED pangocairo>=1.44.6)
-    LIST(APPEND YutilsCpp_includes ${PANGOCAIRO_INCLUDE_DIRS})
-    LIST(APPEND YutilsCpp_libs ${PANGOCAIRO_LIBRARIES})
+    find_package(PANGO REQUIRED)
+    if (NOT PANGOCAIRO_FOUND)
+        message(FATAL_ERROR "CANNOT find PangoCairo!")
+    endif()
+    LIST(APPEND YutilsCpp_includes
+        ${PANGOCAIRO_INCLUDE_DIRS}
+        ${GLIB2_INCLUDE_DIRS})
+    LIST(APPEND YutilsCpp_libs
+        ${PANGO_LIBRARIES}
+        ${PANGOCAIRO_LIBRARIES}
+        ${GLIB2_LIBRARIES})
+
+    find_package(HarfBuzz REQUIRED)
+    LIST(APPEND YutilsCpp_includes
+        ${HARFBUZZ_INCLUDE_DIRS})
+    LIST(APPEND YutilsCpp_libs
+        ${HARFBUZZ_LIBRARIES})
+
+    find_package(Cairo REQUIRED)
+    LIST(APPEND YutilsCpp_includes
+        ${CAIRO_INCLUDE_DIRS})
+    LIST(APPEND YutilsCpp_libs
+        ${CAIRO_LIBRARIES})
 endif (UNIX)
 
 set(YUTILSCPP_INCLUDE_PREFIX include/internal/yutilscpp)
@@ -37,8 +56,17 @@ if (WIN32)
     LIST(APPEND YutilsCpp_libs ${Boost_LOCALE_LIBRARY})
 endif (WIN32)
 
+#config and others
+LIST(APPEND YutilsCpp_includes
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+)
+
 target_link_libraries(YutilsCpp ${YutilsCpp_libs})
-target_include_directories(YutilsCpp PUBLIC ${YutilsCpp_includes})
+target_include_directories(YutilsCpp
+    SYSTEM BEFORE
+    PUBLIC ${YutilsCpp_includes}
+)
 
 # python
 option(ENABLE_PYTHON "Enable python binding" OFF)
