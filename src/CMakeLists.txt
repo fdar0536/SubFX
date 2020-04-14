@@ -81,7 +81,10 @@ set_target_properties(BaseCommon
 
 install(
     TARGETS BaseCommon
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
+
+    PUBLIC_HEADER
+    DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
 )
 
 include(YutilsCpp/CMakeLists.txt)
