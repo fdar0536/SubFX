@@ -9,7 +9,7 @@
 
 namespace Yutils
 {
-class Utf8
+class SYMBOL_SHOW Utf8
 {
 protected:
 

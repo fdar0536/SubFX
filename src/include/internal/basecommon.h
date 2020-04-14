@@ -1,8 +1,14 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
-#endif    /* _MSC_VER */
+#pragma warning(disable: 4251)
+#pragma warning(disable: 4251)
+#endif // _MSC_VER
 
 #pragma once
+
+#ifdef _WIN32
+#define NOMINMAX
+#endif
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
