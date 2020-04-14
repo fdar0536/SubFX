@@ -11,14 +11,14 @@
 #include "emmintrin.h" // SSE
 #endif
 
-#include "shape.hpp"
+#include "YutilsCpp"
 
 #define CURVE_TOLERANCE 1 // Angle in degree to define a curve as flat
 
 using namespace Yutils;
 
 // public member function
-std::shared_ptr<Shape> Shape::create()
+std::shared_ptr<Shape> Shape::create() NOTHROW
 {
     Shape *ret(new (std::nothrow) Shape());
     if (!ret)
@@ -29,8 +29,8 @@ std::shared_ptr<Shape> Shape::create()
     return std::shared_ptr<Shape>(ret);
 }
 
-std::pair<std::tuple<double, double, double, double>, const char *>
-Shape::bounding(std::string &shape)
+std::tuple<double, double, double, double>
+Shape::bounding(std::string &shape) THROW
 {
     // Bounding data
     double x0(0.), y0(0.), x1(0.), y1(0.);
@@ -57,24 +57,20 @@ Shape::bounding(std::string &shape)
         }
     );
 
-    const char *err(nullptr);
-    std::tie(std::ignore, err) = filter(shape, flt);
-    if (err)
-    {
-        return std::make_pair(std::tuple<double, double, double, double>(),
-                              err);
-    }
+    // here may throw exception
+    filter(shape, flt);
 
-    return std::make_pair(std::make_tuple(x0, y0, x1, y1), nullptr);
+    return std::make_tuple(x0, y0, x1, y1);
 }
 
-std::pair<std::string, const char *>
+std::string
 Shape::filter(std::string &shape,
               std::function<std::pair<double, double>(double, double, std::string &)> &flt)
+THROW
 {
     if (!flt)
     {
-        return std::make_pair(std::string(), "flt is empty!");
+        throw std::invalid_argument("filter: flt is empty!");
     }
 
     typedef enum _FLT_STATUS
@@ -95,7 +91,7 @@ Shape::filter(std::string &shape,
         if ((static_cast<uint8_t>(tmpString.at(0)) & 0x80) != 0)
         {
             // input is not ascii
-            return std::make_pair(std::string(), "input is out of ASCII!");
+            throw std::invalid_argument("filter: input is out of ASCII!");
         }
 
         switch (status)
@@ -111,8 +107,8 @@ Shape::filter(std::string &shape,
             }
             else
             {
-                return std::make_pair(std::string(),
-                                      "shape syntax error: unexpected token in the begging of shape.");
+                throw std::invalid_argument("filter: shape syntax error: "
+                                            "unexpected token in the begging of shape.");
             }
 
             continue; // goto next loop
@@ -129,8 +125,9 @@ Shape::filter(std::string &shape,
             else
             {
                 std::string err(tmpString.substr(0, 1));
-                err = "shape syntax error: expect m, n, l, b, s, p or c, but get " + err + " .";
-                return std::make_pair(std::string(), err.c_str());
+                err = "filter: shape syntax error: expect m, n, l, b, s, p "
+                      "or c, but get " + err + " .";
+                throw std::invalid_argument(err);
             }
 
             continue; // goto next loop
@@ -168,11 +165,10 @@ Shape::filter(std::string &shape,
         output += (doubleToString(round(newPoints.second, FP_PRECISION)) + " ");
     } // end while (tmpString.length() != 0)
 
-    return std::make_pair(output, nullptr);
+    return output;
 }
 
-std::pair<std::string, const char *>
-Shape::flatten(std::string &shape)
+std::string Shape::flatten(std::string &shape) THROW
 {
     typedef enum _STATUS
     {
@@ -185,14 +181,16 @@ Shape::flatten(std::string &shape)
     std::string output("");
     std::string number("");
     std::regex startReg("(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+b(\\s+)");
-    std::regex pointReg("^(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)(\\s*)");
+    std::regex pointReg("^(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+"
+                        "(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)\\s+"
+                        "(-?\\d+\\.?\\d*)\\s+(-?\\d+\\.?\\d*)(\\s*)");
     std::smatch sm;
     while (tmpString.length() != 0)
     {
         if ((static_cast<uint8_t>(tmpString.at(0)) & 0x80) != 0)
         {
             // input is not ascii
-            return std::make_pair(std::string(), "input is out of ASCII!");
+            throw std::invalid_argument("flatten: input is out of ASCII!");
         }
 
         switch (status)
@@ -271,11 +269,10 @@ Shape::flatten(std::string &shape)
         }
     } // end while (tmpString.length() != 0)
 
-    return std::make_pair(output, nullptr);
+    return output;
 }
 
-std::pair<std::string, const char *>
-Shape::move(std::string &shape, double x, double y)
+std::string Shape::move(std::string &shape, double x, double y) THROW
 {
     std::function<std::pair<double, double>(double, double, std::string &)> flt([&](
         double cx, double cy, std::string &input)
@@ -285,11 +282,12 @@ Shape::move(std::string &shape, double x, double y)
         }
     );
 
+    // here may throw exception
     return filter(shape, flt);
 }
 
-std::pair<std::vector<std::map<std::string, double>>, const char *>
-Shape::to_pixels(std::string &shape)
+std::vector<std::map<std::string, double>>
+Shape::to_pixels(std::string &shape) THROW
 {
     // Scale values for supersampled rendering
     uint8_t upscale(SUPERSAMPLING);
@@ -303,34 +301,19 @@ Shape::to_pixels(std::string &shape)
     });
 
     // Upscale shape for later downsampling
-    std::string newShape;
-    const char *err(nullptr);
-    std::tie(newShape, err) = filter(shape, flt);
-    if (err)
-    {
-        return std::make_pair(std::vector<std::map<std::string, double>>(),
-                              err);
-    }
+    // here may throw exception
+    std::string newShape(filter(shape, flt));
 
-    std::tuple<double, double, double, double> tmpTuple;
-    std::tie(tmpTuple, err) = bounding(newShape);
-    if (err)
-    {
-        return std::make_pair(std::vector<std::map<std::string, double>>(),
-                              err);
-    }
+    // here may throw exception
+    auto tmpTuple(bounding(newShape));
     double x1(std::get<0>(tmpTuple)), y1(std::get<1>(tmpTuple));
     double x2(std::get<2>(tmpTuple)), y2(std::get<3>(tmpTuple));
 
     double shift_x(-(x1 - (static_cast<int64_t>(x1) % upscale)));
     double shift_y(-(y1 - (static_cast<int64_t>(y1) % upscale)));
 
-    std::tie(newShape, err) = move(newShape, shift_x, shift_y);
-    if (err)
-    {
-        return std::make_pair(std::vector<std::map<std::string, double>>(),
-                              err);
-    }
+    // here may throw exception
+    newShape = move(newShape, shift_x, shift_y);
 
     // Create image
     double img_width(ceil((x2 + shift_x) * downscale) * upscale);
@@ -340,12 +323,8 @@ Shape::to_pixels(std::string &shape)
     std::fill(img_data.begin(), img_data.end(), false);
 
     // Render shape on image
-    err = render_shape(img_width, img_height, img_data, newShape);
-    if (err)
-    {
-        return std::make_pair(std::vector<std::map<std::string, double>>(),
-                              err);
-    }
+    // here may throw exception
+    render_shape(img_width, img_height, img_data, newShape);
 
     // Extract pixels from image
     std::vector<std::map<std::string, double>> pixels;
@@ -378,7 +357,7 @@ Shape::to_pixels(std::string &shape)
         } // end for x
     } // end for y
 
-    return std::make_pair(pixels, nullptr);
+    return pixels;
 }
 
 // private member function
@@ -386,7 +365,7 @@ std::vector<double> Shape::curve4_subdivide(double x0, double y0,
                                             double x1, double y1,
                                             double x2, double y2,
                                             double x3, double y3,
-                                            double pct)
+                                            double pct) NOTHROW
 {
     std::vector<double> ret;
     ret.reserve(16);
@@ -500,7 +479,7 @@ bool Shape::curve4_is_flat(double x0, double y0,
                            double x1, double y1,
                            double x2, double y2,
                            double x3, double y3,
-                           double tolerance)
+                           double tolerance) NOTHROW
 {
     std::vector<std::pair<double, double>> vecs;
     vecs.reserve(3);
@@ -542,7 +521,7 @@ bool Shape::curve4_is_flat(double x0, double y0,
 std::vector<double> Shape::curve4_to_lines(double px0, double py0,
                                            double px1, double py1,
                                            double px2, double py2,
-                                           double px3, double py3)
+                                           double px3, double py3) NOTHROW
 {
     std::vector<double> pts;
     pts.reserve(4);
@@ -582,11 +561,10 @@ std::vector<double> Shape::curve4_to_lines(double px0, double py0,
     return pts;
 }
 
-const char
-*Shape::render_shape(double width,
-                     double height,
-                     std::vector<bool> &image,
-                     std::string &shape)
+void Shape::render_shape(double width,
+                         double height,
+                         std::vector<bool> &image,
+                         std::string &shape) THROW
 {
     std::vector<std::tuple<double, double, double, double>> lines;
     lines.reserve(500);
@@ -657,11 +635,11 @@ const char
     });
 
     std::string shapeBak(shape);
-    const char *err;
-    std::tie(shapeBak, err) = flatten(shapeBak);
-    TESTERR(err)
-    std::tie(std::ignore, err) = filter(shapeBak, flt);
-    TESTERR(err)
+
+    // here may throw exception
+    shapeBak = flatten(shapeBak);
+    // here may throw exception
+    filter(shapeBak, flt);
 
     if (last_move.size() > 0)
     {
@@ -695,10 +673,9 @@ const char
         return ret;
     });
 
-    std::tuple<double, double, double, double> tmpTuple;
     double tmpDouble;
-    std::tie(tmpTuple, err) = bounding(shape);
-    TESTERR(err)
+    // here may throw exception
+    auto tmpTuple(bounding(shape));
     for (double y = std::max(floor(std::get<1>(tmpTuple)), 0.);
          y <= (std::min(ceil(std::get<3>(tmpTuple)), height) - 1);
          ++y)
@@ -716,8 +693,8 @@ const char
                                                 y + 0.5));
             if (cx.size() != 0)
             {
-                std::tie(tmpDouble, err) = trim(cx.at(0), 0, width);
-                TESTERR(err)
+                // here may throw exception
+                tmpDouble = trim(cx.at(0), 0, width);
                 row_stops.push_back(std::make_pair(tmpDouble,
                                     std::get<3>(line) > 0. ? 1. : -1.));
             }
@@ -746,6 +723,4 @@ const char
             } // end for i
         }
     } // end for y
-
-    return nullptr;
 }

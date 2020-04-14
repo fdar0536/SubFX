@@ -39,7 +39,8 @@ add_library(YutilsCpp SHARED
     YutilsCpp/fonthandle.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
     YutilsCpp/math.cpp
-    # YutilsCpp/shape.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
+    YutilsCpp/shape.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp
     YutilsCpp/utf8.cpp
     include/YutilsCpp
@@ -86,6 +87,7 @@ ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp"
 )
 

@@ -7,7 +7,7 @@
 #include <map>
 
 #include "math.hpp"
-#include "../common/basecommon.hpp"
+#include "../basecommon.h"
 
 namespace Yutils
 {
@@ -16,28 +16,27 @@ class SYMBOL_SHOW Shape : protected Math
 {
 public:
 
-    static std::shared_ptr<Shape> create();
+    static std::shared_ptr<Shape> create() NOTHROW;
 
     // Calculates shape bounding box
-    std::pair<std::tuple<double, double, double, double>, const char *>
-    bounding(std::string &);
+    std::tuple<double, double, double, double>
+    bounding(std::string &) THROW;
 
     // Filters shape points
-    std::pair<std::string, const char *>
+    std::string
     filter(std::string &,
-           std::function<std::pair<double, double>(double, double, std::string &)> &);
+           std::function<std::pair<double, double>(double, double, std::string &)> &)
+    THROW;
 
     // Converts shape curves to lines
-    std::pair<std::string, const char *>
-    flatten(std::string &);
+    std::string flatten(std::string &) THROW;
 
     // Shifts shape coordinates
-    std::pair<std::string, const char *>
-    move(std::string &, double, double);
+    std::string move(std::string &, double, double) THROW;
 
     // Converts shape to pixels
-    std::pair<std::vector<std::map<std::string, double>>, const char *>
-    to_pixels(std::string &);
+    std::vector<std::map<std::string, double>>
+    to_pixels(std::string &) THROW;
 
 protected:
 
@@ -51,7 +50,7 @@ private:
                                          double, double,
                                          double, double,
                                          double, double,
-                                         double);
+                                         double) NOTHROW;
 
     // Check flatness of 4th degree curve with angles
     // for flatten
@@ -59,21 +58,21 @@ private:
                         double, double,
                         double, double,
                         double, double,
-                        double);
+                        double) NOTHROW;
 
     // Convert 4th degree curve to line points
     // for flatten
     std::vector<double> curve4_to_lines(double, double,
                                         double, double,
                                         double, double,
-                                        double, double);
+                                        double, double) NOTHROW;
 
     // Renderer (on binary image with aliasing)
     // for to_pixels
-    const char *render_shape(double,
-                             double,
-                             std::vector<bool> &,
-                             std::string &);
+    void render_shape(double,
+                      double,
+                      std::vector<bool> &,
+                      std::string &) THROW;
 };
 
 }
