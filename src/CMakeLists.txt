@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(SUBFX_VERSION r0.0.1)
 set(SUBFX_NAME SubFX)
+include(GNUInstallDirs)
 
 if (UNIX)
     find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
@@ -62,6 +63,27 @@ else () # Windows
 endif (UNIX) # end if (UNIX)
 
 enable_testing()
+
+#common
+add_library(BaseCommon
+    INTERFACE
+)
+
+target_include_directories(BaseCommon
+    INTERFACE
+    include/internal
+)
+
+set_target_properties(BaseCommon
+    PROPERTIES
+    PUBLIC_HEADER
+    "include/internal/basecommon.h")
+
+install(
+    TARGETS BaseCommon
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
+)
+
 include(YutilsCpp/CMakeLists.txt)
 
 configure_file(config.h.in config.h @ONLY)

@@ -42,8 +42,9 @@ add_library(YutilsCpp SHARED
     ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp
     YutilsCpp/utf8.cpp
     include/YutilsCpp
-    include/internal/basecommon.h
 )
+
+add_dependencies(YutilsCpp BaseCommon)
 
 #ICU
 LIST(APPEND YutilsCpp_includes ${ICU_INCLUDE_DIRS})
@@ -66,6 +67,40 @@ target_link_libraries(YutilsCpp ${YutilsCpp_libs})
 target_include_directories(YutilsCpp
     SYSTEM BEFORE
     PUBLIC ${YutilsCpp_includes}
+)
+
+#install
+set_target_properties(YutilsCpp
+    PROPERTIES
+    PUBLIC_HEADER
+    "include/YutilsCpp"
+)
+
+set_target_properties(YutilsCpp
+    PROPERTIES
+    PRIVATE_HEADER
+    "${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/common.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp"
+)
+
+install(
+    TARGETS YutilsCpp
+
+    LIBRARY
+    DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+
+    PUBLIC_HEADER
+    DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+
+    PRIVATE_HEADER
+    DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal/yutilscpp
 )
 
 # python
