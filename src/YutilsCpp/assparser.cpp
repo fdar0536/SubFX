@@ -787,6 +787,9 @@ void AssParser::parseDialogs() THROW
         dialog->words.reserve(50);
         tmpString = dialog->text_stripped;
         uint32_t wordIndex(0);
+#ifdef _MSC_VER
+        try{
+#endif
         while(boost::u32regex_search(tmpString, match, u32reg))
         {
             std::shared_ptr<AssWord> word(std::make_shared<AssWord>());
@@ -818,7 +821,13 @@ void AssParser::parseDialogs() THROW
             tmpString = match.suffix();
             ++wordIndex;
         } //end while(boost::u32regex_search(tmpString, match, u32reg))
-
+#ifdef _MSC_VER
+        }
+        catch (std::out_of_range &)
+        {
+            // do nothing
+        }
+#endif
         // Calculate word positions with all words data already available
         if (dialog->words.size() > 0)
         {
@@ -1090,18 +1099,17 @@ word_reference_found:
     sort(dialogData.begin(), dialogData.end(),
         [](const std::shared_ptr<AssDialog> &a, const std::shared_ptr<AssDialog> &b)
         {
-            return (a->start_time <= b->start_time);
+            return (a->start_time < b->start_time);
         }
     );
 
-    size_t last(dialogData.size() - 1);
     for (size_t i = 0; i < dialogData.size(); ++i)
     {
         std::shared_ptr<AssDialog> dialog(dialogData.at(i));
         dialog->leadin = (i == 0 ?
                           1000.1 :
                           (dialog->start_time - dialogData.at(i - 1)->end_time));
-        dialog->leadout = (i == last ?
+        dialog->leadout = (i == (dialogData.size() - 1) ?
                            1000.1 :
                            (dialogData.at(i + 1)->start_time - dialog->end_time));
     }
