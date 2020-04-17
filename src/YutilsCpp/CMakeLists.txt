@@ -46,7 +46,8 @@ add_library(YutilsCpp SHARED
     include/YutilsCpp
 )
 
-add_dependencies(YutilsCpp BaseCommon)
+add_dependencies(YutilsCpp BaseCommon SubFXUtils)
+LIST(APPEND YutilsCpp_libs SubFXUtils)
 
 #ICU
 LIST(APPEND YutilsCpp_includes ${ICU_INCLUDE_DIRS})

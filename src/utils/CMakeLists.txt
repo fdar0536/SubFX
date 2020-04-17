@@ -3,25 +3,27 @@ add_library(SubFXUtils
     include/internal/utils.hpp
     include/internal/utils/logger.hpp
     utils/logger.cpp
+    include/Utils
 )
 
 target_include_directories(SubFXUtils
     SYSTEM BEFORE
     PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/include/internal
+    ${CMAKE_SOURCE_DIR}/include
 )
 
 set_target_properties(SubFXUtils
     PROPERTIES
     PUBLIC_HEADER
-    "include/internal/utils.hpp"
+    "include/Utils"
 )
 
 set_target_properties(SubFXUtils
     PROPERTIES
     PRIVATE_HEADER
-    "include/internal/utils/logger.hpp"
+    "include/internal/utils/logger.hpp;\
+include/internal/utils.hpp"
 )
 
 install(
