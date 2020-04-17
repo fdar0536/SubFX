@@ -787,11 +787,26 @@ void AssParser::parseDialogs() THROW
         dialog->words.reserve(50);
         tmpString = dialog->text_stripped;
         uint32_t wordIndex(0);
-#ifdef _MSC_VER
-        try{
-#endif
-        while(boost::u32regex_search(tmpString, match, u32reg))
+        bool result(false);
+        while (true)
         {
+#ifdef _MSC_VER
+            try
+            {
+                result = boost::u32regex_search(tmpString, match, u32reg);
+            }
+            catch (std::out_of_range &)
+            {
+                break;
+            }
+#else
+            result = boost::u32regex_search(tmpString, match, u32reg);
+#endif
+            if (!result)
+            {
+                break;
+            }
+
             std::shared_ptr<AssWord> word(std::make_shared<AssWord>());
 
             word->text = match[2];
@@ -820,14 +835,8 @@ void AssParser::parseDialogs() THROW
             dialog->words.push_back(word);
             tmpString = match.suffix();
             ++wordIndex;
-        } //end while(boost::u32regex_search(tmpString, match, u32reg))
-#ifdef _MSC_VER
-        }
-        catch (std::out_of_range &)
-        {
-            // do nothing
-        }
-#endif
+        } //end while(true)
+
         // Calculate word positions with all words data already available
         if (dialog->words.size() > 0)
         {

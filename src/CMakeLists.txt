@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(SubFX LANGUAGES CXX)
+project(SubFX
+    LANGUAGES CXX
+    VERSION 0.0.1
+)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(SUBFX_VERSION r0.0.1)
-set(SUBFX_NAME SubFX)
 include(GNUInstallDirs)
 
 if (UNIX)
@@ -86,6 +88,8 @@ install(
     DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
 )
+
+include(utils/CMakeLists.txt)
 
 include(YutilsCpp/CMakeLists.txt)
 

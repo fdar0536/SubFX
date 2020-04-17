@@ -1,4 +1,7 @@
-#define SUBFX_VERSION "@SUBFX_VERSION@"
-#define SUBFX_NAME "@SUBFX_NAME@"
+#pragma once
+
+#define PROJ_VERSION "r@PROJECT_VERSION@"
+#define PROJ_NAME "@CMAKE_PROJECT_NAME@"
+#define PROJ_NAMESPACE @CMAKE_PROJECT_NAME@
 #cmakedefine ENABLE_SIMD
 #cmakedefine ENABLE_AVX
