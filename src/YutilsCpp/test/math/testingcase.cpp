@@ -8,7 +8,7 @@ TestMath *TestMath::create()
         return nullptr;
     }
 
-    ret->m_math = Yutils::Math::create();
+    ret->m_math = PROJ_NAMESPACE::Yutils::Math::create();
     if (ret->m_math == nullptr)
     {
         delete ret;

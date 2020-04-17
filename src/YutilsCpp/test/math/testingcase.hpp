@@ -38,5 +38,5 @@ private:
 
     TestMath() {}
 
-    std::shared_ptr<Yutils::Math> m_math;
+    std::shared_ptr<PROJ_NAMESPACE::Yutils::Math> m_math;
 };

@@ -16,7 +16,8 @@
 int main()
 {
     puts("Testing ass.hpp ...");
-    std::shared_ptr<Yutils::Ass> ass(Yutils::Ass::create());
+    std::shared_ptr<PROJ_NAMESPACE::Yutils::Ass>
+            ass(PROJ_NAMESPACE::Yutils::Ass::create());
     if (ass == nullptr)
     {
         puts("Fail in initializing");

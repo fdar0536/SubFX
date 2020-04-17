@@ -8,11 +8,11 @@
 
 int main()
 {
-    std::shared_ptr<Yutils::AssParser> parser(nullptr);
+    std::shared_ptr<PROJ_NAMESPACE::Yutils::AssParser> parser(nullptr);
     std::string fileName("in.ass");
     try
     {
-        parser = Yutils::AssParser::create(fileName);
+        parser = PROJ_NAMESPACE::Yutils::AssParser::create(fileName);
     }
     catch (std::invalid_argument &e)
     {

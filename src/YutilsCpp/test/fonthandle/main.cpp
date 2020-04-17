@@ -5,7 +5,7 @@
 int main()
 {
     std::string tmpString("Source Code Pro");
-    auto handle = Yutils::FontHandle::create(
+    auto handle(PROJ_NAMESPACE::Yutils::FontHandle::create(
         tmpString, // family
                 0, // bold
                 0, // italic
@@ -15,7 +15,7 @@ int main()
                1., // xscale
                1., // yscale
                0. // hspace
-               );
+               ));
 
     if (handle == nullptr)
     {
