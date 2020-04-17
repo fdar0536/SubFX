@@ -41,10 +41,11 @@ FontHandle::create(std::string &family,
         return nullptr;
     }
 
-#ifdef _WIN32
-    ret->downscale = (1. / static_cast<double>(ret->upscale));
-#else
+#ifndef _WIN32
     int upscale(FONT_PRECISION);
+    ret->downscale = (1. / static_cast<double>(upscale));
+#else
+    ret->downscale = (1.f / static_cast<double>(ret->upscale));
 #endif
 
 #ifdef _WIN32

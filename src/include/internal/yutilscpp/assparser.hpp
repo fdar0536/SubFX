@@ -41,7 +41,7 @@ public:
 
 protected:
 
-    AssParser() :
+    AssParser() NOTHROW :
         Ass(),
         Utf8(),
         m_logger(nullptr),
