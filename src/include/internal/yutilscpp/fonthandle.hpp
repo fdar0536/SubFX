@@ -14,9 +14,12 @@
 
 #define FONT_PRECISION 64
 
+namespace PROJ_NAMESPACE
+{
+
 namespace Yutils
 {
-class SYMBOL_SHOW FontHandle : protected Math
+class SYMBOL_SHOW FontHandle : public Math
 {
 public:
 
@@ -42,8 +45,12 @@ public:
 
 protected:
 
-    FontHandle(double xscale, double yscale, double hspace) :
-    Math(),
+#ifdef _WIN32
+    FontHandle(double xscale, double yscale, double hspace) NOTHROW :
+#else
+    FontHandle(double xscale, double yscale) NOTHROW :
+        Math(),
+#endif
     #ifdef _WIN32
         dc(nullptr),
         font(nullptr),
@@ -61,7 +68,15 @@ protected:
 
 private:
 
-    FontHandle() {}
+    FontHandle() = delete;
+
+    FontHandle(const FontHandle &) = delete;
+
+    FontHandle& operator=(const FontHandle &other) = delete;
+
+    FontHandle& operator=(FontHandle &&other) = delete;
+
+    FontHandle& operator=(FontHandle other) = delete;
 
 #ifdef _WIN32
     HDC dc;
@@ -88,5 +103,8 @@ private:
     double yscale;
 
     double downscale;
+
 };
-}
+} // end namespace Yutils
+
+} // end PROJ_NAMESPACE

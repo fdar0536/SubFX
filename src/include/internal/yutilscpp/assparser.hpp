@@ -9,6 +9,9 @@
 #include "utf8.hpp"
 #include "../basecommon.h"
 
+namespace PROJ_NAMESPACE
+{
+
 namespace Yutils
 {
 class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
@@ -50,6 +53,14 @@ protected:
     {}
 
 private:
+
+    AssParser(const AssParser &) = delete;
+
+    AssParser& operator=(const AssParser &other) = delete;
+
+    AssParser& operator=(AssParser &&other) = delete;
+
+    AssParser& operator=(AssParser other) = delete;
 
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
     std::istream &safeGetline(std::istream &is, std::string &t) NOTHROW;
@@ -97,4 +108,6 @@ private:
     std::shared_ptr<TEXT_SIZE>
     textSize(std::string &text, std::shared_ptr<AssStyle> &style) THROW;
 };
-}
+} // end namespace Yutils
+
+} // end namespace PROJ_NAMESPACE

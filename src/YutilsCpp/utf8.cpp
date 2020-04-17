@@ -1,6 +1,6 @@
 #include "YutilsCpp"
 
-using namespace Yutils;
+using namespace PROJ_NAMESPACE::Yutils;
 
 uint32_t Utf8::utf8StringLen(std::string &input) NOTHROW
 {

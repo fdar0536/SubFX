@@ -9,6 +9,9 @@
 
 #include "../basecommon.h"
 
+namespace PROJ_NAMESPACE
+{
+
 namespace Yutils
 {
 class SYMBOL_SHOW Ass
@@ -29,6 +32,8 @@ public:
 
 protected:
 
-    Ass() {}
+    Ass() NOTHROW {}
 };
-}
+} // end namespace Yutils
+
+} // end namespace PROJ_NAMESPACE

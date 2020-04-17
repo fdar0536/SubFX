@@ -6,7 +6,6 @@
 #include <cmath>
 
 #include "YutilsCpp"
-#include "config.h"
 
 #ifdef ENABLE_SIMD
 #ifdef ENABLE_AVX
@@ -68,9 +67,7 @@ Math::arc_curve(double x, double y,
     {
         cur_angle_pct = std::min((angle - angle_sum),
                                  static_cast<double>(90.)) / 90.;
-        std::tie(rx3, ry3) = m_common.rotate2d(rx0,
-                                               ry0,
-                                               cw * 90. * cur_angle_pct);
+        std::tie(rx3, ry3) = rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
 
         // arc start to end vector
         rx03 = rx3 - rx0;
@@ -84,15 +81,11 @@ Math::arc_curve(double x, double y,
                                                     tmpDouble * kappa);
 
         // Get curve control points
-        tmpPair = m_common.rotate2d(rx03,
-                                    ry03,
-                                    cw * (-45.) * cur_angle_pct);
+        tmpPair = rotate2d(rx03, ry03, cw * (-45.) * cur_angle_pct);
         rx1 = rx0 + tmpPair.first;
         ry1 = ry0 + tmpPair.second;
 
-        tmpPair = m_common.rotate2d(rx03 * -1.,
-                           ry03 * -1.,
-                           cw * 45. * cur_angle_pct);
+        tmpPair = rotate2d(rx03 * -1., ry03 * -1., cw * 45. * cur_angle_pct);
         rx2 = rx3 + tmpPair.first;
         ry2 = ry3 + tmpPair.second;
 
@@ -147,7 +140,7 @@ double Math::degree(double x1, double y1, double z1,
 {
     double degree = distance(x1, y1, z1) * distance(x2, y2, z2);
     degree = acos((x1 * x2 + y1 * y2 + z1 * z2) / degree);
-    degree = m_common.deg(degree);
+    degree = deg(degree);
 
     // Return with sign by clockwise direction
     if ((x1 * y2 - y1 * x2) < 0)
@@ -228,8 +221,7 @@ double Math::randomsteps(double min, double max, double step) THROW
         throw std::invalid_argument("randomsteps: Invalid input!");
     }
 
-    return std::min(min + m_common.random(0,
-                                          ceil((max - min) / step)) * step, max);
+    return std::min(min + random(0, ceil((max - min) / step)) * step, max);
 }
 
 double Math::round(double x, double dec) NOTHROW
@@ -271,7 +263,7 @@ std::pair<double, double> Math::ellipse(double x, double y,
                                         double w, double h,
                                         double a) NOTHROW
 {
-    double ra(m_common.rad(a));
+    double ra(rad(a));
     return std::make_pair(x + w / 2. * sin(ra),
                           y + h / 2. * cos(ra));
 }
@@ -281,7 +273,7 @@ double Math::randomway() NOTHROW
     double ret;
     while(1)
     {
-        ret = m_common.random(0, 1) * 2. - 1.;
+        ret = random(0, 1) * 2. - 1.;
         if (ret != 0.)
         {
             break;
@@ -301,7 +293,7 @@ Math::rotate(std::tuple<double, double, double> p,
         throw std::invalid_argument("rotate: invalid axis");
     }
 
-    double ra(m_common.rad(angle));
+    double ra(rad(angle));
 
     // Is here has any better way to solve this problem?
     if (axis == "x")
@@ -329,7 +321,7 @@ Math::rotate(std::tuple<double, double, double> p,
                            std::get<2>(p));
 }
 
-// private member function
+// private member functions
 std::tuple<double, double, double>
 Math::bezier2(double pct,
               std::vector<std::tuple<double, double, double>> &pts,

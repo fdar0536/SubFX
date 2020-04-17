@@ -1,5 +1,4 @@
-#ifndef SHAPE_HPP
-#define SHAPE_HPP
+#pragma once
 
 #include <string>
 #include <functional>
@@ -9,9 +8,11 @@
 #include "math.hpp"
 #include "../basecommon.h"
 
-namespace Yutils
+namespace PROJ_NAMESPACE
 {
 
+namespace Yutils
+{
 class SYMBOL_SHOW Shape : protected Math
 {
 public:
@@ -74,7 +75,6 @@ private:
                       std::vector<bool> &,
                       std::string &) THROW;
 };
+} // end namespace Yutils
 
-}
-
-#endif // SHAPE_HPP
+} // end namespace PROJ_NAMESPACE

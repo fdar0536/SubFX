@@ -13,7 +13,7 @@
 
 #include "YutilsCpp"
 
-using namespace Yutils;
+using namespace PROJ_NAMESPACE::Yutils;
 
 std::shared_ptr<FontHandle>
 FontHandle::create(std::string &family,
@@ -31,16 +31,20 @@ FontHandle::create(std::string &family,
         throw std::invalid_argument("FontHandle::create: size cannot lower than 0");
     }
 
+#ifdef _WIN32
     FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale, hspace));
+#else
+    FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale));
+#endif
     if (!ret)
     {
         return nullptr;
     }
 
-#ifndef _WIN32
-    int upscale(FONT_PRECISION);
-#else
+#ifdef _WIN32
     ret->downscale = (1. / static_cast<double>(ret->upscale));
+#else
+    int upscale(FONT_PRECISION);
 #endif
 
 #ifdef _WIN32

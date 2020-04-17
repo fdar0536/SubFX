@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "../basecommon.h"
-#include "config.h"
 
 // Floating point precision by numbers behind point (for shape points)
 #define FP_PRECISION 3
@@ -17,11 +16,11 @@ namespace PROJ_NAMESPACE
 
 namespace Yutils
 {
-class Common
+class SYMBOL_SHOW Common
 {
-public:
+protected:
 
-    Common(void) NOTHROW;
+    Common() NOTHROW;
 
     std::pair<double, double> rotate2d(double, double, double) NOTHROW;
 

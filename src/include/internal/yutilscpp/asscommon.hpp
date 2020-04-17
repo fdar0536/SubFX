@@ -6,10 +6,15 @@
 
 #include <cstdint>
 
+#include "../basecommon.h"
+
 #define ASS_TRUE -1
 #define ASS_FALSE 0
 
 // reference: https://github.com/weizhenye/ASS/wiki/ASS-%E5%AD%97%E5%B9%95%E6%A0%BC%E5%BC%8F%E8%A7%84%E8%8C%83
+
+namespace PROJ_NAMESPACE
+{
 
 namespace Yutils
 {
@@ -232,4 +237,6 @@ public:
     std::vector<std::shared_ptr<AssWord>> words;
     std::vector<std::shared_ptr<AssChar>> chars;
 };
-}
+} // end namespace Yutils
+
+} // end PROJ_NAMESPACE

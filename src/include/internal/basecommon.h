@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "config.h"
+
 #ifdef _WIN32
 #define NOMINMAX
 #endif

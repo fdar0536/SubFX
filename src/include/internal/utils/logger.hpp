@@ -52,7 +52,11 @@ private:
 
     Logger(const Logger &) = delete;
 
-    Logger operator=(Logger &) = delete;
+    Logger& operator=(const Logger &other) = delete;
+
+    Logger& operator=(Logger &&other) = delete;
+
+    Logger& operator=(Logger other) = delete;
 
     FILE *m_out;
 

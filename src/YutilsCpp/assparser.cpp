@@ -23,7 +23,7 @@
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
-using namespace Yutils;
+using namespace PROJ_NAMESPACE::Yutils;
 
 std::shared_ptr<AssParser>
 AssParser::create(const std::string &fileName) THROW
@@ -142,7 +142,7 @@ bool AssParser::isCharAvailable() const NOTHROW
     return charReady;
 }
 
-// private member function
+// private member functions
 std::istream &AssParser::safeGetline(std::istream &is, std::string &buf) NOTHROW
 {
     buf.clear();

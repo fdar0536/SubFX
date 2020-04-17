@@ -12,7 +12,7 @@ namespace PROJ_NAMESPACE
 
 namespace Yutils
 {
-class SYMBOL_SHOW Math
+class SYMBOL_SHOW Math : public Common
 {
 public:
 
@@ -70,10 +70,11 @@ public:
 protected:
 
     Math() NOTHROW :
-        m_common(Common())
+        Common()
     {}
 
 private:
+
     std::tuple<double, double, double> bezier2(double pct,
                      std::vector<std::tuple<double, double, double>> &pts,
                                                bool is3D) NOTHROW;
@@ -91,8 +92,6 @@ private:
                                                bool is3D) NOTHROW;
 
     double fac(double n) NOTHROW;
-
-    Common m_common;
 };
 } // end namespace Yutils
 

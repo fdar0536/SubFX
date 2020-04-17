@@ -74,12 +74,15 @@ add_library(BaseCommon
 target_include_directories(BaseCommon
     INTERFACE
     include/internal
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 set_target_properties(BaseCommon
     PROPERTIES
     PUBLIC_HEADER
-    "include/internal/basecommon.h")
+    "include/internal/basecommon.h;\
+${CMAKE_CURRENT_BINARY_DIR}/config.h"
+    )
 
 install(
     TARGETS BaseCommon

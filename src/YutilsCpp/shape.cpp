@@ -15,7 +15,7 @@
 
 #define CURVE_TOLERANCE 1 // Angle in degree to define a curve as flat
 
-using namespace Yutils;
+using namespace PROJ_NAMESPACE::Yutils;
 
 // public member function
 std::shared_ptr<Shape> Shape::create() NOTHROW
