@@ -26,7 +26,8 @@ using boost::bad_lexical_cast;
 using namespace PROJ_NAMESPACE::Yutils;
 
 std::shared_ptr<AssParser>
-AssParser::create(const std::string &fileName) THROW
+AssParser::create(const std::string &fileName,
+                  const std::string &warningOut) THROW
 {
     std::fstream assFile;
     assFile.open(fileName, std::fstream::in);
@@ -38,6 +39,23 @@ AssParser::create(const std::string &fileName) THROW
     AssParser *ret(new (std::nothrow) AssParser());
     if (!ret)
     {
+        return nullptr;
+    }
+
+    if (warningOut.empty())
+    {
+        ret->m_logger = PROJ_NAMESPACE::Utils::Logger::create();
+    }
+    else
+    {
+        ret->m_logger = ret->m_logger =
+                PROJ_NAMESPACE::Utils::Logger::create(warningOut,
+                                                      warningOut);
+    }
+
+    if (ret->m_logger == nullptr)
+    {
+        delete ret;
         return nullptr;
     }
 
@@ -78,7 +96,7 @@ AssParser::create(const std::string &fileName) THROW
     if (ret->metaData->play_res_x == 0 ||
         ret->metaData->play_res_y == 0)
     {
-        std::cerr << "Warning: PlayRes is fallback to default." << std::endl;
+        ret->m_logger->writeErr("Warning: PlayRes is fallback to default.\n");
         ret->metaData->play_res_x = 640;
         ret->metaData->play_res_y = 360;
     }
@@ -86,8 +104,9 @@ AssParser::create(const std::string &fileName) THROW
     if (ret->styleData.size() == 0)
     {
         // set default style
-        std::cerr << "Warning: CANNOT find any style data in ass file." << std::endl;
-        std::cerr << "Warning: Create default style." << std::endl;
+        ret->m_logger->writeErr("Warning: CANNOT find any style data "
+                                "in ass file.\n");
+        ret->m_logger->writeErr("Warning: Create default style.\n");
 
         std::shared_ptr<AssStyle> style(std::make_shared<AssStyle>());
         ret->styleData["Default"] = style;
@@ -182,7 +201,7 @@ std::string AssParser::checkBom(std::string &in) NOTHROW
         return in;
     }
 
-    std::cerr << "Warning: Remove utf-8 bom." << std::endl;
+    m_logger->writeErr("Warning: Remove utf-8 bom.\n");
     return in.substr(3);
 }
 
@@ -504,9 +523,9 @@ void AssParser::parseDialogs() THROW
         dialog->styleref = styleData[dialog->style];
         if (dialog->styleref == nullptr)
         {
-            std::cerr << "Waring: dialog " << dialog->i;
-            std::cerr << " fallback to default style.";
-            std::cerr << std::endl;
+            std::string out("Waring: dialog " + std::to_string(dialog->i));
+            out += " fallback to default style.\n";
+            m_logger->writeErr(out);
             dialog->styleref = std::make_shared<AssStyle>();
         }
 

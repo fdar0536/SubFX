@@ -20,10 +20,10 @@ public:
 
     static std::shared_ptr<Logger> create(FILE *out = stdout,
                                           FILE *err = stderr,
-                                          bool autoCloseFiles = false);
+                                          bool autoCloseFiles = true);
 
-    static std::shared_ptr<Logger> create(std::string &outFile,
-                                          std::string &errFile);
+    static std::shared_ptr<Logger> create(const std::string &outFile,
+                                          const std::string &errFile);
 
     ~Logger();
 

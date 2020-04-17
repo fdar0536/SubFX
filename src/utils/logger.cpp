@@ -22,8 +22,8 @@ Logger::create(FILE *out,
 }
 
 std::shared_ptr<Logger>
-Logger::create(std::string &outFile,
-               std::string &errFile)
+Logger::create(const std::string &outFile,
+               const std::string &errFile)
 {
     FILE *out(nullptr);
     FILE *err(nullptr);

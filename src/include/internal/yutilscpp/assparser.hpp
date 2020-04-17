@@ -8,6 +8,7 @@
 #include "asscommon.hpp"
 #include "utf8.hpp"
 #include "../basecommon.h"
+#include "../utils/utils.hpp"
 
 namespace PROJ_NAMESPACE
 {
@@ -19,7 +20,8 @@ class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
 public:
 
     static std::shared_ptr<AssParser>
-    create(const std::string &fileName) THROW;
+    create(const std::string &fileName,
+           const std::string &warningOut = "") THROW;
 
     std::shared_ptr<AssMeta> meta() const NOTHROW;
 
@@ -42,6 +44,7 @@ protected:
     AssParser() :
         Ass(),
         Utf8(),
+        m_logger(nullptr),
         section(Idle),
         metaData(std::make_shared<AssMeta>()),
         styleData(std::map<std::string, std::shared_ptr<AssStyle>>()),
@@ -61,6 +64,8 @@ private:
     AssParser& operator=(AssParser &&other) = delete;
 
     AssParser& operator=(AssParser other) = delete;
+
+    std::shared_ptr<PROJ_NAMESPACE::Utils::Logger> m_logger;
 
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
     std::istream &safeGetline(std::istream &is, std::string &t) NOTHROW;
