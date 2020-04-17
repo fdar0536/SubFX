@@ -1,6 +1,6 @@
 add_library(SubFXUtils
     SHARED
-    include/internal/utils.hpp
+    include/internal/utils/utils.hpp
     include/internal/utils/logger.hpp
     utils/logger.cpp
     include/Utils
@@ -23,7 +23,7 @@ set_target_properties(SubFXUtils
     PROPERTIES
     PRIVATE_HEADER
     "include/internal/utils/logger.hpp;\
-include/internal/utils.hpp"
+include/internal/utils/utils.hpp"
 )
 
 install(
@@ -35,7 +35,7 @@ install(
 
     PUBLIC_HEADER
     DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
+    ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
 
     PRIVATE_HEADER
     DESTINATION

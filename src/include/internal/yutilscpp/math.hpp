@@ -7,9 +7,12 @@
 
 #include "common.hpp"
 
+namespace PROJ_NAMESPACE
+{
+
 namespace Yutils
 {
-class SYMBOL_SHOW Math : public Common
+class SYMBOL_SHOW Math
 {
 public:
 
@@ -66,7 +69,9 @@ public:
 
 protected:
 
-    Math() NOTHROW : Common() {}
+    Math() NOTHROW :
+        m_common(Common())
+    {}
 
 private:
     std::tuple<double, double, double> bezier2(double pct,
@@ -86,5 +91,11 @@ private:
                                                bool is3D) NOTHROW;
 
     double fac(double n) NOTHROW;
+
+    Common m_common;
 };
-}
+} // end namespace Yutils
+
+} // end PROJ_NAMESPACE
+
+

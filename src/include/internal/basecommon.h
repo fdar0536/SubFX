@@ -22,7 +22,9 @@
 #ifdef __cplusplus
 #define THROW noexcept(false)
 #define NOTHROW noexcept
+#define UNUSED(x) static_cast<void>(x)
 #else
 #define THROW
 #define NOTHROW
+#define UNUSED(x) (void)x
 #endif

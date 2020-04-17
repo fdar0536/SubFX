@@ -4,17 +4,22 @@
 #include <utility>
 
 #include "../basecommon.h"
+#include "config.h"
 
-#define FP_PRECISION 3 // Floating point precision by numbers behind point (for shape points)
-#define SUPERSAMPLING 8 // Anti-aliasing precision for shape to pixels conversion
+// Floating point precision by numbers behind point (for shape points)
+#define FP_PRECISION 3
 
-#define UNUSED(x) static_cast<void>(x)
+// Anti-aliasing precision for shape to pixels conversion
+#define SUPERSAMPLING 8
+
+namespace PROJ_NAMESPACE
+{
 
 namespace Yutils
 {
-class SYMBOL_SHOW Common
+class Common
 {
-protected:
+public:
 
     Common(void) NOTHROW;
 
@@ -32,3 +37,5 @@ protected:
     std::string doubleToString(double input) NOTHROW;
 };
 } // end namespace Yutils
+
+} // end PROJ_NAMESPACE
