@@ -14,7 +14,7 @@ namespace PROJ_NAMESPACE
 namespace Utils
 {
 
-class Logger
+class SYMBOL_SHOW Logger
 {
 public:
 

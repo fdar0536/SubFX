@@ -12,7 +12,7 @@
 
 #include "YutilsCpp"
 
-using namespace Yutils;
+using namespace PROJ_NAMESPACE::Yutils;
 
 std::shared_ptr<Ass> Ass::create() NOTHROW
 {
