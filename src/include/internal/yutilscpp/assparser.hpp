@@ -63,8 +63,6 @@ private:
 
     AssParser& operator=(AssParser &&other) = delete;
 
-    AssParser& operator=(AssParser other) = delete;
-
     std::shared_ptr<PROJ_NAMESPACE::Utils::Logger> m_logger;
 
     // https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

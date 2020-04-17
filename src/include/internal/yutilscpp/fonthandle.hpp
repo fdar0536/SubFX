@@ -76,8 +76,6 @@ private:
 
     FontHandle& operator=(FontHandle &&other) = delete;
 
-    FontHandle& operator=(FontHandle other) = delete;
-
 #ifdef _WIN32
     HDC dc;
 

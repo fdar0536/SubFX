@@ -56,8 +56,6 @@ private:
 
     Logger& operator=(Logger &&other) = delete;
 
-    Logger& operator=(Logger other) = delete;
-
     FILE *m_out;
 
     FILE *m_err;
