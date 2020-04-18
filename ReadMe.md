@@ -1,5 +1,7 @@
 # SubFX
 
+[![Build Status](https://travis-ci.com/fdar0536/SubFX.svg?branch=master)](https://travis-ci.com/fdar0536/SubFX)
+
 A scripting tool for creating karaoke subtitle effects.
 
 Now is under development.
