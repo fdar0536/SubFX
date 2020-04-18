@@ -12,7 +12,6 @@ archlinux:
     - pango
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
-    - ~/build:~/build
   before_install:
     - sudo sed -i '/#MAKEFLAGS=/c MAKEFLAGS="-j2"' /etc/makepkg.conf
   script:
