@@ -15,4 +15,4 @@ target_include_directories(testAssParser
 
 configure_file(in.ass.in in.ass @ONLY)
 
-# add_test(YutilsCppAss testAssParser)
+add_test(YutilsCppAss testAssParser)

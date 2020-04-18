@@ -10,12 +10,12 @@ archlinux:
     - cmake
     - boost
     - pango
+    - adobe-source-code-pro-fonts
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:
     - sudo sed -i '/#MAKEFLAGS=/c MAKEFLAGS="-j2"' /etc/makepkg.conf
   script:
-    - ls
     - mkdir build
     - cd build
     - cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../testResult ../src
@@ -36,6 +36,7 @@ before_install:
         export msys2+=" -msys2 -c "\"\$@"\" --"
         $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-toolchain base-devel
         $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-cmake mingw-w64-x86_64-boost
+        $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-adobe-source-code-pro-fonts
         ## Install more MSYS2 packages from https://packages.msys2.org/base here
         taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
         export PATH=/C/tools/msys64/mingw64/bin:$PATH
