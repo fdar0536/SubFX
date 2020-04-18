@@ -39,7 +39,7 @@ before_install:
         $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-adobe-source-code-pro-fonts
         ## Install more MSYS2 packages from https://packages.msys2.org/base here
         taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
+        export PATH=/C/tools/msys64/mingw64/bin:${TRAVIS_BUILD_DIR}/build:$PATH
         ;;
     esac
 
@@ -61,12 +61,11 @@ script:
   - |-
     case $TRAVIS_OS_NAME in
       windows)
-        $mingw64 cd ${TRAVIS_BUILD_DIR}
-        $mingw64 mkdir build
-        $mingw64 cd build
+        $mingw64 mkdir ${TRAVIS_BUILD_DIR}/build
+        $mingw64 cd ${TRAVIS_BUILD_DIR}/build
         $mingw64 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=${TRAVIS_BUILD_DIR}/testResult -DCMAKE_BUILD_TYPE=Release ${TRAVIS_BUILD_DIR}/src
         $mingw64 make -j2
-        $mingw64 PATH=$PWD:$PATH ctest
+        $mingw64 ctest
         ;;
       linux)
         curl -s https://raw.githubusercontent.com/mikkeloscar/arch-travis/master/arch-travis.sh | bash
