@@ -13,7 +13,6 @@ archlinux:
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:
-    - sudo ln -s /dev/null /etc/pacman.d/hooks/package-cleanup.hook
     - sudo sed -i '/#MAKEFLAGS=/c MAKEFLAGS="-j2"' /etc/makepkg.conf
   script:
     - mkdir build
@@ -61,11 +60,11 @@ script:
   - |-
     case $TRAVIS_OS_NAME in
       windows)
-        $msys2 mkdir build
-        $msys2 cd build
-        $msys2 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=../test -DCMAKE_BUILD_TYPE=Release ../src
-        $msys2 make -j2
-        $msys2 PATH=$PWD:$PATH ctest
+        $mingw64 mkdir build
+        $mingw64 cd build
+        $mingw64 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=../test -DCMAKE_BUILD_TYPE=Release ../src
+        $mingw64 make -j2
+        $mingw64 PATH=$PWD:$PATH ctest
         ;;
       linux)
         curl -s https://raw.githubusercontent.com/mikkeloscar/arch-travis/master/arch-travis.sh | bash
