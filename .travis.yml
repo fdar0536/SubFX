@@ -15,9 +15,10 @@ archlinux:
   before_install:
     - sudo sed -i '/#MAKEFLAGS=/c MAKEFLAGS="-j2"' /etc/makepkg.conf
   script:
+    - cd fdar0536/SubFX
     - mkdir build
     - cd build
-    - cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/test
+    - cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../testResult ../src
     - make -j2
     - ctest
 
@@ -60,9 +61,10 @@ script:
   - |-
     case $TRAVIS_OS_NAME in
       windows)
+        $mingw64 cd fdar0536/SubFX
         $mingw64 mkdir build
         $mingw64 cd build
-        $mingw64 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=../test -DCMAKE_BUILD_TYPE=Release ../src
+        $mingw64 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=../testResult -DCMAKE_BUILD_TYPE=Release ../src
         $mingw64 make -j2
         $mingw64 PATH=$PWD:$PATH ctest
         ;;
