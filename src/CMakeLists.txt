@@ -81,7 +81,7 @@ set_target_properties(BaseCommon
     PROPERTIES
     PUBLIC_HEADER
     "include/internal/basecommon.h;\
-${CMAKE_CURRENT_BINARY_DIR}/config.h"
+${CMAKE_BINARY_DIR}/config.h"
     )
 
 install(
@@ -90,11 +90,21 @@ install(
     PUBLIC_HEADER
     DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal
+    COMPONENT
+    devel
 )
 
-include(utils/CMakeLists.txt)
+install(
+    EXPORT ${CMAKE_PROJECT_NAME}Targets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+    FILE ${CMAKE_PROJECT_NAME}Targets.cmake
+    NAMESPACE ${CMAKE_PROJECT_NAME}::
+    COMPONENT devel
+)
 
-include(YutilsCpp/CMakeLists.txt)
+add_subdirectory(utils)
+
+add_subdirectory(YutilsCpp)
 
 configure_file(config.h.in config.h @ONLY)
 

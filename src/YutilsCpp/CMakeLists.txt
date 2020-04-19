@@ -5,6 +5,7 @@ if (UNIX)
     endif()
     LIST(APPEND YutilsCpp_includes
         ${PANGOCAIRO_INCLUDE_DIRS}
+        ${PANGO_INCLUDE_DIRS}
         ${GLIB2_INCLUDE_DIRS})
     LIST(APPEND YutilsCpp_libs
         ${PANGO_LIBRARIES}
@@ -24,63 +25,70 @@ if (UNIX)
         ${CAIRO_LIBRARIES})
 endif (UNIX)
 
-set(YUTILSCPP_INCLUDE_PREFIX include/internal/yutilscpp)
+set(YUTILSCPP_INCLUDE_PREFIX ${CMAKE_SOURCE_DIR}/include/internal/yutilscpp)
 
-add_library(YutilsCpp SHARED
+set(${CMAKE_PROJECT_NAME}Utils_DIR "${CMAKE_BINARY_DIR}/utils")
+find_package(${CMAKE_PROJECT_NAME}Utils CONFIG REQUIRED)
+
+add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
-    YutilsCpp/ass.cpp
+    ass.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
     ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
-    YutilsCpp/assparser.cpp
+    assparser.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp
-    YutilsCpp/common.cpp
+    common.cpp
     # YutilsCpp/file.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
-    YutilsCpp/fonthandle.cpp
+    fonthandle.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
-    YutilsCpp/math.cpp
+    math.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
-    YutilsCpp/shape.cpp
+    shape.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp
-    YutilsCpp/utf8.cpp
-    include/YutilsCpp
+    utf8.cpp
+    ${CMAKE_SOURCE_DIR}/include/YutilsCpp
 )
 
-add_dependencies(YutilsCpp BaseCommon SubFXUtils)
-LIST(APPEND YutilsCpp_libs SubFXUtils)
+add_library(${CMAKE_PROJECT_NAME}::Yutils ALIAS ${CMAKE_PROJECT_NAME}YutilsCpp)
+file(WRITE
+    ${CMAKE_BINARY_DIR}/YutilsCpp/${CMAKE_PROJECT_NAME}YutilsCppConfig.cmake
+    "")
+
+add_dependencies(${CMAKE_PROJECT_NAME}YutilsCpp BaseCommon)
+LIST(APPEND YutilsCpp_libs ${CMAKE_PROJECT_NAME}::Utils)
 
 #ICU
 LIST(APPEND YutilsCpp_includes ${ICU_INCLUDE_DIRS})
 LIST(APPEND YutilsCpp_libs ${ICU_LIBRARIES})
 
 # boost
-LIST(APPEND YutilsCpp_includes ${Boost_INCLUDE_DIRS})
 LIST(APPEND YutilsCpp_libs ${Boost_REGEX_LIBRARY})
 if (WIN32)
     LIST(APPEND YutilsCpp_libs ${Boost_LOCALE_LIBRARY})
 endif (WIN32)
 
-#config and others
-LIST(APPEND YutilsCpp_includes
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-)
-
-target_link_libraries(YutilsCpp ${YutilsCpp_libs})
-target_include_directories(YutilsCpp
+target_link_libraries(${CMAKE_PROJECT_NAME}YutilsCpp PUBLIC ${YutilsCpp_libs})
+target_include_directories(${CMAKE_PROJECT_NAME}YutilsCpp
     SYSTEM BEFORE
-    PUBLIC ${YutilsCpp_includes}
+    PUBLIC
+    ${YutilsCpp_includes}
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
 
 #install
-set_target_properties(YutilsCpp
+set_target_properties(${CMAKE_PROJECT_NAME}YutilsCpp
     PROPERTIES
-    PUBLIC_HEADER
-    "include/YutilsCpp"
-)
 
-set_target_properties(YutilsCpp
-    PROPERTIES
+    EXPORT_NAME Yutils
+
+    VERSION ${PROJECT_VERSION}
+
+    PUBLIC_HEADER
+    "${CMAKE_SOURCE_DIR}/include/YutilsCpp"
+
     PRIVATE_HEADER
     "${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp;\
@@ -93,19 +101,40 @@ ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp"
 )
 
 install(
-    TARGETS YutilsCpp
+    TARGETS ${CMAKE_PROJECT_NAME}YutilsCpp
+    DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+
+    EXPORT ${CMAKE_PROJECT_NAME}Targets
+    DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
 
     LIBRARY
     DESTINATION
     ${CMAKE_INSTALL_LIBDIR}
 
+    RUNTIME
+    DESTINATION
+    ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+    runtime
+
+    ARCHIVE
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT
+    devel
+
     PUBLIC_HEADER
     DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+    COMPONENT
+    devel
 
     PRIVATE_HEADER
     DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/internal/yutilscpp
+    COMPONENT
+    devel
 )
 
 # python
@@ -118,6 +147,5 @@ if (ENABLE_PYTHON)
 endif (ENABLE_PYTHON)
 
 if (BUILD_TESTING_CASES)
-    include(YutilsCpp/test/CMakeLists.txt)
+    include(test/CMakeLists.txt)
 endif (BUILD_TESTING_CASES)
-

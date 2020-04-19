@@ -4,13 +4,13 @@ add_executable(testAssParser
     assdumper.cpp
 )
 
-add_dependencies(testAssParser YutilsCpp)
-target_link_libraries(testAssParser YutilsCpp)
+add_dependencies(testAssParser ${CMAKE_PROJECT_NAME}YutilsCpp)
+target_link_libraries(testAssParser PRIVATE ${CMAKE_PROJECT_NAME}YutilsCpp)
 target_include_directories(testAssParser
     SYSTEM BEFORE
     PRIVATE
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/include
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 )
 
 configure_file(in.ass.in in.ass @ONLY)
@@ -21,10 +21,10 @@ if (WIN32)
             TARGET testAssParser
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_BINARY_DIR}/libSubFXUtils.dll"
-            "${CMAKE_BINARY_DIR}/libSubFXUtils.dll.a"
-            "${CMAKE_BINARY_DIR}/libYutilsCpp.dll"
-            "${CMAKE_BINARY_DIR}/libYutilsCpp.dll.a"
+            "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll"
+            "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll.a"
+            "${CMAKE_BINARY_DIR}/YutilsCpp/libYutilsCpp.dll"
+            "${CMAKE_BINARY_DIR}/YutilsCpp/libYutilsCpp.dll.a"
             $<TARGET_FILE_DIR:testAssParser>)
     endif(MINGW)
 endif(WIN32)
