@@ -19,8 +19,8 @@ if (WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll"
             "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll.a"
-            "${CMAKE_BINARY_DIR}/YutilsCpp/libYutilsCpp.dll"
-            "${CMAKE_BINARY_DIR}/YutilsCpp/libYutilsCpp.dll.a"
+            "${CMAKE_BINARY_DIR}/YutilsCpp/libSubFXYutilsCpp.dll"
+            "${CMAKE_BINARY_DIR}/YutilsCpp/libSubFXYutilsCpp.dll.a"
             $<TARGET_FILE_DIR:testFontHandle>)
     endif (MINGW)
 endif(WIN32)
