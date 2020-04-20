@@ -10,7 +10,7 @@
 namespace PROJ_NAMESPACE
 {
 
-namespace Yutils
+namespace Utils
 {
 class SYMBOL_SHOW Utf8
 {
@@ -23,7 +23,7 @@ protected:
     // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
     std::vector<std::string> utf8StringSplit(std::string&) NOTHROW;
 };
-} // end namespace Yutils
+} // end namespace Utils
 
 } // end namespace PROJ_NAMESPACE
 

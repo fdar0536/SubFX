@@ -5,14 +5,14 @@
 #include <string>
 #include <memory>
 
-#include "common.hpp"
+#include "Utils"
 
 namespace PROJ_NAMESPACE
 {
 
 namespace Yutils
 {
-class SYMBOL_SHOW Math : public Common
+class SYMBOL_SHOW Math : public PROJ_NAMESPACE::Utils::Common
 {
 public:
 

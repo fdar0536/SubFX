@@ -6,16 +6,15 @@
 
 #include "ass.hpp"
 #include "asscommon.hpp"
-#include "utf8.hpp"
 #include "../basecommon.h"
-#include "../utils/utils.hpp"
+#include "Utils"
 
 namespace PROJ_NAMESPACE
 {
 
 namespace Yutils
 {
-class SYMBOL_SHOW AssParser : protected Ass, protected Utf8
+class SYMBOL_SHOW AssParser : protected Ass, protected PROJ_NAMESPACE::Utils::Utf8
 {
 public:
 

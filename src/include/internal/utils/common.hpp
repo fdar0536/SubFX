@@ -14,7 +14,7 @@
 namespace PROJ_NAMESPACE
 {
 
-namespace Yutils
+namespace Utils
 {
 class SYMBOL_SHOW Common
 {
@@ -35,6 +35,6 @@ protected:
 
     std::string doubleToString(double input) NOTHROW;
 };
-} // end namespace Yutils
+} // end namespace Utils
 
 } // end PROJ_NAMESPACE

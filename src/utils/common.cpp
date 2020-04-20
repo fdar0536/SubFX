@@ -7,12 +7,12 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "YutilsCpp"
+#include "Utils"
 
 #define PI \
     3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651e+00
 
-using namespace PROJ_NAMESPACE::Yutils;
+using namespace PROJ_NAMESPACE::Utils;
 
 Common::Common() NOTHROW
 {

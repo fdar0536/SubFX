@@ -36,8 +36,6 @@ add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
     ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
     assparser.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/common.hpp
-    common.cpp
     # YutilsCpp/file.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
     fonthandle.cpp
@@ -45,8 +43,6 @@ add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     math.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
     shape.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp
-    utf8.cpp
     ${CMAKE_SOURCE_DIR}/include/YutilsCpp
 )
 
