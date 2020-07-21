@@ -41,8 +41,12 @@ add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     fonthandle.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
     math.cpp
+    internal/math_internal.hpp
+    internal/math_internal.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
     shape.cpp
+    internal/shape_internal.hpp
+    internal/shape_internal.cpp
     ${CMAKE_SOURCE_DIR}/include/YutilsCpp
 )
 

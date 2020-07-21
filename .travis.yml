@@ -1,6 +1,5 @@
 os:
   - linux
-  - windows
 language: cpp
 
 services: docker
@@ -22,36 +21,6 @@ archlinux:
     - make -j2
     - ctest
 
-before_install:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-        choco uninstall -y mingw
-        choco upgrade --no-progress -y msys2
-        export msys2='cmd //C RefreshEnv.cmd '
-        export msys2+='& set MSYS=winsymlinks:nativestrict '
-        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-        export msys2+=" -msys2 -c "\"\$@"\" --"
-        $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-toolchain base-devel
-        $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-cmake mingw-w64-x86_64-boost
-        $msys2 pacman -S --noconfirm --need mingw-w64-x86_64-adobe-source-code-pro-fonts
-        ## Install more MSYS2 packages from https://packages.msys2.org/base here
-        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        ;;
-    esac
-
-before_cache:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        # https://unix.stackexchange.com/a/137322/107554
-        $msys2 pacman --sync --clean --noconfirm
-        ;;
-    esac
-
 cache:
     directories:
     - $HOME/AppData/Local/Temp/chocolatey
@@ -61,13 +30,6 @@ cache:
 script:
   - |-
     case $TRAVIS_OS_NAME in
-      windows)
-        $mingw64 mkdir ${TRAVIS_BUILD_DIR}/build
-        $mingw64 cd ${TRAVIS_BUILD_DIR}/build
-        $mingw64 cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_PREFIX=${TRAVIS_BUILD_DIR}/testResult -DCMAKE_BUILD_TYPE=Release ${TRAVIS_BUILD_DIR}/src
-        $mingw64 make -j2
-        $mingw64 ctest
-        ;;
       linux)
         curl -s https://raw.githubusercontent.com/mikkeloscar/arch-travis/master/arch-travis.sh | bash
         ;;

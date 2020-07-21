@@ -63,7 +63,7 @@ AssParser::create(const std::string &fileName,
     std::string tmpString;
     uint8_t flag(1);
     uint8_t flags[] = {0, 0, 0, 0};
-    while(!ret->safeGetline(assFile, tmpString).eof())
+    while(!PROJ_NAMESPACE::Utils::Misc::safeGetline(assFile, tmpString).eof())
     {
         if (flag)
         {
@@ -162,35 +162,6 @@ bool AssParser::isCharAvailable() const NOTHROW
 }
 
 // private member functions
-std::istream &AssParser::safeGetline(std::istream &is, std::string &buf) NOTHROW
-{
-    buf.clear();
-    buf.reserve(5120);
-
-    std::istream::sentry se(is, true);
-    std::streambuf* sb = is.rdbuf();
-
-    while(1)
-    {
-        int c = sb->sbumpc();
-        switch (c) {
-        case '\n':
-            return is;
-        case '\r':
-            if(sb->sgetc() == '\n')
-                sb->sbumpc();
-            return is;
-        case std::streambuf::traits_type::eof():
-            // Also handle the case when the last line has no line ending
-            if(buf.empty())
-                is.setstate(std::ios::eofbit);
-            return is;
-        default:
-            buf += static_cast<char>(c);
-        }
-    }
-}
-
 std::string AssParser::checkBom(std::string &in) NOTHROW
 {
     // utf-8 bom
@@ -393,59 +364,59 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             // but ignore here
             // color1 and alpha1
             tmpString = match[4];
-            tmpTuple = stringToColorAlpha(tmpString);
+            tmpTuple = Ass::stringToColorAlpha(tmpString);
 
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color1 = colorAlphaToString(tmpVector);
+            style->color1 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha1 = colorAlphaToString(tmpVector);
+            style->alpha1 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color2 and alpha2
             tmpString = match[5];
-            tmpTuple = stringToColorAlpha(tmpString);
+            tmpTuple = Ass::stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color2 = colorAlphaToString(tmpVector);
+            style->color2 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha2 = colorAlphaToString(tmpVector);
+            style->alpha2 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color3 and alpha3
             tmpString = match[6];
-            tmpTuple = stringToColorAlpha(tmpString);
+            tmpTuple = Ass::stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color3 = colorAlphaToString(tmpVector);
+            style->color3 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha3 = colorAlphaToString(tmpVector);
+            style->alpha3 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
 
             // color4 and alpha4
             tmpString = match[7];
-            tmpTuple = stringToColorAlpha(tmpString);
+            tmpTuple = Ass::stringToColorAlpha(tmpString);
             tmpVector.reserve(3);
             tmpVector.push_back(std::get<0>(tmpTuple));
             tmpVector.push_back(std::get<1>(tmpTuple));
             tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color4 = colorAlphaToString(tmpVector);
+            style->color4 = Ass::colorAlphaToString(tmpVector);
             tmpVector.clear();
             tmpVector.reserve(1);
             tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha4 = colorAlphaToString(tmpVector);
+            style->alpha4 = Ass::colorAlphaToString(tmpVector);
 
             styleData[match[1]] = style;
         }
@@ -475,10 +446,10 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
                 dialog->layer = lexical_cast<uint32_t>(tmpString);
 
                 tmpString = match[3];
-                dialog->start_time = stringToMs(tmpString);
+                dialog->start_time = Ass::stringToMs(tmpString);
 
                 tmpString = match[4];
-                dialog->end_time = stringToMs(tmpString);
+                dialog->end_time = Ass::stringToMs(tmpString);
 
                 dialog->style = match[5];
                 dialog->actor = match[6];
@@ -671,10 +642,12 @@ void AssParser::parseDialogs() THROW
                     syl->text = match[2];
 
                     tmpString = match[1];
-                    syl->prespace = utf8StringLen(tmpString);
+                    syl->prespace =
+                            PROJ_NAMESPACE::Utils::Utf8::stringLen(tmpString);
 
                     tmpString = match[3];
-                    syl->postspace = utf8StringLen(tmpString);
+                    syl->postspace =
+                            PROJ_NAMESPACE::Utils::Utf8::stringLen(tmpString);
                 }
                 else
                 {
@@ -832,10 +805,12 @@ void AssParser::parseDialogs() THROW
             textsize = textSize(word->text, dialog->styleref);
 
             tmpString = match[1];
-            word->prespace = utf8StringLen(tmpString);
+            word->prespace =
+                    PROJ_NAMESPACE::Utils::Utf8::stringLen(tmpString);
 
             tmpString = match[3];
-            word->postspace = utf8StringLen(tmpString);
+            word->postspace =
+                    PROJ_NAMESPACE::Utils::Utf8::stringLen(tmpString);
 
             word->i = wordIndex;
             word->start_time = dialog->start_time;
@@ -957,7 +932,9 @@ void AssParser::parseDialogs() THROW
 
         // Add dialog characters
         dialog->chars.reserve(50);
-        std::vector<std::string> charText(utf8StringSplit(dialog->text_stripped));
+        std::vector<std::string> charText(
+                    PROJ_NAMESPACE::Utils::Utf8::stringSplit(
+                        dialog->text_stripped));
         for (size_t cIndex = 0; cIndex < charText.size(); ++cIndex)
         {
             std::shared_ptr<AssChar> assChar(std::make_shared<AssChar>());
@@ -973,7 +950,8 @@ void AssParser::parseDialogs() THROW
             {
                 std::shared_ptr<AssSyl> syl(dialog->syls.at(index));
                 uint32_t maxLoop(syl->prespace +
-                                 utf8StringLen(syl->text) +
+                                 PROJ_NAMESPACE::Utils::Utf8::stringLen(
+                                     syl->text) +
                                  syl->postspace);
                 for (size_t sIndex = 0; sIndex < maxLoop; ++sIndex)
                 {
@@ -996,7 +974,8 @@ syl_reference_found:
             {
                 std::shared_ptr<AssWord> word(dialog->words.at(index));
                 uint32_t maxLoop(word->prespace +
-                                 utf8StringLen(word->text) +
+                                 PROJ_NAMESPACE::Utils::Utf8::stringLen(
+                                     word->text) +
                                  word->postspace);
                 for (size_t wIndex = 0; wIndex < maxLoop; ++wIndex)
                 {

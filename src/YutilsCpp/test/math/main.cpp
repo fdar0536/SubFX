@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #include "testingcase.hpp"
 
@@ -11,29 +13,22 @@
 int main()
 {
     puts("Testing math.hpp");
+    srand(time(nullptr));
 
-    TestMath *test(TestMath::create());
-    if (!test)
-    {
-        std::cout << "Fail in initializing" << std::endl;
-        return 1;
-    }
+    TESTING(testArcCurve())
+    TESTING(testBezier())
+    TESTING(testDegree())
+    TESTING(testDistance())
+    TESTING(testLineIntersect())
+    TESTING(testOrtho())
+    TESTING(testRandomsteps())
+    TESTING(testRound())
+    TESTING(testStretch())
+    TESTING(testTrim())
+    TESTING(testEllipse())
+    TESTING(testRandomway())
+    TESTING(testRotate())
 
-    TESTING(test->testArcCurve())
-    TESTING(test->testBezier())
-    TESTING(test->testDegree())
-    TESTING(test->testDistance())
-    TESTING(test->testLineIntersect())
-    TESTING(test->testOrtho())
-    TESTING(test->testRandomsteps())
-    TESTING(test->testRound())
-    TESTING(test->testStretch())
-    TESTING(test->testTrim())
-    TESTING(test->testEllipse())
-    TESTING(test->testRandomway())
-    TESTING(test->testRotate())
-
-    delete test;
     std::cout << "All done!" << std::endl;
     return 0;
 }

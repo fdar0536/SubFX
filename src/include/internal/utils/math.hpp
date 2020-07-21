@@ -16,25 +16,23 @@ namespace PROJ_NAMESPACE
 
 namespace Utils
 {
-class SYMBOL_SHOW Common
+
+namespace Math
 {
-protected:
 
-    Common() NOTHROW;
+SYMBOL_SHOW std::pair<double, double> rotate2d(double, double, double) NOTHROW;
 
-    std::pair<double, double> rotate2d(double, double, double) NOTHROW;
+// math.rad
+SYMBOL_SHOW double rad(double angle) NOTHROW;
 
-    // math.rad
-    double rad(double angle) NOTHROW;
+// math.deg
+SYMBOL_SHOW double deg(double r) NOTHROW;
 
-    // math.deg
-    double deg(double r) NOTHROW;
+// math.random
+SYMBOL_SHOW double random(double min, double max) NOTHROW;
 
-    // math.random
-    double random(double min, double max) NOTHROW;
+} // end namespace Math
 
-    std::string doubleToString(double input) NOTHROW;
-};
 } // end namespace Utils
 
 } // end PROJ_NAMESPACE

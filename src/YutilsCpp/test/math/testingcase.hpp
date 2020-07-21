@@ -2,41 +2,28 @@
 
 #include "YutilsCpp"
 
-class TestMath
-{
-public:
+int testArcCurve();
 
-    static TestMath *create();
+int testBezier();
 
-    int testArcCurve();
+int testDegree();
 
-    int testBezier();
+int testDistance();
 
-    int testDegree();
+int testLineIntersect();
 
-    int testDistance();
+int testOrtho();
 
-    int testLineIntersect();
+int testRandomsteps();
 
-    int testOrtho();
+int testRound();
 
-    int testRandomsteps();
+int testStretch();
 
-    int testRound();
+int testTrim();
 
-    int testStretch();
+int testEllipse();
 
-    int testTrim();
+int testRandomway();
 
-    int testEllipse();
-
-    int testRandomway();
-
-    int testRotate();
-
-private:
-
-    TestMath() {}
-
-    std::shared_ptr<PROJ_NAMESPACE::Yutils::Math> m_math;
-};
+int testRotate();

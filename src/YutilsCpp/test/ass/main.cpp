@@ -1,34 +1,29 @@
 #include <cstdio>
 
+#include "config.h"
 #include "YutilsCpp"
 
 #define StringToColorAlpha(x, y) \
-    x = ass->stringToColorAlpha(y); \
+    x = ass::stringToColorAlpha(y); \
     printf("r: %d, g: %d, b: %d, a: %d\n", \
            std::get<0>(x), std::get<1>(x), \
            std::get<2>(x), std::get<3>(x));
 
 #define ColorAlphaToString(x, y) \
-    x = ass->colorAlphaToString(y); \
+    x = ass::colorAlphaToString(y); \
     puts(x.c_str()); \
     y.clear();
+
+namespace ass = PROJ_NAMESPACE::Yutils::Ass;
 
 int main()
 {
     puts("Testing ass.hpp ...");
-    std::shared_ptr<PROJ_NAMESPACE::Yutils::Ass>
-            ass(PROJ_NAMESPACE::Yutils::Ass::create());
-    if (ass == nullptr)
-    {
-        puts("Fail in initializing");
-        return 1;
-    }
-
     std::string tmpString("0:00:51.97");
     uint64_t ms;
     try
     {
-        ms = ass->stringToMs(tmpString);
+        ms = ass::stringToMs(tmpString);
     }
     catch (std::invalid_argument &)
     {
@@ -42,7 +37,7 @@ int main()
     printf("case 1's result is: %ld\n", ms);
 #endif
 
-    tmpString = ass->msToString(ms);
+    tmpString = ass::msToString(ms);
     printf("case 2's result is: %s\n", tmpString.c_str());
 
     std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> res;

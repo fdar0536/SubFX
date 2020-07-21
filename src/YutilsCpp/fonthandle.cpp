@@ -454,11 +454,15 @@ FontHandle::text_to_shape(std::string &text) THROW
                 last_type = cur_type;
             }
 
-            tmpDouble = round(cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.x * downscale * xscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.y * downscale * yscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
             ++i;
             break;
         case PT_LINETO:
@@ -469,11 +473,15 @@ FontHandle::text_to_shape(std::string &text) THROW
                 last_type = cur_type;
             }
 
-            tmpDouble = round(cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.x * downscale * xscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.y * downscale * yscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
             ++i;
             break;
         case PT_BEZIERTO:
@@ -484,23 +492,35 @@ FontHandle::text_to_shape(std::string &text) THROW
                 last_type = cur_type;
             }
 
-            tmpDouble = round(cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.x * downscale * xscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        cur_point.y * downscale * yscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(points[i + 1].x * downscale * xscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        points[i + 1].x * downscale * xscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(points[i + 1].y * downscale * yscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        points[i + 1].y * downscale * yscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(points[i + 2].x * downscale * xscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        points[i + 2].x * downscale * xscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
-            tmpDouble = round(points[i + 2].y * downscale * yscale, FP_PRECISION);
-            shape.push_back(doubleToString(tmpDouble));
+            tmpDouble = Math::round(
+                        points[i + 2].y * downscale * yscale, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
 
             i += 3;
             break;
@@ -561,11 +581,13 @@ FontHandle::text_to_shape(std::string &text) THROW
                 shape.push_back("m");
             }
 
-            tmpValue = round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
             break;
         case CAIRO_PATH_LINE_TO:
             if (cur_type != last_type)
@@ -573,11 +595,13 @@ FontHandle::text_to_shape(std::string &text) THROW
                 shape.push_back("l");
             }
 
-            tmpValue = round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
             break;
         case CAIRO_PATH_CURVE_TO:
             if (cur_type != last_type)
@@ -585,23 +609,28 @@ FontHandle::text_to_shape(std::string &text) THROW
                 shape.push_back("b");
             }
 
-            tmpValue = round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 2].point.x, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 2].point.x, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 2].point.y, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 2].point.y, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 3].point.x, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 3].point.x, FP_PRECISION);
+            shape.push_back(PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
 
-            tmpValue = round(path->data[i + 3].point.y, FP_PRECISION);
-            shape.push_back(doubleToString(tmpValue));
+            tmpValue = Math::round(path->data[i + 3].point.y, FP_PRECISION);
+            shape.push_back(
+                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
             break;
         case CAIRO_PATH_CLOSE_PATH:
             if (cur_type != last_type)

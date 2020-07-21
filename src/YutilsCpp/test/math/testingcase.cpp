@@ -1,24 +1,8 @@
 #include "testingcase.hpp"
 
-TestMath *TestMath::create()
-{
-    TestMath *ret(new (std::nothrow) TestMath());
-    if (!ret)
-    {
-        return nullptr;
-    }
+namespace math = PROJ_NAMESPACE::Yutils::Math;
 
-    ret->m_math = PROJ_NAMESPACE::Yutils::Math::create();
-    if (ret->m_math == nullptr)
-    {
-        delete ret;
-        return nullptr;
-    }
-
-    return ret;
-}
-
-int TestMath::testArcCurve()
+int testArcCurve()
 {
     puts("Testing arc_curve");
 
@@ -34,9 +18,9 @@ int TestMath::testArcCurve()
         {
             try
             {
-                ret = m_math->arc_curve(0., 1.0,
-                                        1.5, 2.0,
-                                        testData[i]);
+                ret = math::arc_curve(0., 1.0,
+                                      1.5, 2.0,
+                                      testData[i]);
             }
             catch (std::invalid_argument &)
             {
@@ -49,9 +33,9 @@ int TestMath::testArcCurve()
         }
         else
         {
-            ret = m_math->arc_curve(0., 1.0,
-                                    1.5, 2.0,
-                                    testData[i]);
+            ret = math::arc_curve(0., 1.0,
+                                  1.5, 2.0,
+                                  testData[i]);
             if (!ret.size())
             {
                 printf("Failed in arc_curve's case %d.", i);
@@ -72,9 +56,9 @@ int TestMath::testArcCurve()
 
 #define TESTBEZIERINTERNAL(a, b, c, d) \
     input.push_back(std::make_tuple(b, c, d)); \
-    m_math->bezier(a, input, 1);
+    math::bezier(a, input, 1);
 
-int TestMath::testBezier()
+int testBezier()
 {
     // total 7 cases
     puts("Testing bezier");
@@ -84,7 +68,7 @@ int TestMath::testBezier()
     // case 1
     try
     {
-        ret = m_math->bezier(1.2, input, 1);
+        ret = math::bezier(1.2, input, 1);
     }
     catch (std::invalid_argument &e)
     {
@@ -94,7 +78,7 @@ int TestMath::testBezier()
     // case 2
     try
     {
-        ret = m_math->bezier(0., input, 1);
+        ret = math::bezier(0., input, 1);
     }
     catch (std::invalid_argument &e)
     {
@@ -115,23 +99,23 @@ int TestMath::testBezier()
 
 #undef TESTBEZIERINTERNAL
 
-int TestMath::testDegree()
+int testDegree()
 {
     puts("Testing degree");
-    printf("%lf\n", m_math->degree(5., 6., 7., 8., 9., 10.));
+    printf("%lf\n", math::degree(5., 6., 7., 8., 9., 10.));
     puts("degree is pass");
     return 0;
 } // end testDegree
 
-int TestMath::testDistance()
+int testDistance()
 {
     puts("Testing distance");
-    printf("%lf\n", m_math->distance(3., 4., 0.));
+    printf("%lf\n", math::distance(3., 4., 0.));
     puts("distance is pass");
     return 0;
 } // end testDistance
 
-int TestMath::testLineIntersect()
+int testLineIntersect()
 {
     puts("Testing line_intersect");
 
@@ -139,8 +123,8 @@ int TestMath::testLineIntersect()
     // case 1
     try
     {
-        m_math->line_intersect(0., 0., 0., 0.,
-                               0., 0., 0., 0., 1);
+        math::line_intersect(0., 0., 0., 0.,
+                             0., 0., 0., 0., 1);
     }
     catch (std::invalid_argument &e)
     {
@@ -148,24 +132,24 @@ int TestMath::testLineIntersect()
     }
 
     // case 2
-    m_math->line_intersect(1., 3., 5., 7.,
-                           2., 8., 6., 12., 1);
+    math::line_intersect(1., 3., 5., 7.,
+                         2., 8., 6., 12., 1);
 
     puts("line_intersect is pass");
     return 0;
 } // end testLineIntersect
 
-int TestMath::testOrtho()
+int testOrtho()
 {
     puts("Testing ortho");
 
-    m_math->ortho(5., 10., 15., 2., 4., 6.);
+    math::ortho(5., 10., 15., 2., 4., 6.);
 
     puts("ortho is pass");
     return 0;
 } // end testOrtho
 
-int TestMath::testRandomsteps()
+int testRandomsteps()
 {
     puts("Testing randomsteps");
 
@@ -174,7 +158,7 @@ int TestMath::testRandomsteps()
 
     try
     {
-        m_math->randomsteps(5., 3., -1.);
+        math::randomsteps(5., 3., -1.);
     }
     catch (std::invalid_argument &e)
     {
@@ -182,37 +166,37 @@ int TestMath::testRandomsteps()
     }
 
     // case 2
-    printf("%lf\n", m_math->randomsteps(2., 3., 0.5));
+    printf("%lf\n", math::randomsteps(2., 3., 0.5));
 
     puts("randomsteps is pass");
     return 0;
 } // end testRandomsteps
 
-int TestMath::testRound()
+int testRound()
 {
     puts("Testing Round");
 
-    double ret = m_math->round(3.86456443435, 5.);
+    double ret = math::round(3.86456443435, 5.);
     printf("%lf\n", ret);
 
-    ret = m_math->round(3.86456443435, 0.5);
+    ret = math::round(3.86456443435, 0.5);
     printf("%lf\n", ret);
 
     puts("Round is pass");
     return 0;
 } // end testRound
 
-int TestMath::testStretch()
+int testStretch()
 {
     puts("Testing stretch");
 
-    m_math->stretch(12., 126., 38., 75.);
+    math::stretch(12., 126., 38., 75.);
 
     puts("stretch is pass");
     return 0;
 } // end testStretch
 
-int TestMath::testTrim()
+int testTrim()
 {
     puts("Testing trim");
 
@@ -220,7 +204,7 @@ int TestMath::testTrim()
     // case 1
     try
     {
-        m_math->trim(3., 5., 2.);
+        math::trim(3., 5., 2.);
     }
     catch (std::invalid_argument &e)
     {
@@ -228,36 +212,36 @@ int TestMath::testTrim()
     }
 
     // case 2
-    printf("%lf\n", m_math->trim(3., 0.5, 2.));
+    printf("%lf\n", math::trim(3., 0.5, 2.));
 
     puts("trim is pass");
     return 0;
 } // end testTrim
 
-int TestMath::testEllipse()
+int testEllipse()
 {
     puts("Testing ellipse");
 
-    m_math->ellipse(2., 6., 3., 7., 5.);
+    math::ellipse(2., 6., 3., 7., 5.);
 
     puts("ellipse is pass");
     return 0;
 } // end testEllipse
 
-int TestMath::testRandomway()
+int testRandomway()
 {
     puts("Testing randomway");
     int i;
     for (i = 0; i < 5; ++i)
     {
-        printf("%lf\n", m_math->randomway());
+        printf("%lf\n", math::randomway());
     }
 
     puts("randomway is pass");
     return 0;
 } // end testRandomway
 
-int TestMath::testRotate()
+int testRotate()
 {
     puts("Testing rotate");
     std::tuple<double, double, double> input;
@@ -266,7 +250,7 @@ int TestMath::testRotate()
     // case 1
     try
     {
-        m_math->rotate(input, "", 2.);
+        math::rotate(input, "", 2.);
     }
     catch (std::invalid_argument &e)
     {
@@ -280,7 +264,7 @@ int TestMath::testRotate()
     int i;
     for (i = 0; i < 3; ++i)
     {
-        m_math->rotate(input, strings[i], 2.);
+        math::rotate(input, strings[i], 2.);
     }
 
     puts("rotate is pass");

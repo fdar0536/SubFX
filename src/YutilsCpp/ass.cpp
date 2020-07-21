@@ -14,18 +14,7 @@
 
 using namespace PROJ_NAMESPACE::Yutils;
 
-std::shared_ptr<Ass> Ass::create() NOTHROW
-{
-    Ass *ret(new (std::nothrow) Ass());
-    if (!ret)
-    {
-        return std::shared_ptr<Ass>(nullptr);
-    }
-
-    return std::shared_ptr<Ass>(ret);
-}
-
-uint64_t Ass::stringToMs(std::string &ass_ms) THROW
+SYMBOL_SHOW uint64_t Ass::stringToMs(std::string &ass_ms) THROW
 {
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(ass_ms, reg))
@@ -59,7 +48,7 @@ uint64_t Ass::stringToMs(std::string &ass_ms) THROW
     return ret;
 }
 
-std::string Ass::msToString(uint64_t ms_ass) NOTHROW
+SYMBOL_SHOW std::string Ass::msToString(uint64_t ms_ass) NOTHROW
 {
     uint32_t hr(static_cast<int>(floor(ms_ass / 3600000)) % 10); //hour
     uint32_t mins(static_cast<uint32_t>(floor(ms_ass % 3600000 / 60000))); // minutes
@@ -71,7 +60,7 @@ std::string Ass::msToString(uint64_t ms_ass) NOTHROW
     return std::string(buf);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
+SYMBOL_SHOW std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
 Ass::stringToColorAlpha(std::string &input) THROW
 {
     uint8_t r(0), g(0), b(0), a(0);
@@ -117,7 +106,7 @@ Ass::stringToColorAlpha(std::string &input) THROW
     return std::make_tuple(r, g, b, a);
 }
 
-std::string
+SYMBOL_SHOW std::string
 Ass::colorAlphaToString(std::vector<uint8_t> &input) THROW
 {
     if (input.size() != 1 &&

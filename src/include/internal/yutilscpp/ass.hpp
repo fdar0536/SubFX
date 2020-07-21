@@ -3,7 +3,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <memory>
 
 #include <cstdint>
 
@@ -14,26 +13,22 @@ namespace PROJ_NAMESPACE
 
 namespace Yutils
 {
-class SYMBOL_SHOW Ass
+
+namespace Ass
 {
-public:
 
-    static std::shared_ptr<Ass> create() NOTHROW;
+SYMBOL_SHOW uint64_t stringToMs(std::string &ass_ms) THROW;
 
-    uint64_t stringToMs(std::string &ass_ms) THROW;
+SYMBOL_SHOW std::string msToString(uint64_t ms_ass) NOTHROW;
 
-    std::string msToString(uint64_t ms_ass) NOTHROW;
+SYMBOL_SHOW std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
+stringToColorAlpha(std::string &input) THROW;
 
-    std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
-    stringToColorAlpha(std::string &input) THROW;
+SYMBOL_SHOW std::string
+colorAlphaToString(std::vector<uint8_t> &input) THROW;
 
-    std::string
-    colorAlphaToString(std::vector<uint8_t> &input) THROW;
+} // end namespace Ass
 
-protected:
-
-    Ass() NOTHROW {}
-};
 } // end namespace Yutils
 
 } // end namespace PROJ_NAMESPACE

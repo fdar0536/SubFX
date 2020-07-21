@@ -1,9 +1,11 @@
 add_library(${CMAKE_PROJECT_NAME}Utils
     SHARED
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/common.hpp
-    common.cpp
     ${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp
     logger.cpp
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/math.hpp
+    math.cpp
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp
+    misc.cpp
     ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.hpp
     utf8.cpp
     ${CMAKE_SOURCE_DIR}/include/Utils
@@ -32,8 +34,9 @@ set_target_properties(${CMAKE_PROJECT_NAME}Utils
     "${CMAKE_SOURCE_DIR}/include/Utils"
 
     PRIVATE_HEADER
-    "${CMAKE_SOURCE_DIR}/include/internal/utils/common.hpp;\
-${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp;\
+    "${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp;\
+${CMAKE_SOURCE_DIR}/include/internal/utils/math.hpp;\
+${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp \
 ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.hpp"
 )
 

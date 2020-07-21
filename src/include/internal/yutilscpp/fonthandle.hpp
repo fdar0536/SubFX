@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #ifdef _WIN32
 #include "windows.h"
@@ -9,7 +10,6 @@
 #include "pango/pangocairo.h"
 #endif
 
-#include "math.hpp"
 #include "../basecommon.h"
 
 #define FONT_PRECISION 64
@@ -19,7 +19,7 @@ namespace PROJ_NAMESPACE
 
 namespace Yutils
 {
-class SYMBOL_SHOW FontHandle : public Math
+class SYMBOL_SHOW FontHandle
 {
 public:
 
@@ -45,23 +45,19 @@ public:
 
 protected:
 
-#ifdef _WIN32
-    FontHandle(double xscale, double yscale, double hspace) NOTHROW :
-#else
+#ifndef _WIN32
     FontHandle(double xscale, double yscale) NOTHROW :
-        Math(),
-#endif
-    #ifdef _WIN32
+        surface(nullptr),
+        context(nullptr),
+        layout(nullptr),
+#else
+    FontHandle(double xscale, double yscale, double hspace) NOTHROW :
         dc(nullptr),
         font(nullptr),
         old_font(nullptr),
         hspace(hspace),
         upscale(FONT_PRECISION),
-    #else
-        surface(nullptr),
-        context(nullptr),
-        layout(nullptr),
-    #endif
+#endif
         xscale(xscale),
         yscale(yscale)
     {}

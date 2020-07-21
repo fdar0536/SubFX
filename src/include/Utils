@@ -1,5 +1,6 @@
 #pragma once
 
-#include "internal/utils/common.hpp"
 #include "internal/utils/logger.hpp"
+#include "internal/utils/math.hpp"
+#include "internal/utils/misc.hpp"
 #include "internal/utils/utf8.hpp"

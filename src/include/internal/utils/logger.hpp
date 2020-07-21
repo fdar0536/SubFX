@@ -5,7 +5,6 @@
 
 #include <cstdio>
 
-#include "config.h"
 #include "../basecommon.h"
 
 namespace PROJ_NAMESPACE

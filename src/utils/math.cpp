@@ -14,37 +14,25 @@
 
 using namespace PROJ_NAMESPACE::Utils;
 
-Common::Common() NOTHROW
-{
-    srand(static_cast<uint32_t>(time(nullptr)));
-}
-
 // protected member function
-std::pair<double, double>
-Common::rotate2d(double x, double y, double angle) NOTHROW
+SYMBOL_SHOW std::pair<double, double>
+Math::rotate2d(double x, double y, double angle) NOTHROW
 {
     double ra(rad(angle));
     return std::make_pair(cos(ra) * x - sin(ra) * y, sin(ra) * x + cos(ra) * y);
 }
 
-double Common::rad(double angle) NOTHROW
+SYMBOL_SHOW double Math::rad(double angle) NOTHROW
 {
     return (angle * PI / 180.);
 }
 
-double Common::deg(double r) NOTHROW
+SYMBOL_SHOW double Math::deg(double r) NOTHROW
 {
     return (r * 180. / PI);
 }
 
-double Common::random(double min, double max) NOTHROW
+SYMBOL_SHOW double Math::random(double min, double max) NOTHROW
 {
     return ((max - min) * rand() / (RAND_MAX + 1.0) + min);
-}
-
-std::string Common::doubleToString(double input) NOTHROW
-{
-    double buffer[500];
-    sprintf(reinterpret_cast<char *>(buffer), "%.3lf", input);
-    return std::string(reinterpret_cast<char *>(buffer));
 }
