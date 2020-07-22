@@ -37,16 +37,8 @@ SYMBOL_SHOW std::string move(std::string &, double, double) THROW;
 SYMBOL_SHOW std::vector<std::map<std::string, double>>
 to_pixels(std::string &) THROW;
 
-}
+} // end namespace Shape
 
-/*
-class SYMBOL_SHOW Shape : protected Math
-{
-private:
-
-
-};
-*/
 } // end namespace Yutils
 
 } // end namespace PROJ_NAMESPACE
