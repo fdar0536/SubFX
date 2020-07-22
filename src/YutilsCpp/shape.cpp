@@ -10,7 +10,6 @@
 
 using namespace PROJ_NAMESPACE::Yutils;
 
-// public member function
 std::tuple<double, double, double, double>
 Shape::bounding(std::string &shape) THROW
 {
@@ -343,7 +342,7 @@ Shape::to_pixels(std::string &shape) THROW
             if (opacity > 0.)
             {
                 std::map<std::string, double> pixel;
-                pixel["alpha"] = static_cast<uint8_t>(255 - (opacity * (downscale * downscale)));
+                pixel["alpha"] = static_cast<uint8_t>(opacity * (downscale * downscale));
                 pixel["x"] = (x - shift_x) * downscale;
                 pixel["y"] = (y - shift_y) * downscale;
                 pixels.push_back(pixel);
