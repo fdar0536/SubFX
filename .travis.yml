@@ -10,6 +10,8 @@ archlinux:
     - boost
     - pango
     - adobe-source-code-pro-fonts
+    - pybind11
+    - python
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:
