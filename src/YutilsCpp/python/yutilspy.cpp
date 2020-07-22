@@ -549,28 +549,28 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "If strikeout is true, font has strikeout decoration.\n"
     "size is the font size.\n"
     "xscale and yscale can define horizontal & vertical scale.\n"
-    "hspace can define intercharacter space.\n"
-    "If failed, an error message will store in the return string.\n")
+    "hspace can define intercharacter space.\n")
 
     .def("metrics", &FontHandle::metrics,
-    "(metrics, err) = metrics()\n"
+    "metrics = metrics()\n"
     "Returns font metrics as dictionary with followings fields:\n"
     "ascent: font ascent\n"
     "descent: font descent\n"
     "internal_leading: font internal leading\n"
     "external_leading: font external leading\n"
     "height: font maximal height\n"
-    "If failed, an error message will store in err.\n")
+    "If failed, it will return an empty dictionary.\n")
 
     .def("text_extents", &FontHandle::text_extents,
-    "(extents, err) = text_extents(text)\n"
-    "Returns extents of text with given font as dictionary with followings fields:\n"
+    "extents = text_extents(text)\n"
+    "Returns extents of text with given font as "
+    "dictionary with followings fields:\n"
     "width: text width\n"
     "height: text height\n"
-    "If failed, an error message will store in err.\n")
+    "If failed, it will return an empty dictionary.\n")
 
     .def("text_to_shape", &FontHandle::text_to_shape,
-    "(shape, err) = text_to_shape(text)\n"
+    "shape = text_to_shape(text)\n"
     "Converts text with given font to an ASS shape.\n"
-    "If failed, an error message will store in err.\n");
+    "If failed, it will return an empty string.");
 }
