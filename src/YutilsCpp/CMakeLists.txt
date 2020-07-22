@@ -36,7 +36,10 @@ add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
     ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
     assparser.cpp
-    # YutilsCpp/file.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp
+    asswriter.cpp
+    internal/asswriter_internal.hpp
+    internal/asswriter_internal.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
     fonthandle.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
