@@ -140,13 +140,10 @@ install(
     devel
 )
 
-# python
-option(ENABLE_PYTHON "Enable python binding" OFF)
-
 option(BUILD_TESTING_CASES "Build testing cases" ON)
 
 if (ENABLE_PYTHON)
-    include(YutilsCpp/python/CMakeLists.txt)
+    add_subdirectory(python)
 endif (ENABLE_PYTHON)
 
 if (BUILD_TESTING_CASES)

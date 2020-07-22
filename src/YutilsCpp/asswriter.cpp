@@ -78,10 +78,11 @@ SYMBOL_SHOW void AssWriter::write(const char *fileName,
     file.close();
 }
 
-SYMBOL_SHOW void write(const char *fileName,
-                       std::shared_ptr<AssMeta> &meta,
-                       std::map<std::string, std::shared_ptr<AssStyle>> &styles,
-                       std::vector<std::string> &assBuf) THROW
+SYMBOL_SHOW void AssWriter::write(const char *fileName,
+                                  std::shared_ptr<AssMeta> &meta,
+                                  std::map<std::string,
+                                  std::shared_ptr<AssStyle>> &styles,
+                                  std::vector<std::string> &assBuf) THROW
 {
     // here may throw
     AssWriter_Internal::checkFileName(fileName);

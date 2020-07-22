@@ -104,6 +104,9 @@ install(
 
 add_subdirectory(utils)
 
+# python
+option(ENABLE_PYTHON "Enable python binding" ON)
+
 add_subdirectory(YutilsCpp)
 
 configure_file(config.h.in config.h @ONLY)
