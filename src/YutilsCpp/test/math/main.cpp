@@ -13,7 +13,11 @@
 int main()
 {
     puts("Testing math.hpp");
+#ifdef _WIN32
+    srand(static_cast<unsigned int>(time(nullptr)));
+#else
     srand(time(nullptr));
+#endif // _WIN32
 
     TESTING(testArcCurve())
     TESTING(testBezier())
