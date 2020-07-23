@@ -18,7 +18,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     });
 
     /* in math.hpp*/
-    auto math = m.def_submodule("Math");
+    auto math(m.def_submodule("Math"));
 
     math.def("arc_curve", &Math::arc_curve,
              "list[tuple(cx, cy)] = arc_curve(x, y, cx, cy, angle)\n"
@@ -110,7 +110,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "Allows to rotate a point in 3D room.\n");
 
     /* in shape.hpp */
-    auto shape = m.def_submodule("Shape");
+    auto shape(m.def_submodule("Shape"));
 
     shape.def("bounding", &Shape::bounding,
     "tuple(x0, y0, x1, y1) = bounding(shape)\n"
@@ -156,7 +156,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "alpha: opacity\n");
 
     /* in ass.hpp */
-    auto ass = m.def_submodule("Ass");
+    auto ass(m.def_submodule("Ass"));
 
     ass.def("stringToMs", &Ass::stringToMs,
     "ms_ass = stringToMs(ass_ms)\n"
@@ -498,7 +498,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "(in case there's none, it's 1000.1)\n");
 
     /* in asswriter.hpp */
-    auto assWriter = m.def_submodule("AssWriter");
+    auto assWriter(m.def_submodule("AssWriter"));
 
     assWriter.def("write",
                   py::overload_cast<const char *,
@@ -572,5 +572,5 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     .def("text_to_shape", &FontHandle::text_to_shape,
     "shape = text_to_shape(text)\n"
     "Converts text with given font to an ASS shape.\n"
-    "If failed, it will return an empty string.");
+    "If failed, it will return an empty string.\n");
 }

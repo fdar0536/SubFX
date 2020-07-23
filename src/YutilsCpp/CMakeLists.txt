@@ -96,11 +96,10 @@ set_target_properties(${CMAKE_PROJECT_NAME}YutilsCpp
     "${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp;\
-${YUTILSCPP_INCLUDE_PREFIX}/common.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\
-${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp;\
-${YUTILSCPP_INCLUDE_PREFIX}/utf8.hpp"
+${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp"
 )
 
 install(

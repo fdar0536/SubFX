@@ -36,7 +36,7 @@ set_target_properties(${CMAKE_PROJECT_NAME}Utils
     PRIVATE_HEADER
     "${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp;\
 ${CMAKE_SOURCE_DIR}/include/internal/utils/math.hpp;\
-${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp \
+${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp;\
 ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.hpp"
 )
 

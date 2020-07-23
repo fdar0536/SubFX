@@ -1,0 +1,15 @@
+from setuptools import setup
+import platform
+
+setup(
+    name='@CMAKE_PROJECT_NAME@_YutilsPy',
+    version='@PROJECT_VERSION@',
+    author='',
+    author_email='',
+    description='Python bindings for @CMAKE_PROJECT_NAME@-YutilsCpp',
+    long_description='Python bindings for @CMAKE_PROJECT_NAME@-YutilsCpp',
+    url='',
+    platforms=[platform.system() + '-' + platform.machine()],
+    license='GPLv3',
+    package_dir = {'': '@CMAKE_CURRENT_BINARY_DIR@'}
+)
