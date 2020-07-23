@@ -12,6 +12,7 @@ archlinux:
     - adobe-source-code-pro-fonts
     - pybind11
     - python
+    - python-setuptools
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:
