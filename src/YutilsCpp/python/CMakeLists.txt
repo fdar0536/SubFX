@@ -38,6 +38,7 @@ set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/timestamp")
 set(DEPS        ${CMAKE_PROJECT_NAME}_YutilsPy "${SETUP_PY}")
 
 configure_file(${SETUP_PY_IN} ${SETUP_PY} @ONLY)
+configure_file(assPy.py ${CMAKE_PROJECT_NAME}_AssPy.py @ONLY)
 
 add_custom_command(OUTPUT ${OUTPUT}
                    COMMAND
@@ -73,6 +74,14 @@ if ("${PYTHON_MODULE_INSTALL_PREFIX}" STREQUAL "")
 
         DESTINATION "${PYTHON_SITE_PACKAGES}"
     )
+
+    install(
+        FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_AssPy.py"
+
+        DESTINATION "${PYTHON_SITE_PACKAGES}"
+    )
+
 else()
     install(
         TARGETS ${CMAKE_PROJECT_NAME}_YutilsPy
@@ -83,6 +92,13 @@ else()
     install(
         DIRECTORY
         "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_YutilsPy.egg-info"
+
+        DESTINATION "${PYTHON_MODULE_INSTALL_PREFIX}/${PYTHON_SITE_PACKAGES}"
+    )
+
+    install(
+        FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_AssPy.py"
 
         DESTINATION "${PYTHON_MODULE_INSTALL_PREFIX}/${PYTHON_SITE_PACKAGES}"
     )

@@ -125,13 +125,18 @@ double Math::degree(double x1, double y1, double z1,
                     double x2, double y2, double z2) NOTHROW
 {
     double degree = distance(x1, y1, z1) * distance(x2, y2, z2);
+    if (degree == 0.)
+    {
+        return 0.;
+    }
+
     degree = acos((x1 * x2 + y1 * y2 + z1 * z2) / degree);
     degree = PROJ_NAMESPACE::Utils::Math::deg(degree);
 
     // Return with sign by clockwise direction
     if ((x1 * y2 - y1 * x2) < 0)
     {
-        return (degree * - 1.);
+        return (degree * -1.);
     }
 
     return degree;

@@ -1,32 +1,29 @@
-﻿# -*- coding: utf-8 -*-
-
-
-########################################## Declaration ######################################################
-
-# Declaration:
-# tcaxPy.pyc's source code
-# Copyright (c) 2008 - 2012 milkyjing (milkyjing@gmail.com). All rights reserved.
-# Please visit tcax.rhacg.com to get the latest information
-# Version: ver0.7.3.5 build20100109
-# Revision: ver0.7.5.0 build20100912
-# Revision: ver0.7.8.1 build20110703
-# Revision: ver0.7.9.0 build20110721
-# Revision: ver0.7.9.2 build20110812
-# Revision: ver0.7.9.3 build20110813
-# Revision: ver0.7.9.8 build20110901
-# Revision: ver0.7.9.9 build20111222
-# Revision: ver0.8.0.0 build20120722
+# This file is a modified version of tcaxPy 0.8.0.0
+# Copyright (c) 2008 - 2012 milkyjing (milkyjing@gmail.com).
+# Copyright (c) 2020 fdar0536
 
 ######################################### Modules ###########################################################
 
-from math    import *
-from random  import *
-from YutilsPy import *
 import sys
 
-######################################### Global Constant ###################################################
+if (sys.platform == "win32"):
+    info = sys.version_info
+    if (info.major >= 3 and info.minor >= 8): # python >= 3.8
+        import os
+        os.add_dll_directory(os.path.join(os.environ['SUBFX_HOME'], 'bin'))
+        os.add_dll_directory(os.path.join(os.environ['ICU_HOME'], 'bin'))
 
-tcaxPy_Version       = '0.8.0.0'
+        try:
+            import SubFX_YutilsPy as Yutils
+        except ImportError:
+            raise ImportError("Cannot import SubFX_YutilsPy")
+    else:
+        import SubFX_YutilsPy as Yutils
+else:
+    import SubFX_YutilsPy as Yutils
+
+import math
+import random
 
 ########################################## Main FX Function #################################################
 def SubL(Start = 0, End = 0, Layer = 0, Style = 'TCMS'):
@@ -125,44 +122,6 @@ def t(a1, a2 = None, a3 = None, a4 = None):
             A = str(format(a3, '.2f'))
         return '\\t({t1},{t2},{a},{code})'.format(t1 = int(a1), t2 = int(a2), a = A, code = a4)
 
-def animation(a1, a2 = None, a3 = None, a4 = None):
-    if a2 == None:
-        return '\\t({code})'.format(code = a1)
-    elif a3 == None:
-        if a1 == int(a1):
-            A = str(int(a1))
-        else:
-            A = str(format(a1, '.2f'))
-        return '\\t({a},{code})'.format(a = A, code = a2)
-    elif a4 == None:
-        return '\\t({t1},{t2},{code})'.format(t1 = int(a1), t2 = int(a2), code = a3)
-    else:
-        if a3 == int(a3):
-            A = str(int(a3))
-        else:
-            A = str(format(a3, '.2f'))
-        return '\\t({t1},{t2},{a},{code})'.format(t1 = int(a1), t2 = int(a2), a = A, code = a4)
-
-def t1(t1, t2, code):    # deprecated
-    return '\\t({0},{1},{2})'.format(int(t1), int(t2), code)
-
-def animation1(t1, t2, code):    # deprecated
-    return '\\t({0},{1},{2})'.format(int(t1), int(t2), code)
-
-def t2(t1, t2, a, code):    # deprecated
-    if a == int(a):
-        A = str(int(a))
-    else:
-        A = str(format(a, '.2f'))
-    return '\\t({0},{1},{2},{3})'.format(int(t1), int(t2), A, code)
-
-def animation2(t1, t2, a, code):    # deprecated
-    if a == int(a):
-        A = str(int(a))
-    else:
-        A = str(format(a, '.2f'))
-    return '\\t({0},{1},{2},{3})'.format(int(t1), int(t2), A, code)
-
 def fscx(x):
     if x == int(x):
         X = str(int(x))
@@ -226,7 +185,7 @@ def blur(x):
 def p(a):
     return '\\p{0}'.format(int(a))
 
-def b():
+def b(a):
     return '\\b{0}'.format(int(a))
 
 def be(x):
@@ -358,19 +317,6 @@ def color3(c):
 def color4(c):
     return '\\4c&H{0}&'.format(c)
 
-def mov(x1, y1, x2, y2):    # deprecated
-    if x1 == int(x1) and y1 == int(y1) and x2 == int(x2) and y2 == int(y2):
-        X1 = str(int(x1))
-        Y1 = str(int(y1))
-        X2 = str(int(x2))
-        Y2 = str(int(y2))
-    else:
-        X1 = str(format(x1, '.2f'))
-        Y1 = str(format(y1, '.2f'))
-        X2 = str(format(x2, '.2f'))
-        Y2 = str(format(y2, '.2f'))
-    return '\\move({0},{1},{2},{3})'.format(X1, Y1, X2, Y2)
-
 def move(x1, y1, x2, y2, t1 = None, t2 = None):
     if x1 == int(x1) and y1 == int(y1) and x2 == int(x2) and y2 == int(y2):
         X1 = str(int(x1))
@@ -395,12 +341,6 @@ def clip(a1, a2 = None, a3 = None, a4 = None):
     else:
         return '\\clip({x1},{y1},{x2},{y2})'.format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
 
-def clip1(Draw):    # deprecated
-    return '\\clip({0})'.format(Draw)
-
-def clip2(Scale, Draw):    # deprecated
-    return '\\clip({0},{1})'.format(Scale, Draw)
-
 def iclip(a1, a2 = None, a3 = None, a4 = None):
     if a2 == None:
         return '\\iclip({draw})'.format(draw = a1)
@@ -409,16 +349,10 @@ def iclip(a1, a2 = None, a3 = None, a4 = None):
     else:
         return '\\iclip({x1},{y1},{x2},{y2})'.format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
 
-def iclip1(Draw):    # deprecated
-    return '\\iclip({0})'.format(Draw)
-
-def iclip2(Scale, Draw):    # deprecated
-    return '\\iclip({0},{1})'.format(Scale, Draw)
-
 #--------------------------------------------- Utility Function -------------------------------------------#
 
 def GetVersion():
-    print('tcaxLib version: ' + tcaxLibGetVersion() + '\ntcaxPy version: ' + tcaxPy_Version)
+    print('SubFX version: ' + Yutils.version())
 
 def Pause():
     print('Press any key to continue...')
@@ -438,14 +372,14 @@ def abspath(filename):
 
 def MakePath(FolderIndex = 0, ImageIndex = 0, MainFolder = 'src',
              SubFolder = 'list', ImageName = 'img', ImageType = '.png', PathType = 'pi'):
-    
+
     if (sys.platform == 'win32'):
         if PathType == 'pi':
-            img_path = '%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+            img_path = r'%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
         elif PathType == 'sys':
-            img_path = '%s\%s%d\%s (%d)%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+            img_path = r'%s\%s%d\%s (%d)%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
         else:
-            img_path = '%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+            img_path = r'%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
     else:
         if PathType == 'pi':
             img_path = '%s/%s%d/%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
@@ -453,19 +387,8 @@ def MakePath(FolderIndex = 0, ImageIndex = 0, MainFolder = 'src',
             img_path = '%s/%s%d/%s (%d)%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
         else:
             img_path = '%s/%s%d/%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
-    
-    return img_path
 
-def tcaxLog(info):
-    if (sys.platform == 'win32'):
-        s = str(info) + '\r\n'
-    else:
-        s = str(info) + '\n'
-    
-    logfile = open(GetVal(val_OutFile) + '_data.log', 'ab')
-    logfile.write(b'\xef\xbb\xbf')             # codecs.BOM_UTF8
-    logfile.write(s.encode('utf-8'))
-    logfile.close()
+    return img_path
 
 #--------------------------------------------- Advanced Function -------------------------------------------#
 
@@ -486,15 +409,10 @@ def AdvInt(a):       # 高级取整函数 AdvancedIntegrate
         return int(a)
 
 def DeFmtTime(TIME):       # 重新数字化已被格式化的时间 TIME = '0:00:00.00'
-    return int(TIME[0:1]) * 60 * 60 * 1000 + int(TIME[2:4]) * 60 * 1000 + int(TIME[5:7]) * 1000 + int(TIME[8:10] * 10)
+    return Yutils.Ass.stringToMs(TIME)
 
 def FmtTime(t):       # 格式化时间
-    t = int(t)
-    hour = int((t / 3600000) % 10)
-    minute = int((t % 3600000) / 60000)
-    second = int((t % 60000) / 1000)
-    semiSecond = int((t % 1000) / 10)
-    return '{0}:{1:02d}:{2:02d}.{3:02d}'.format(hour, minute, second, semiSecond)
+    return Yutils.Ass.msToString(t)
 
 def PixPt():       # 返回一个像素点 PixelPoint, deprecated, use DrawPoint instead
     return '{\\p1}m 0 0 l 1 0 1 1 0 1{\\p0}'
@@ -510,13 +428,10 @@ def DrawLight(l):
     return light
 
 def MovPxl():       # 移动单位个像素 MovePixel
-    if randint(0, 1) == 0:
-        return -1
-    else:
-        return 1
+    return Yutils.Math.randomway()
 
 def GetDistance(x1, y1, x2, y2):
-    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
+    return Yutils.Math.distance((x1 - x2), (y1 - y2))
 
 def GetAngle(x, y, ox, oy):
     r = GetDistance(x, y, ox, oy)
@@ -528,7 +443,7 @@ def GetAngle(x, y, ox, oy):
     return a
 
 def RandSign():
-    if randint(0, 1) == 1:
+    if random.randint(0, 1) == 1:
         return 1
     else:
         return -1
@@ -536,72 +451,76 @@ def RandSign():
 def RandomGauss(l, h, g):
     sum = 0
     for i in range(g):
-        sum += l + (h - l) * random()
+        sum += l + (h - l) * random.random()
     return sum / g
 
 def RandomDouble(l, h):
-    return l + (h - l) * random()
+    return l + (h - l) * random.random()
 
 def RandGauss(l, h):
     sum = 0
     for i in range(6):
-        sum += l + (h - l) * random()
+        sum += l + (h - l) * random.random()
     return sum / 6
 
 def RandRGB():       # 返回一个随机的RGB值 RandomRGB
-    return FmtRGB(randint(0, 255), randint(0, 255), randint(0, 255))
+    return FmtRGB(random.randint(0, 255), \
+                  random.randint(0, 255), \
+                  random.randint(0, 255))
 
 def RandA():       # 返回一个随机的Alpha值 RandomAlpha
-    return FmtHex(randint(0, 255))
+    return FmtHex(random.randint(0, 255))
 
 def RandImg(n, IMG_WD, IMG_HT):       # 随机图形 RandomImage
-    STR_RAND_IMG = 'm ' + str(randint(0, IMG_WD)) + ' ' + str(randint(0, IMG_HT)) + ' b '
+    STR_RAND_IMG = 'm ' + str(random.randint(0, IMG_WD)) + \
+                   ' ' + str(random.randint(0, IMG_HT)) + ' b '
     for i in range(6 * n):
         if i % 2 == 0:
-            STR_RAND_IMG += str(randint(0, IMG_WD)) + ' '
+            STR_RAND_IMG += str(random.randint(0, IMG_WD)) + ' '
         else:
-            STR_RAND_IMG += str(randint(0, IMG_HT)) + ' '
+            STR_RAND_IMG += str(random.randint(0, IMG_HT)) + ' '
     return STR_RAND_IMG + 'c'
 
 def RandCir(a, b, r):       # 随机圆分布函数 RandomCircle1
-    R = randint(0, r)
-    theta = randint(0, 2 * 314) / 100.0
-    x = AdvInt(R * cos(theta) + a)
-    y = AdvInt(R * sin(theta) + b)
+    R = random.randint(0, r)
+    theta = random.randint(0, 2 * 314) / 100.0
+    x = AdvInt(R * math.cos(theta) + a)
+    y = AdvInt(R * math.sin(theta) + b)
     return (x, y)
 
 def RandCir2(a, b, r1, r2):      # 随机环分布函数 RandomCircle2
-    R = randint(r1, r2)
-    theta = randint(0, 2 * 314) / 100.0
-    x = AdvInt(R * cos(theta) + a)
-    y = AdvInt(R * sin(theta) + b)
+    R = random.randint(r1, r2)
+    theta = random.randint(0, 2 * 314) / 100.0
+    x = AdvInt(R * math.cos(theta) + a)
+    y = AdvInt(R * math.sin(theta) + b)
     return (x, y)
 
 def RandCir3(a, b, r1, r2, theta1, theta2):      # 带缺口的随机环分布函数 RandomCircle3
-    R = randint(r1, r2)
+    R = random.randint(r1, r2)
     Tmp = min(theta1, theta2)
     theta2 = max(theta1, theta2)
     theta1 = Tmp
-    theta = randint(AdvInt(314 * theta1 / 180.0), AdvInt(314 * theta2 / 180.0)) / 100.0
-    x = AdvInt(R * cos(theta) + a)
-    y = AdvInt(R * sin(theta) + b)
+    theta = random.randint(AdvInt(314 * theta1 / 180.0), \
+                           AdvInt(314 * theta2 / 180.0)) / 100.0
+    x = AdvInt(R * math.cos(theta) + a)
+    y = AdvInt(R * math.sin(theta) + b)
     return (x, y)
 
 def Cir(n, a, b, r):       # 圆函数
     CIR = []
     for i in range(n):
-        theta = (n - i - 1) * 2 * pi / n
-        x = AdvInt(r * cos(theta) + a)
-        y = AdvInt(r * sin(theta) + b)
+        theta = (n - i - 1) * 2 * math.pi / n
+        x = AdvInt(r * math.cos(theta) + a)
+        y = AdvInt(r * math.sin(theta) + b)
         CIR.append((x, y))
     return CIR
 
 def Circle(n, a, b, r):       # 圆函数
     CIR = []
     for i in range(n):
-        theta = (n - i - 1) * 2 * pi / n
-        x = r * cos(theta) + a
-        y = r * sin(theta) + b
+        theta = (n - i - 1) * 2 * math.pi / n
+        x = r * math.cos(theta) + a
+        y = r * math.sin(theta) + b
         CIR.append((x, y))
     return CIR
 
@@ -612,14 +531,14 @@ def RandPolygon(r1, r2, v):
     r2 *= 8
     num = int(v)
     for i in range(num):
-        vertex.append(RandomDouble(0, 2 * pi))
+        vertex.append(RandomDouble(0, 2 * math.pi))
     vertex.sort()
-    x = cos(vertex[0]) * r1
-    y = sin(vertex[0]) * r2
+    x = math.cos(vertex[0]) * r1
+    y = math.sin(vertex[0]) * r2
     s += 'm {0} {1} '.format(AdvInt(x), AdvInt(y))
     for i in range(1, num):
-        x = cos(vertex[i]) * r1
-        y = sin(vertex[i]) * r2
+        x = math.cos(vertex[i]) * r1
+        y = math.sin(vertex[i]) * r2
         s += 'l {0} {1} '.format(AdvInt(x), AdvInt(y))
     s += 'c{\\p0}'
     return s
@@ -691,36 +610,6 @@ def Jump(P_START, P_END, P_TOP, T):         # 跳跃特效函数
     return JUMP
 
 def AssDrawOffset(draw, x, y):      # 平移ASS绘图代码
-    ret = ' '
-    lastCmd = None
-    elem = draw.split()
-    num = len(elem)
-    i = 0
-    while i < num:
-        if elem[i] == 'm':
-            ret += 'm {} {} '.format(int(float(elem[i + 1]) + x + 0.5), int(float(elem[i + 2]) + y + 0.5))
-            lastCmd = 'm'
-            i += 2
-        elif elem[i] == 'l':
-            ret += 'l {} {} '.format(int(float(elem[i + 1]) + x + 0.5), int(float(elem[i + 2]) + y + 0.5))
-            lastCmd = 'l'
-            i += 2
-        elif elem[i] == 'b':
-            ret += 'b {} {} {} {} {} {} '.format(int(float(elem[i + 1]) + x + 0.5), int(float(elem[i + 2]) + y + 0.5), int(float(elem[i + 3]) + x + 0.5), int(float(elem[i + 4]) + y + 0.5), int(float(elem[i + 5]) + x + 0.5), int(float(elem[i + 6]) + y + 0.5))
-            lastCmd = 'b'
-            i += 6
-        elif elem[i] == 'c':
-            ret += 'c '
-            lastCmd = 'c'
-        elif lastCmd == 'l':
-            i -= 1
-            ret += '{} {} '.format(int(float(elem[i + 1]) + x + 0.5), int(float(elem[i + 2]) + y + 0.5))
-            i += 2
-        elif lastCmd == 'b':
-            i -= 1
-            ret += '{} {} {} {} {} {} '.format(int(float(elem[i + 1]) + x + 0.5), int(float(elem[i + 2]) + y + 0.5), int(float(elem[i + 3]) + x + 0.5), int(float(elem[i + 4]) + y + 0.5), int(float(elem[i + 5]) + x + 0.5), int(float(elem[i + 6]) + y + 0.5))
-            i += 6
-        i += 1
-    return ret
+    return Yutils.Shape.move(draw, x, y)
 
 #############################################################################################################
