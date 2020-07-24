@@ -35,7 +35,7 @@ set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/timestamp")
 set(DEPS        ${CMAKE_PROJECT_NAME}_YutilsPy "${SETUP_PY}")
 
 configure_file(${SETUP_PY_IN} ${SETUP_PY} @ONLY)
-configure_file(assPy.py ${CMAKE_PROJECT_NAME}_AssPy.py @ONLY)
+configure_file(asspy.py ${CMAKE_PROJECT_NAME}_AssPy.py @ONLY)
 
 add_custom_command(OUTPUT ${OUTPUT}
                    COMMAND
