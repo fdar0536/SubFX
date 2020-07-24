@@ -1,6 +1,3 @@
-find_package(pybind11 2.3.0 REQUIRED)
-find_package(Python 3.8.0 REQUIRED COMPONENTS Interpreter Development)
-
 add_library(${CMAKE_PROJECT_NAME}_YutilsPy SHARED
     yutilspy.cpp
 )

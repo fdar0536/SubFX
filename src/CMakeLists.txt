@@ -106,6 +106,10 @@ add_subdirectory(utils)
 
 # python
 option(ENABLE_PYTHON "Enable python binding" ON)
+if (ENABLE_PYTHON)
+    find_package(pybind11 2.3.0 REQUIRED)
+    find_package(Python 3.7.0 REQUIRED COMPONENTS Interpreter Development)
+endif(ENABLE_PYTHON)
 
 add_subdirectory(YutilsCpp)
 
