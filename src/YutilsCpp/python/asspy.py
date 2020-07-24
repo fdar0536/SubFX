@@ -1,4 +1,4 @@
-# This file is a modified version of tcaxPy 0.8.0.0
+# This file is based on tcaxPy
 # Copyright (c) 2008 - 2012 milkyjing (milkyjing@gmail.com).
 # Copyright (c) 2020 fdar0536
 
@@ -10,8 +10,8 @@ if (sys.platform == "win32"):
     info = sys.version_info
     if (info.major >= 3 and info.minor >= 8): # python >= 3.8
         import os
-        os.add_dll_directory(os.path.join(os.environ['SUBFX_HOME'], 'bin'))
-        os.add_dll_directory(os.path.join(os.environ['ICU_HOME'], 'bin'))
+        os.add_dll_directory(os.path.join(os.environ["SUBFX_HOME"], "bin"))
+        os.add_dll_directory(os.path.join(os.environ["ICU_HOME"], "bin"))
 
         try:
             import SubFX_YutilsPy as Yutils
@@ -26,14 +26,14 @@ import math
 import random
 
 ########################################## Main FX Function #################################################
-def SubL(Start = 0, End = 0, Layer = 0, Style = 'TCMS'):
-    return 'Dialogue: {0},{1},{2},{3},NTP,0000,0000,0000,,'.format(int(Layer), FmtTime(Start), FmtTime(End), Style)
+def SubL(Start = 0, End = 0, Layer = 0, Style = "TCMS"):
+    return "Dialogue: {0},{1},{2},{3},NTP,0000,0000,0000,,".format(int(Layer), FmtTime(Start), FmtTime(End), Style)
 
-def ass_main(ASS_BUF, SubDlg = '', Event = '', Text = ''):
-    if Event == '':
-        ASS_BUF.append('{0}{1}{2}'.format(SubDlg, Event, Text))
+def ass_main(ASS_BUF, SubDlg = "", Event = "", Text = ""):
+    if Event == "":
+        ASS_BUF.append("{0}{1}{2}".format(SubDlg, Event, Text))
     else:
-        ASS_BUF.append('{0}{{{1}}}{2}'.format(SubDlg, Event, Text))
+        ASS_BUF.append("{0}{{{1}}}{2}".format(SubDlg, Event, Text))
 
 #############################################################################################################
 
@@ -45,11 +45,11 @@ def ass_main(ASS_BUF, SubDlg = '', Event = '', Text = ''):
 
 def FmtHex(n):                                   # dec to hex FormatHex
     if n <= 0:
-        return '00'
+        return "00"
     elif n >= 255:
-        return 'FF'
+        return "FF"
     else:
-        return '{0:02X}'.format(int(n))
+        return "{0:02X}".format(int(n))
 
 def HexToDec(a):                                 # hex to dec
     return int(a, 16)
@@ -58,7 +58,7 @@ def FmtFloat(f):
     if f == int(f):
         F = str(int(f))
     else:
-        F = str(format(f, '.2f'))
+        F = str(format(f, ".2f"))
     return F
 
 def FmtRGB(r, g, b):                             # return a formated RGB string
@@ -71,7 +71,7 @@ def DeFmtRGB(CLR):                               # convert RGB string to RGB tup
     return (CLR_LIS_1, CLR_LIS_2, CLR_LIS_3)
 
 def DecRGB(RGB):                                 # convert RGB string to RGB dec value
-    return int('0x' + RGB, 16)
+    return int("0x" + RGB, 16)
 
 def clip_0_255(a):
     if a < 0:
@@ -90,232 +90,232 @@ def MakeRGBA(r, g, b, a):
 #-------------------------------- Ass tag functions -------------------------------#
 
 def an(a):
-    return '\\an{0}'.format(int(a))
+    return "\\an{0}".format(int(a))
 
 def K(a):
-    return '\\K{0}'.format(int(a))
+    return "\\K{0}".format(int(a))
 
 def k(a):
-    return '\\k{0}'.format(int(a))
+    return "\\k{0}".format(int(a))
 
 def ko(a):
-    return '\\ko{0}'.format(int(a))
+    return "\\ko{0}".format(int(a))
 
 def kf(a):
-    return '\\kf{0}'.format(int(a))
+    return "\\kf{0}".format(int(a))
 
 def t(a1, a2 = None, a3 = None, a4 = None):
     if a2 == None:
-        return '\\t({code})'.format(code = a1)
+        return "\\t({code})".format(code = a1)
     elif a3 == None:
         if a1 == int(a1):
             A = str(int(a1))
         else:
-            A = str(format(a1, '.2f'))
-        return '\\t({a},{code})'.format(a = A, code = a2)
+            A = str(format(a1, ".2f"))
+        return "\\t({a},{code})".format(a = A, code = a2)
     elif a4 == None:
-        return '\\t({t1},{t2},{code})'.format(t1 = int(a1), t2 = int(a2), code = a3)
+        return "\\t({t1},{t2},{code})".format(t1 = int(a1), t2 = int(a2), code = a3)
     else:
         if a3 == int(a3):
             A = str(int(a3))
         else:
-            A = str(format(a3, '.2f'))
-        return '\\t({t1},{t2},{a},{code})'.format(t1 = int(a1), t2 = int(a2), a = A, code = a4)
+            A = str(format(a3, ".2f"))
+        return "\\t({t1},{t2},{a},{code})".format(t1 = int(a1), t2 = int(a2), a = A, code = a4)
 
 def fscx(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\fscx{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\fscx{0}".format(X)
 
 def fscy(y):
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\fscy{0}'.format(Y)
+        Y = str(format(y, ".2f"))
+    return "\\fscy{0}".format(Y)
 
 def fsc(x, y):
     if x == int(x) and y == int(y):
         X = str(int(x))
         Y = str(int(y))
     else:
-        X = str(format(x, '.2f'))
-        Y = str(format(y, '.2f'))
-    return '\\fscx{0}\\fscy{1}'.format(X, Y)
+        X = str(format(x, ".2f"))
+        Y = str(format(y, ".2f"))
+    return "\\fscx{0}\\fscy{1}".format(X, Y)
 
 def fn(a):
-    return '\\fn{0}'.format(a)
+    return "\\fn{0}".format(a)
 
 def fs(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\fs{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\fs{0}".format(X)
 
 def fad(t1, t2):
-    return '\\fad({0},{1})'.format(int(t1), int(t2))
+    return "\\fad({0},{1})".format(int(t1), int(t2))
 
 def fade(a1, a2, a3, t1, t2, t3, t4):
-    return '\\fade({0},{1},{2},{3},{4},{5},{6})'.format(clip_0_255(a1), clip_0_255(a2), clip_0_255(a3), int(t1), int(t2), int(t3), int(t4))
+    return "\\fade({0},{1},{2},{3},{4},{5},{6})".format(clip_0_255(a1), clip_0_255(a2), clip_0_255(a3), int(t1), int(t2), int(t3), int(t4))
 
 def bord(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\bord{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\bord{0}".format(X)
 
 def shad(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\shad{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\shad{0}".format(X)
 
 def blur(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\blur{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\blur{0}".format(X)
 
 def p(a):
-    return '\\p{0}'.format(int(a))
+    return "\\p{0}".format(int(a))
 
 def b(a):
-    return '\\b{0}'.format(int(a))
+    return "\\b{0}".format(int(a))
 
 def be(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\be{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\be{0}".format(X)
 
 def xbord(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\xbord{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\xbord{0}".format(X)
 
 def ybord(y):
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\ybord{0}'.format(Y)
+        Y = str(format(y, ".2f"))
+    return "\\ybord{0}".format(Y)
 
 def xshad(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\xshad{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\xshad{0}".format(X)
 
 def yshad(y):
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\yshad{0}'.format(Y)
+        Y = str(format(y, ".2f"))
+    return "\\yshad{0}".format(Y)
 
 def fax(x):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
-    return '\\fax{0}'.format(X)
+        X = str(format(x, ".2f"))
+    return "\\fax{0}".format(X)
 
 def fay(y):
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\fay{0}'.format(Y)
+        Y = str(format(y, ".2f"))
+    return "\\fay{0}".format(Y)
 
 def frx(a):
     if a == int(a):
         A = str(int(a))
     else:
-        A = str(format(a, '.2f'))
-    return '\\frx{0}'.format(A)
+        A = str(format(a, ".2f"))
+    return "\\frx{0}".format(A)
 
 def fry(a):
     if a == int(a):
         A = str(int(a))
     else:
-        A = str(format(a, '.2f'))
-    return '\\fry{0}'.format(A)
+        A = str(format(a, ".2f"))
+    return "\\fry{0}".format(A)
 
 def frz(a):
     if a == int(a):
         A = str(int(a))
     else:
-        A = str(format(a, '.2f'))
-    return '\\frz{0}'.format(A)
+        A = str(format(a, ".2f"))
+    return "\\frz{0}".format(A)
 
 def fr(a):
     if a == int(a):
         A = str(int(a))
     else:
-        A = str(format(a, '.2f'))
-    return '\\fr{0}'.format(A)
+        A = str(format(a, ".2f"))
+    return "\\fr{0}".format(A)
 
 def pos(x, y):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
+        X = str(format(x, ".2f"))
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\pos({0},{1})'.format(X, Y)
+        Y = str(format(y, ".2f"))
+    return "\\pos({0},{1})".format(X, Y)
 
 def org(x, y):
     if x == int(x):
         X = str(int(x))
     else:
-        X = str(format(x, '.2f'))
+        X = str(format(x, ".2f"))
     if y == int(y):
         Y = str(int(y))
     else:
-        Y = str(format(y, '.2f'))
-    return '\\org({0},{1})'.format(X, Y)
+        Y = str(format(y, ".2f"))
+    return "\\org({0},{1})".format(X, Y)
 
 def alpha(a):                                    # note that a is a dec value
-    return '\\alpha&H{0}&'.format(FmtHex(a))
+    return "\\alpha&H{0}&".format(FmtHex(a))
 
 def alpha1(a):
-    return '\\1a&H{0}&'.format(FmtHex(a))
+    return "\\1a&H{0}&".format(FmtHex(a))
 
 def alpha2(a):
-    return '\\2a&H{0}&'.format(FmtHex(a))
+    return "\\2a&H{0}&".format(FmtHex(a))
 
 def alpha3(a):
-    return '\\3a&H{0}&'.format(FmtHex(a))
+    return "\\3a&H{0}&".format(FmtHex(a))
 
 def alpha4(a):
-    return '\\4a&H{0}&'.format(FmtHex(a))
+    return "\\4a&H{0}&".format(FmtHex(a))
 
 def color(c):                                    # note that c is a RGB string
-    return '\\c&H{0}&'.format(c)
+    return "\\c&H{0}&".format(c)
 
 def color1(c):
-    return '\\1c&H{0}&'.format(c)
+    return "\\1c&H{0}&".format(c)
 
 def color2(c):
-    return '\\2c&H{0}&'.format(c)
+    return "\\2c&H{0}&".format(c)
 
 def color3(c):
-    return '\\3c&H{0}&'.format(c)
+    return "\\3c&H{0}&".format(c)
 
 def color4(c):
-    return '\\4c&H{0}&'.format(c)
+    return "\\4c&H{0}&".format(c)
 
 def move(x1, y1, x2, y2, t1 = None, t2 = None):
     if x1 == int(x1) and y1 == int(y1) and x2 == int(x2) and y2 == int(y2):
@@ -324,71 +324,84 @@ def move(x1, y1, x2, y2, t1 = None, t2 = None):
         X2 = str(int(x2))
         Y2 = str(int(y2))
     else:
-        X1 = str(format(x1, '.2f'))
-        Y1 = str(format(y1, '.2f'))
-        X2 = str(format(x2, '.2f'))
-        Y2 = str(format(y2, '.2f'))
+        X1 = str(format(x1, ".2f"))
+        Y1 = str(format(y1, ".2f"))
+        X2 = str(format(x2, ".2f"))
+        Y2 = str(format(y2, ".2f"))
     if t2 == None:
-        return '\\move({0},{1},{2},{3})'.format(X1, Y1, X2, Y2)
+        return "\\move({0},{1},{2},{3})".format(X1, Y1, X2, Y2)
     else:
-        return '\\move({0},{1},{2},{3},{4},{5})'.format(X1, Y1, X2, Y2, int(t1), int(t2))
+        return "\\move({0},{1},{2},{3},{4},{5})".format(X1, Y1, X2, Y2, int(t1), int(t2))
 
 def clip(a1, a2 = None, a3 = None, a4 = None):
     if a2 == None:
-        return '\\clip({draw})'.format(draw = a1)
+        return "\\clip({draw})".format(draw = a1)
     elif a3 == None:
-        return '\\clip({scale},{draw})'.format(scale = a1, draw = a2)
+        return "\\clip({scale},{draw})".format(scale = a1, draw = a2)
     else:
-        return '\\clip({x1},{y1},{x2},{y2})'.format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
+        return "\\clip({x1},{y1},{x2},{y2})".format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
 
 def iclip(a1, a2 = None, a3 = None, a4 = None):
     if a2 == None:
-        return '\\iclip({draw})'.format(draw = a1)
+        return "\\iclip({draw})".format(draw = a1)
     elif a3 == None:
-        return '\\iclip({scale},{draw})'.format(scale = a1, draw = a2)
+        return "\\iclip({scale},{draw})".format(scale = a1, draw = a2)
     else:
-        return '\\iclip({x1},{y1},{x2},{y2})'.format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
+        return "\\iclip({x1},{y1},{x2},{y2})".format(x1 = int(a1), y1 = int(a2), x2 = int(a3), y2 = int(a4))
 
 #--------------------------------------------- Utility Function -------------------------------------------#
 
 def GetVersion():
-    print('SubFX version: ' + Yutils.version())
+    print("SubFX version: " + Yutils.version())
 
 def Pause():
-    print('Press any key to continue...')
+    print("Press any key to continue...")
     sys.stdin.readline()
 
 def GetRootDir():
-    if sys.platform == 'win32':
-        return __file__.rsplit('\\', 1)[0]
+    if sys.platform == "win32":
+        return __file__.rsplit("\\", 1)[0]
     else:
-        return '/'
+        return "/"
 
 def GetWorkingDir():
     return sys.path[0]
 
 def abspath(filename):
-    return sys.path[0] + '\\' + filename
+    return sys.path[0] + "\\" + filename
 
-def MakePath(FolderIndex = 0, ImageIndex = 0, MainFolder = 'src',
-             SubFolder = 'list', ImageName = 'img', ImageType = '.png', PathType = 'pi'):
+def MakePath(FolderIndex = 0, ImageIndex = 0, MainFolder = "src",
+             SubFolder = "list", ImageName = "img", ImageType = ".png", PathType = "pi"):
 
-    if (sys.platform == 'win32'):
-        if PathType == 'pi':
-            img_path = r'%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
-        elif PathType == 'sys':
-            img_path = r'%s\%s%d\%s (%d)%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+    if (sys.platform == "win32"):
+        if PathType == "pi":
+            img_path = r"%s\%s%d\%s%04d%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+        elif PathType == "sys":
+            img_path = r"%s\%s%d\%s (%d)%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
         else:
-            img_path = r'%s\%s%d\%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+            img_path = r"%s\%s%d\%s%04d%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
     else:
-        if PathType == 'pi':
-            img_path = '%s/%s%d/%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
-        elif PathType == 'sys':
-            img_path = '%s/%s%d/%s (%d)%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+        if PathType == "pi":
+            img_path = "%s/%s%d/%s%04d%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+        elif PathType == "sys":
+            img_path = "%s/%s%d/%s (%d)%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
         else:
-            img_path = '%s/%s%d/%s%04d%s' % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
+            img_path = "%s/%s%d/%s%04d%s" % (MainFolder, SubFolder, FolderIndex, ImageName, ImageIndex, ImageType)
 
     return img_path
+
+def is_syl_blank(syl):
+    if syl.duration <= 0:
+        return True
+    
+    if len(syl.text) <= 0:
+        return True
+    
+    tmp_str = syl.text
+    tmp_str = tmp_str.strip()
+    tmp_str = tmp_str.replace(" ", "")
+    tmp_str = tmp_str.replace("　", "")
+    return (len(tmp_str) <= 0)
 
 #--------------------------------------------- Advanced Function -------------------------------------------#
 
@@ -408,23 +421,23 @@ def AdvInt(a):       # 高级取整函数 AdvancedIntegrate
     else:                # elif a < 0 and a - int(a) > -0.5:
         return int(a)
 
-def DeFmtTime(TIME):       # 重新数字化已被格式化的时间 TIME = '0:00:00.00'
+def DeFmtTime(TIME):       # 重新数字化已被格式化的时间 TIME = "0:00:00.00"
     return Yutils.Ass.stringToMs(TIME)
 
 def FmtTime(t):       # 格式化时间
     return Yutils.Ass.msToString(t)
 
 def PixPt():       # 返回一个像素点 PixelPoint, deprecated, use DrawPoint instead
-    return '{\\p1}m 0 0 l 1 0 1 1 0 1{\\p0}'
+    return "{\\p1}m 0 0 l 1 0 1 1 0 1{\\p0}"
 
 def DrawPoint():
-    return '{\\p1}m 0 0 l 1 0 1 1 0 1{\\p0}'
+    return "{\\p1}m 0 0 l 1 0 1 1 0 1{\\p0}"
 
 def DrawLight(l):
-    light = '{\\p4}'
+    light = "{\\p4}"
     l *= 8
-    light += 'm 0 0 l -{length} 0 0 8 c'.format(length = int(l))
-    light += '{\\p0}'
+    light += "m 0 0 l -{length} 0 0 8 c".format(length = int(l))
+    light += "{\\p0}"
     return light
 
 def MovPxl():       # 移动单位个像素 MovePixel
@@ -472,14 +485,14 @@ def RandA():       # 返回一个随机的Alpha值 RandomAlpha
     return FmtHex(random.randint(0, 255))
 
 def RandImg(n, IMG_WD, IMG_HT):       # 随机图形 RandomImage
-    STR_RAND_IMG = 'm ' + str(random.randint(0, IMG_WD)) + \
-                   ' ' + str(random.randint(0, IMG_HT)) + ' b '
+    STR_RAND_IMG = "m " + str(random.randint(0, IMG_WD)) + \
+                   " " + str(random.randint(0, IMG_HT)) + " b "
     for i in range(6 * n):
         if i % 2 == 0:
-            STR_RAND_IMG += str(random.randint(0, IMG_WD)) + ' '
+            STR_RAND_IMG += str(random.randint(0, IMG_WD)) + " "
         else:
-            STR_RAND_IMG += str(random.randint(0, IMG_HT)) + ' '
-    return STR_RAND_IMG + 'c'
+            STR_RAND_IMG += str(random.randint(0, IMG_HT)) + " "
+    return STR_RAND_IMG + "c"
 
 def RandCir(a, b, r):       # 随机圆分布函数 RandomCircle1
     R = random.randint(0, r)
@@ -525,7 +538,7 @@ def Circle(n, a, b, r):       # 圆函数
     return CIR
 
 def RandPolygon(r1, r2, v):
-    s = '{\\p4}'
+    s = "{\\p4}"
     vertex = []
     r1 *= 8
     r2 *= 8
@@ -535,50 +548,50 @@ def RandPolygon(r1, r2, v):
     vertex.sort()
     x = math.cos(vertex[0]) * r1
     y = math.sin(vertex[0]) * r2
-    s += 'm {0} {1} '.format(AdvInt(x), AdvInt(y))
+    s += "m {0} {1} ".format(AdvInt(x), AdvInt(y))
     for i in range(1, num):
         x = math.cos(vertex[i]) * r1
         y = math.sin(vertex[i]) * r2
-        s += 'l {0} {1} '.format(AdvInt(x), AdvInt(y))
-    s += 'c{\\p0}'
+        s += "l {0} {1} ".format(AdvInt(x), AdvInt(y))
+    s += "c{\\p0}"
     return s
 
 def DevImg(IMG, DEVX, DEVY):       # 图形偏移 DeviateIamge
     NEW_IMG_LIS = IMG.split()
-    NEW_IMG = 'm ' + str(int(NEW_IMG_LIS[1]) + DEVX) + ' ' + str(int(NEW_IMG_LIS[2]) + DEVY) + ' b '
+    NEW_IMG = "m " + str(int(NEW_IMG_LIS[1]) + DEVX) + " " + str(int(NEW_IMG_LIS[2]) + DEVY) + " b "
     n = len(NEW_IMG_LIS)
     for i in range(4, n - 1):
         if i % 2 == 0:
             NEW_IMG_LIS[i] = int(NEW_IMG_LIS[i]) + DEVX
-            NEW_IMG += str(NEW_IMG_LIS[i]) + ' '
+            NEW_IMG += str(NEW_IMG_LIS[i]) + " "
         else:
             NEW_IMG_LIS[i] = int(NEW_IMG_LIS[i]) + DEVY
-            NEW_IMG += str(NEW_IMG_LIS[i]) + ' '
-    return NEW_IMG + 'c'
+            NEW_IMG += str(NEW_IMG_LIS[i]) + " "
+    return NEW_IMG + "c"
 
 def RevImgX(IMG):       # 图形按照x轴对换 ReverseIamgeX
     NEW_IMG_LIS = IMG.split()
-    NEW_IMG = 'm ' + str(-int(NEW_IMG_LIS[1])) + ' ' + NEW_IMG_LIS[2] + ' b '
+    NEW_IMG = "m " + str(-int(NEW_IMG_LIS[1])) + " " + NEW_IMG_LIS[2] + " b "
     n = len(NEW_IMG_LIS)
     for i in range(4, n - 1):
         if i % 2 == 0:
             NEW_IMG_LIS[i] = -int(NEW_IMG_LIS[i])
-            NEW_IMG += str(NEW_IMG_LIS[i]) + ' '
+            NEW_IMG += str(NEW_IMG_LIS[i]) + " "
         else:
-            NEW_IMG += NEW_IMG_LIS[i] + ' '
-    return NEW_IMG + 'c'
+            NEW_IMG += NEW_IMG_LIS[i] + " "
+    return NEW_IMG + "c"
 
 def RevImgY(IMG):       # 图形按照y轴对换 ReverseIamgeY
     NEW_IMG_LIS = IMG.split()
-    NEW_IMG = 'm ' + NEW_IMG_LIS[1] + ' ' + str(-int(NEW_IMG_LIS[2])) + ' b '
+    NEW_IMG = "m " + NEW_IMG_LIS[1] + " " + str(-int(NEW_IMG_LIS[2])) + " b "
     n = len(NEW_IMG_LIS)
     for i in range(4, n - 1):
         if i % 2 == 0:
-            NEW_IMG += NEW_IMG_LIS[i] + ' '
+            NEW_IMG += NEW_IMG_LIS[i] + " "
         else:
             NEW_IMG_LIS[i] = -int(NEW_IMG_LIS[i])
-            NEW_IMG += str(NEW_IMG_LIS[i]) + ' '
-    return NEW_IMG + 'c'
+            NEW_IMG += str(NEW_IMG_LIS[i]) + " "
+    return NEW_IMG + "c"
 
 def DivClr(COLOR1, COLOR2, n):       # 拆分颜色 DivideColor
     CLR_LIS_11 = HexToDec(COLOR1[0:2])

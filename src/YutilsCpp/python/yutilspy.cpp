@@ -349,6 +349,8 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     py::class_<AssParser, std::shared_ptr<AssParser>>(m, "AssParser")
 
     .def_static("create", &AssParser::create,
+        py::arg("fileName"),
+        py::arg("warningOut") = "",
     "Create a AssParser object.\n"
     "input string is ass's file name.\n")
 
@@ -396,7 +398,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "effect: dialog effect description\n"
     "text: dialog text\n")
 
-    .def("extandDialogs", &AssParser::extendDialogs,
+    .def("extendDialogs", &AssParser::extendDialogs,
     "Add the following fields to AssDialog object.\n"
     "After call this function, "
     "you can get extended dialogs by calling dialogs().\n"
