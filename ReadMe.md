@@ -43,4 +43,6 @@ Now is under development.
 
 ## Licence
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
+Except for the following components, all others are distributed under [LGPLv2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html):
+- [AssPy](src/YutilsCpp/python/asspy.py): [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
+- examples amd testing cases: [MIT](https://opensource.org/licenses/MIT)
