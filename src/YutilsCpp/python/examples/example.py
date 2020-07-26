@@ -1,4 +1,4 @@
-# This file is part of SubFX
+# This file is part of SubFX.
 # Copyright (c) 2020 fdar0536
 #
 # SubFX is free software: you can redistribute it and/or modify
