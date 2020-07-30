@@ -36,9 +36,14 @@ namespace AssWriter_Internal
 template<class T>
 void write(T &file, std::shared_ptr<AssParser> &parser) THROW
 {
-    writeMeta(file, parser->meta());
-    writeStyle(file, parser->styles());
-    writeEvent(file, parser->dialogs());
+    auto meta(parser->meta());
+    writeMeta(file, meta);
+
+    auto styles(parser->styles());
+    writeStyle(file, styles);
+
+    auto dialogs(parser->dialogs());
+    writeEvent(file, dialogs);
 }
 
 template<class T>
