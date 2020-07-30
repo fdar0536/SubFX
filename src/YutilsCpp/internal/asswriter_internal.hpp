@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <fstream>
+#include <ostream>
 
 #include "internal/basecommon.h"
 #include "YutilsCpp"
@@ -33,20 +33,58 @@ namespace Yutils
 namespace AssWriter_Internal
 {
 
+template<class T>
+void write(T &file, std::shared_ptr<AssParser> &parser) THROW
+{
+    writeMeta(file, parser->meta());
+    writeStyle(file, parser->styles());
+    writeEvent(file, parser->dialogs());
+}
+
+template<class T>
+void write(T &file,
+           const char *assHeader,
+           size_t headerLength,
+           std::vector<std::string> &assBuf) THROW
+{
+    if (headerLength) // length != 0
+    {
+        file << assHeader;
+    }
+
+    for (auto i = assBuf.begin(); i != assBuf.end(); ++i)
+    {
+        file << *i << std::endl;
+    }
+}
+
+template<class T>
+void write(T &file,
+           std::shared_ptr<AssMeta> &meta,
+           std::map<std::string,
+           std::shared_ptr<AssStyle>> &styles,
+           std::vector<std::string> &assBuf) THROW
+{
+    writeMeta(file, meta);
+    // here may throw
+    writeStyle(file, styles);
+    writeEvent(file, assBuf);
+}
+
 void checkFileName(const char *fileName) THROW;
 
-void writeMeta(std::fstream &file, std::shared_ptr<AssMeta> &meta) NOTHROW;
+void writeMeta(std::ostream &file, std::shared_ptr<AssMeta> &meta) NOTHROW;
 
-void writeStyle(std::fstream &file,
+void writeStyle(std::ostream &file,
                 std::map<std::string,
                 std::shared_ptr<AssStyle>> &styles) THROW;
 
-void writeEventHeader(std::fstream &file) NOTHROW;
+void writeEventHeader(std::ostream &file) NOTHROW;
 
-void writeEvent(std::fstream &file,
+void writeEvent(std::ostream &file,
                 std::vector<std::string> &assBuf) NOTHROW;
 
-void writeEvent(std::fstream &file,
+void writeEvent(std::ostream &file,
                 std::vector<std::shared_ptr<AssDialog>> &dialogs) NOTHROW;
 
 } // end namespace AssWriter_Internal

@@ -37,12 +37,22 @@ namespace AssWriter
 SYMBOL_SHOW void write(const char *fileName,
                        std::shared_ptr<AssParser> &parser) THROW;
 
+SYMBOL_SHOW void write(std::shared_ptr<AssParser> &parser) THROW;
+
 SYMBOL_SHOW void write(const char *fileName,
                        const char *assHeader,
                        std::vector<std::string> &assBuf) THROW;
 
+SYMBOL_SHOW void write(const char *assHeader,
+                       std::vector<std::string> &assBuf) THROW;
+
 SYMBOL_SHOW void write(const char *fileName,
                        std::shared_ptr<AssMeta> &meta,
+                       std::map<std::string,
+                       std::shared_ptr<AssStyle>> &styles,
+                       std::vector<std::string> &assBuf) THROW;
+
+SYMBOL_SHOW void write(std::shared_ptr<AssMeta> &meta,
                        std::map<std::string,
                        std::shared_ptr<AssStyle>> &styles,
                        std::vector<std::string> &assBuf) THROW;

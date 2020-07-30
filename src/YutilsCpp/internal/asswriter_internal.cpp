@@ -34,7 +34,7 @@ void AssWriter_Internal::checkFileName(const char *fileName) THROW
     }
 }
 
-void AssWriter_Internal::writeMeta(std::fstream &file,
+void AssWriter_Internal::writeMeta(std::ostream &file,
                                    std::shared_ptr<AssMeta> &meta) NOTHROW
 {
     file << "[Script Info]" << std::endl;
@@ -61,7 +61,7 @@ void AssWriter_Internal::writeMeta(std::fstream &file,
     file << std::endl;
 }
 
-void AssWriter_Internal::writeStyle(std::fstream &file,
+void AssWriter_Internal::writeStyle(std::ostream &file,
                                     std::map<std::string,
                                     std::shared_ptr<AssStyle>> &styles) THROW
 {
@@ -163,13 +163,13 @@ void AssWriter_Internal::writeStyle(std::fstream &file,
     file << std::endl;
 }
 
-void AssWriter_Internal::writeEventHeader(std::fstream &file) NOTHROW
+void AssWriter_Internal::writeEventHeader(std::ostream &file) NOTHROW
 {
     file << "[Events]" << std::endl;
     file << "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text" << std::endl;
 }
 
-void AssWriter_Internal::writeEvent(std::fstream &file,
+void AssWriter_Internal::writeEvent(std::ostream &file,
                                     std::vector<std::string> &assBuf) NOTHROW
 {
     writeEventHeader(file);
@@ -180,7 +180,7 @@ void AssWriter_Internal::writeEvent(std::fstream &file,
     }
 }
 
-void AssWriter_Internal::writeEvent(std::fstream &file,
+void AssWriter_Internal::writeEvent(std::ostream &file,
                                     std::vector<std::shared_ptr<AssDialog>>
                                     &dialogs) NOTHROW
 {

@@ -41,16 +41,14 @@ SYMBOL_SHOW void AssWriter::write(const char *fileName,
         throw std::invalid_argument("write: CANOT open file");
     }
 
-    auto meta(parser->meta());
-    AssWriter_Internal::writeMeta(file, meta);
-
-    auto styles(parser->styles());
-    AssWriter_Internal::writeStyle(file, styles);
-
-    auto dialogs(parser->dialogs());
-    AssWriter_Internal::writeEvent(file, dialogs);
+    AssWriter_Internal::write(file, parser);
 
     file.close();
+}
+
+SYMBOL_SHOW void AssWriter::write(std::shared_ptr<AssParser> &parser) THROW
+{
+    AssWriter_Internal::write(std::cout, parser);
 }
 
 SYMBOL_SHOW void AssWriter::write(const char *fileName,
@@ -84,17 +82,15 @@ SYMBOL_SHOW void AssWriter::write(const char *fileName,
         throw std::invalid_argument("write: CANOT open file");
     }
 
-    if (length) // length != 0
-    {
-        file << assHeader;
-    }
-
-    for (auto i = assBuf.begin(); i != assBuf.end(); ++i)
-    {
-        file << *i << std::endl;
-    }
+    AssWriter_Internal::write(file, assHeader, length, assBuf);
 
     file.close();
+}
+
+SYMBOL_SHOW void AssWriter::write(const char *assHeader,
+                                  std::vector<std::string> &assBuf) THROW
+{
+    AssWriter_Internal::write(std::cout, assHeader, strlen(assHeader), assBuf);
 }
 
 SYMBOL_SHOW void AssWriter::write(const char *fileName,
@@ -113,10 +109,15 @@ SYMBOL_SHOW void AssWriter::write(const char *fileName,
         throw std::invalid_argument("write: CANOT open file");
     }
 
-    AssWriter_Internal::writeMeta(file, meta);
-    // here may throw
-    AssWriter_Internal::writeStyle(file, styles);
-    AssWriter_Internal::writeEvent(file, assBuf);
+    AssWriter_Internal::write(file, meta, styles, assBuf);
 
     file.close();
+}
+
+SYMBOL_SHOW void AssWriter::write(std::shared_ptr<AssMeta> &meta,
+                                  std::map<std::string,
+                                  std::shared_ptr<AssStyle>> &styles,
+                                  std::vector<std::string> &assBuf) THROW
+{
+    AssWriter_Internal::write(std::cout, meta, styles, assBuf);
 }
