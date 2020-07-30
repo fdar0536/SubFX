@@ -33,6 +33,22 @@ namespace Yutils
 namespace AssWriter_Internal
 {
 
+void checkFileName(const char *fileName) THROW;
+
+void writeMeta(std::ostream &file, std::shared_ptr<AssMeta> &meta) NOTHROW;
+
+void writeStyle(std::ostream &file,
+                std::map<std::string,
+                std::shared_ptr<AssStyle>> &styles) THROW;
+
+void writeEventHeader(std::ostream &file) NOTHROW;
+
+void writeEvent(std::ostream &file,
+                std::vector<std::string> &assBuf) NOTHROW;
+
+void writeEvent(std::ostream &file,
+                std::vector<std::shared_ptr<AssDialog>> &dialogs) NOTHROW;
+
 template<class T>
 void write(T &file, std::shared_ptr<AssParser> &parser) THROW
 {
@@ -75,22 +91,6 @@ void write(T &file,
     writeStyle(file, styles);
     writeEvent(file, assBuf);
 }
-
-void checkFileName(const char *fileName) THROW;
-
-void writeMeta(std::ostream &file, std::shared_ptr<AssMeta> &meta) NOTHROW;
-
-void writeStyle(std::ostream &file,
-                std::map<std::string,
-                std::shared_ptr<AssStyle>> &styles) THROW;
-
-void writeEventHeader(std::ostream &file) NOTHROW;
-
-void writeEvent(std::ostream &file,
-                std::vector<std::string> &assBuf) NOTHROW;
-
-void writeEvent(std::ostream &file,
-                std::vector<std::shared_ptr<AssDialog>> &dialogs) NOTHROW;
 
 } // end namespace AssWriter_Internal
 
