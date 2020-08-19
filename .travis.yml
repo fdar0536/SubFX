@@ -13,6 +13,7 @@ archlinux:
     - pybind11
     - python
     - python-setuptools
+    - nlohmann-json
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:
