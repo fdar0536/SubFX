@@ -38,20 +38,20 @@ public:
 
     static std::shared_ptr<Logger> create(FILE *out = stdout,
                                           FILE *err = stderr,
-                                          bool autoCloseFiles = true);
+                                          bool autoCloseFiles = true) NOTHROW;
 
     static std::shared_ptr<Logger> create(const std::string &outFile,
-                                          const std::string &errFile);
+                                          const std::string &errFile) NOTHROW;
 
     ~Logger();
 
-    void writeOut(const char *);
+    void writeOut(const char *) NOTHROW;
 
-    void writeOut(std::string &);
+    void writeOut(std::string &) NOTHROW;
 
-    void writeErr(const char *);
+    void writeErr(const char *) NOTHROW;
 
-    void writeErr(std::string &);
+    void writeErr(std::string &) NOTHROW;
 
 private:
 

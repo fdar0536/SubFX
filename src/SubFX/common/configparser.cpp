@@ -2,7 +2,7 @@
 #include <regex>
 #include <map>
 
-#include "../../common/basecommon.hpp"
+#include "internal/basecommon.h"
 #include "configparser.hpp"
 
 #ifdef _MSC_VER
@@ -11,35 +11,50 @@
 
 using json = nlohmann::json;
 
-// public member function
-std::string ConfigParser::getSubName() const
+// public member functions
+std::shared_ptr<ConfigParser>
+    ConfigParser::create(std::string &jsonFileName) THROW
 {
-    return subName;
+    ConfigParser *ret(new (std::nothrow) ConfigParser());
+    if (!ret)
+    {
+        return nullptr;
+    }
+
+    // here may throw exception
+    ret->parseConfig(jsonFileName);
+    return std::shared_ptr<ConfigParser>(ret);
 }
 
-std::string ConfigParser::getLogFileName() const
+std::string ConfigParser::getSubName() const NOTHROW
 {
-    return logFile;
+    return m_subName;
 }
 
-std::string ConfigParser::getOutputFileName() const
+std::string ConfigParser::getLogFileName() const NOTHROW
 {
-    return outputFile;
+    return m_logFile;
 }
 
-std::vector<std::shared_ptr<ConfigData>> ConfigParser::getConfigDatas() const
+std::string ConfigParser::getOutputFileName() const NOTHROW
 {
-    return configDatas;
+    return m_outputFile;
+}
+
+std::vector<std::shared_ptr<ConfigData>>
+ConfigParser::getConfigDatas() const NOTHROW
+{
+    return m_configDatas;
 }
 
 // private member function
-const char *ConfigParser::parseConfig(std::string &jsonFileName)
+void ConfigParser::parseConfig(std::string &jsonFileName) THROW
 {
     std::fstream inputFile;
     inputFile.open(jsonFileName, std::ios::in);
     if (inputFile.fail())
     {
-        return "Fail to open config file.";
+        throw std::invalid_argument("Fail to open config file.");
     }
 
     std::string errString;
@@ -51,35 +66,29 @@ const char *ConfigParser::parseConfig(std::string &jsonFileName)
     catch (nlohmann::detail::parse_error &e)
     {
         inputFile.close();
-        errString = e.what();
-        return errString.c_str();
+        throw std::invalid_argument(e.what());
     }
 
     inputFile.close();
 
-    const char *err(nullptr);
-    err = getConfigItem(subName, config, "subtitle");
-    TESTERR(err)
+    getConfigItem(m_subName, config, "subtitle");
 
-    err = getConfigItem(logFile, config, "logFile");
-    TESTERR(err)
-    if (logFile == "")
+    getConfigItem(m_logFile, config, "logFile");
+    if (m_logFile == "")
     {
-        logFile = "stdout";
+        m_logFile = "stdout";
     }
 
-    err = getConfigItem(outputFile, config, "outputFile");
-    TESTERR(err)
+    getConfigItem(m_outputFile, config, "outputFile");
 
     json scripts;
-    err = getConfigItem(scripts, config, "scripts");
-    TESTERR(err)
+    getConfigItem(scripts, config, "scripts");
     if (scripts.size() == 0)
     {
-        return "No input script.";
+        throw std::invalid_argument("No input script.");
     }
 
-    configDatas.reserve(50);
+    m_configDatas.reserve(50);
     std::map<std::string, SubMode> modeMap;
     modeMap["line"] = SubMode::lines;
     modeMap["word"] = SubMode::words;
@@ -89,58 +98,56 @@ const char *ConfigParser::parseConfig(std::string &jsonFileName)
     std::regex pyScript("^.*\\.py$");
     for (size_t i = 0; i < scripts.size(); ++i)
     {
-        std::shared_ptr<ConfigData> configData = std::make_shared<ConfigData>();
+        std::shared_ptr<ConfigData>
+                configData = std::make_shared<ConfigData>();
         if (configData == nullptr)
         {
-            return "Fail to allocate memory.";
+            throw std::invalid_argument("Fail to allocate memory.");
         }
 
-        err = getConfigItem(configData->scriptName, scripts.at(i), "script");
-        TESTERR(err)
+        getConfigItem(configData->scriptName, scripts.at(i), "script");
         if (!regex_match(configData->scriptName, pyScript))
         {
-            errString = "Invalid python script name: " + configData->scriptName;
-            return errString.c_str();
+            errString = "Invalid python script name: "
+                    + configData->scriptName;
+            throw std::invalid_argument(errString);
         }
 
-        err = getConfigItem(modeRes, scripts.at(i), "mode");
-        TESTERR(err)
+        getConfigItem(modeRes, scripts.at(i), "mode");
         if (modeRes != "line" &&
             modeRes != "word" &&
             modeRes != "syl" &&
             modeRes != "char")
         {
             errString = ("Invalid mode: " + modeRes);
-            configDatas.clear();
-            return errString.c_str();
+            m_configDatas.clear();
+            throw std::invalid_argument(errString);
         }
 
         configData->mode = modeMap[modeRes];
 
-        err = getConfigItem(configData->startLine, scripts.at(i), "startLine");
-        TESTERR(err)
+        getConfigItem(configData->startLine, scripts.at(i), "startLine");
         if (configData->startLine < 0)
         {
-            configDatas.clear();
-            return "\"startLine\" CANNOT less than ZERO.";
+            m_configDatas.clear();
+            throw std::invalid_argument("\"startLine\" CANNOT less "
+                                        "than ZERO.");
         }
 
-        err = getConfigItem(configData->endLine, scripts.at(i), "endLine");
-        TESTERR(err)
+        getConfigItem(configData->endLine, scripts.at(i), "endLine");
         if (configData->endLine >= 0 &&
             configData->startLine > configData->endLine)
         {
-            configDatas.clear();
-            return "\"startLine\" is GREATER THAN \"endLine\".";
+            m_configDatas.clear();
+            throw std::invalid_argument("\"startLine\" is GREATER "
+                                        "THAN \"endLine\".");
         }
 
-        configDatas.push_back(configData);
+        m_configDatas.push_back(configData);
     }
 
-    if (configDatas.size() == 0)
+    if (m_configDatas.size() == 0)
     {
-        return "No input script.";
+        throw std::invalid_argument("No input script.");
     }
-
-    return nullptr;
 }

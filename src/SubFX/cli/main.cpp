@@ -27,24 +27,18 @@ int main(int argc, char **argv)
     py::scoped_interpreter guard{};
 
     std::string jsonFileName(argv[1]);
-    std::shared_ptr<SubFXAssInit> assConfig;
-    const char *err(nullptr);
-    std::tie(assConfig, err) = SubFXAssInit::create(jsonFileName);
-
-    if (err)
+    std::shared_ptr<ConfigParser> assConfig;
+    try
     {
-        std::cerr << err << std::endl;
+        assConfig = ConfigParser::create(jsonFileName);
+    }
+    catch (std::invalid_argument &e)
+    {
+        std::cout << e.what() << std::endl;
         return 1;
     }
 
-    std::shared_ptr<AssLauncher> assLauncher(nullptr);
-    std::tie(assLauncher, err) = AssLauncher::create(assConfig);
-    if (err)
-    {
-        std::cerr << err<< std::endl;
-        return 1;
-    }
-
+    std::shared_ptr<AssLauncher> assLauncher(AssLauncher::create());
     int ret(assLauncher->exec(assConfig));
     if (ret)
     {
@@ -57,7 +51,7 @@ int main(int argc, char **argv)
 
 void printHelp(char **argv)
 {
-    std::cout << argv[0] << " " << SUBFX_VERSION << " usage:" << std::endl;
+    std::cout << argv[0] << " " << PROJ_VERSION << " usage:" << std::endl;
     std::cout << argv[0] << " /path/to/your/configFile.json" << std::endl;
     std::cout << "\"-h\" or \"--help\": print this message and exit." << std::endl;
 }

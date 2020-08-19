@@ -516,7 +516,20 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "leadin: dialog pretime / duration from last dialog to this one "
     "(in case there's none, it's 1000.1)\n"
     "leadout: dialog posttime / duration from this dialog to next one "
-    "(in case there's none, it's 1000.1)\n");
+    "(in case there's none, it's 1000.1)\n")
+
+    .def("dialogIsExtended", &AssParser::dialogIsExtended,
+    "Returns true if dialogs are already being extended, "
+    "else it will return false.\n")
+
+    .def("isSylAvailable", &AssParser::isSylAvailable,
+    "Indicate dialogs' syllable is available or not.\n")
+
+    .def("isWordAvailable", &AssParser::isWordAvailable,
+    "Indicate dialogs' word is available or not\n")
+
+    .def("isCharAvailable", &AssParser::isCharAvailable,
+    "Indicate dialogs' character is available or not.\n");
 
     /* in asswriter.hpp */
     auto assWriter(m.def_submodule("AssWriter"));
@@ -526,7 +539,7 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
                   std::shared_ptr<AssParser> &>(&AssWriter::write),
                   "write(fileName, assParser)\n"
     "Write all contents to file(ass) by providing AssParser, "
-    "fileName as its name.");
+    "fileName as its name.\n");
 
     assWriter.def("write", py::overload_cast<const char *,
                   const char *,
@@ -541,15 +554,15 @@ PYBIND11_MODULE(SubFX_YutilsPy, m)
     "assBuf is a list of strings.\n"
     "If assHeader is not empty, it will write assHeader first, "
     "then write contents in assBuf to file, "
-    "else just write assBuf to file.");
+    "else just write assBuf to file.\n");
 
     assWriter.def("write", py::overload_cast<const char *,
                   std::shared_ptr<AssMeta> &,
                   std::map<std::string,
                   std::shared_ptr<AssStyle>> &,
                   std::vector<std::string> &>(&AssWriter::write),
-    "write(meta, styles, assBuf)"
-    "Write all contents by providing meta, styles and assbuf.");
+    "write(meta, styles, assBuf)\n"
+    "Write all contents by providing meta, styles and assbuf.\n");
 
     /* in fonthandle.hpp */
     py::class_<FontHandle, std::shared_ptr<FontHandle>>(m, "FontHandle")

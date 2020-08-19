@@ -1,6 +1,6 @@
 # gui and cli
 option(ENABLE_CLI "Enable CLI frontend" ON)
-option(ENABLE_GUI "Enable GUI frontend" ON)
+option(ENABLE_GUI "Enable GUI frontend" OFF)
 if (ENABLE_CLI OR ENABLE_GUI)
     find_package(nlohmann_json 3.7.0 REQUIRED)
 endif (ENABLE_CLI OR ENABLE_GUI)

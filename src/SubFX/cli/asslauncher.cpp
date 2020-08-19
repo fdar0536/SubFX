@@ -15,39 +15,72 @@
 
 namespace py = pybind11;
 
-std::pair<std::shared_ptr<AssLauncher>, const char *>
-AssLauncher::create(std::shared_ptr<SubFXAssInit> &assConfig)
+std::shared_ptr<AssLauncher>
+AssLauncher::create() NOTHROW
 {
     AssLauncher *ret(new (std::nothrow) AssLauncher());
     if (!ret)
     {
-        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
-                              "Fail to allocate memory.");
+        return nullptr;
     }
 
-    const char *err(ret->LauncherInit(assConfig->getLogFileName(),
-                                      assConfig->getOutputFileName()));
-    if (err)
+    try
     {
+#if (defined(_WIN32) && \
+    PY_MAJOR_VERSION == 3 && \
+    PY_MINOR_VERSION == 8 && \
+    PY_MICRO_VERSION >= 0) // python >= 3.8.0 on windows
+        /* import os
+         * os.add_dll_directory(os.path.join(os.environ["SUBFX_HOME"], "bin"))
+         */
+        py::object os = py::module::import("os");
+        os.attr("add_dll_directory")(os.attr("path").attr("join")(
+                                     os.attr("environ")["SUBFX_HOME"],
+                                     "bin"));
+#endif
+        ret->m_yutils = py::module::import("SubFX_YutilsPy");
+    }
+    catch (py::error_already_set &e)
+    {
+        std::cerr << e.what() << std::endl;
         delete ret;
-        return std::make_pair(std::shared_ptr<AssLauncher>(nullptr),
-                              err);
+        return nullptr;
     }
 
-    return std::make_pair(std::shared_ptr<AssLauncher>(ret),
-                          nullptr);
+    return std::shared_ptr<AssLauncher>(ret);
 }
 
-int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
+int AssLauncher::exec(std::shared_ptr<ConfigParser> &assConfig) NOTHROW
 {
-    auto parser(assConfig->getParser());
+    if (assConfig->getLogFileName() == "stdout")
+    {
+        m_logger = PROJ_NAMESPACE::Utils::Logger::create();
+    }
+    else
+    {
+        m_logger = PROJ_NAMESPACE::Utils::Logger::create(
+                    assConfig->getLogFileName(),
+                    assConfig->getLogFileName());
+    }
+
+    if (m_logger == nullptr)
+    {
+        std::cerr << "Fail to create logger" << std::endl;
+        return 1;
+    }
+
+    if (getParser(assConfig))
+    {
+        return 1;
+    }
+
     auto configs(assConfig->getConfigDatas());
-    auto dialogs(parser->dialogs());
-    totalConfigs = configs.size();
-    for (size_t i = 0; i < totalConfigs; ++i)
+    py::list dialogs(m_parser.attr("dialogs")());
+    m_totalConfigs = configs.size();
+    for (size_t i = 0; i < m_totalConfigs; ++i)
     {
         auto config(configs.at(i));
-        if (execConfig(assConfig, config, dialogs))
+        if (execConfig(config, dialogs))
         {
             reset();
             std::cout << std::endl;
@@ -55,28 +88,27 @@ int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
         }
 
         std::cout << std::endl;
-        ++currentConfig;
+        ++m_currentConfig;
     }
 
-    auto meta(parser->getMetaPtr());
-    auto styles(parser->getStyleData());
+    auto meta(m_parser.attr("meta")());
+    auto styles(m_parser.attr("styles")());
+
+    // todo: find better way to solve this problem
+    py::list assBuf(py::cast(m_assBuf));
 
     std::cout << "Writing output..." << std::endl;
-    const char *err(file->writeAssFile(meta, styles, assBuf));
-    if (err)
+    try
     {
-        const char *now(getCurrentTime());
-        if (now)
-        {
-            fputs(now, logFile);
-        }
-        else
-        {
-            fputs("CANNOT get current time!", logFile);
-        }
-
-        fputs(err, logFile);
-        fputs("\n", logFile);
+        m_yutils.attr("AssWriter").attr("write")(
+                    assConfig->getOutputFileName().c_str(),
+                    meta,
+                    styles,
+                    assBuf);
+    }
+    catch (py::error_already_set &e)
+    {
+        m_logger->writeErr(e.what());
         return 1;
     }
 
@@ -85,17 +117,34 @@ int AssLauncher::exec(std::shared_ptr<SubFXAssInit> &assConfig)
     return 0;
 }
 
-// private member function
-void AssLauncher::reset()
+// private member functions
+
+int AssLauncher::getParser(std::shared_ptr<ConfigParser> &assConfig) NOTHROW
 {
-    resString.clear();
-    assBuf.clear();
-    totalConfigs = 0;
-    currentConfig = 1;
+    try
+    {
+        m_parser = m_yutils.attr("AssParser").attr("create")(
+                    assConfig->getSubName());
+        m_parser.attr("extendDialogs")();
+    }
+    catch (py::error_already_set &e)
+    {
+        pExecConfigError(e);
+        return 1;
+    }
+
+    return 0;
 }
 
-int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
-                            std::shared_ptr<ConfigData> &config,
+void AssLauncher::reset()
+{
+    m_resString.clear();
+    m_assBuf.clear();
+    m_totalConfigs = 0;
+    m_currentConfig = 1;
+}
+
+int AssLauncher::execConfig(std::shared_ptr<ConfigData> &config,
                             py::list &dialogs)
 {
     py::object mainObj;
@@ -125,7 +174,7 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
     case SubMode::syls:
     {
         modeName = "syls";
-        if (!assConfig->isSylAvailable())
+        if (!m_parser.attr("isSylAvailable")())
         {
             pExecConfigWarning(modeName);
             modeName = "line";
@@ -136,7 +185,7 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
     case SubMode::words:
     {
         modeName = "words";
-        if (!assConfig->isWordAvailable())
+        if (!m_parser.attr("isWordAvailable")())
         {
             pExecConfigWarning(modeName);
             modeName = "line";
@@ -147,7 +196,7 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
     case SubMode::chars:
     {
         modeName = "chars";
-        if (!assConfig->isCharAvailable())
+        if (!m_parser.attr("isCharAvailable")())
         {
             pExecConfigWarning(modeName);
             modeName = "line";
@@ -166,8 +215,8 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
     {
         std::string lastError("Error: ");
         lastError += "\"startLine\" or \"endLine\" is greater than or equal to ";
-        lastError += "dialogs\' count.";
-        fputs(lastError.c_str(), logFile);
+        lastError += "dialogs\' count.\n";
+        m_logger->writeErr(lastError);
         return 1;
     }
 
@@ -180,14 +229,10 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
         py::object resObj;
         if (modeName == "line")
         {
-            PyDict_DelItemString(line.ptr(), "syls");
-            PyDict_DelItemString(line.ptr(), "words");
-            PyDict_DelItemString(line.ptr(), "chars");
-
             try
             {
                 resObj = mainObj(line, py::list());
-                resString = resObj.cast<std::vector<std::string>>();
+                m_resString = resObj.cast<std::vector<std::string>>();
             }
             catch (py::error_already_set &e)
             {
@@ -200,21 +245,19 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
                 return 1;
             }
 
-            assBuf.insert(assBuf.end(), resString.begin(), resString.end());
+            m_assBuf.insert(m_assBuf.end(),
+                            m_resString.begin(),
+                            m_resString.end());
         }
         else
         {
             py::list list(line[modeName.c_str()]);
-            PyDict_DelItemString(line.ptr(), "syls");
-            PyDict_DelItemString(line.ptr(), "words");
-            PyDict_DelItemString(line.ptr(), "chars");
-
             for (size_t j = 0; j < py::len(list); ++j)
             {
                 try
                 {
                     resObj = mainObj(line, list[j]);
-                    resString = resObj.cast<std::vector<std::string>>();
+                    m_resString = resObj.cast<std::vector<std::string>>();
                 }
                 catch (py::error_already_set &e)
                 {
@@ -227,9 +270,9 @@ int AssLauncher::execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
                     return 1;
                 }
 
-                assBuf.insert(assBuf.end(),
-                              resString.begin(),
-                              resString.end());
+                m_assBuf.insert(m_assBuf.end(),
+                                m_resString.begin(),
+                                m_resString.end());
             } // end for j
         } // end if (modeName == "line")
 
@@ -256,9 +299,9 @@ void AssLauncher::pExecConfigWarning(std::string &input)
     output += "Warning: \"";
     output += input;
     output += "\" mode is not available. ";
-    output += "Fallback to \"line\" mode.";
-    fputs(output.c_str(), logFile);
-    fputs("\n", logFile);
+    output += "Fallback to \"line\" mode.\n";
+    m_logger->writeErr(output);
+    m_logger->writeErr("\n");
 }
 
 const char *AssLauncher::getCurrentTime()
@@ -283,8 +326,8 @@ void AssLauncher::reportProgress(size_t currentLine, size_t totalLines)
     progress *= 100.;
     std::cout << "Current progress: " << progress;
 
-    progress = static_cast<double>(currentConfig);
-    progress /= static_cast<double>(totalConfigs);
+    progress = static_cast<double>(m_currentConfig);
+    progress /= static_cast<double>(m_totalConfigs);
     progress *= 100.;
     std::cout << "% Total progress: " << progress;
     std::cout << "%\r" << std::flush;

@@ -3,44 +3,53 @@
 
 #include "pybind11/pybind11.h"
 
-#include "../common/subfxassinit.hpp"
-#include "launcher.hpp"
+#include "internal/basecommon.h"
+#include "../common/configparser.hpp"
+#include "Utils"
 
 namespace py = pybind11;
 
-class AssLauncher : public Launcher
+class AssLauncher
 {
 public:
 
-    static std::pair<std::shared_ptr<AssLauncher>, const char *>
-    create(std::shared_ptr<SubFXAssInit> &assConfig);
+    static std::shared_ptr<AssLauncher>
+    create() NOTHROW;
 
-    int exec(std::shared_ptr<SubFXAssInit> &assConfig);
+    int exec(std::shared_ptr<ConfigParser> &assConfig) NOTHROW;
 
 protected:
 
     AssLauncher() :
-        Launcher(),
-        resString(std::vector<std::string>()),
-        assBuf(std::vector<std::string>()),
-        totalConfigs(0),
-        currentConfig(1)
+        m_assBuf(std::vector<std::string>()),
+        m_resString(std::vector<std::string>()),
+        m_totalConfigs(0),
+        m_currentConfig(1),
+        m_yutils(py::object()),
+        m_parser(py::object())
     {}
 
 private:
 
-    std::vector<std::string> resString;
+    std::vector<std::string> m_assBuf;
 
-    std::vector<std::string> assBuf;
+    std::vector<std::string> m_resString;
 
-    size_t totalConfigs;
+    size_t m_totalConfigs;
 
-    size_t currentConfig;
+    size_t m_currentConfig;
+
+    py::object m_yutils;
+
+    py::object m_parser;
+
+    std::shared_ptr<PROJ_NAMESPACE::Utils::Logger> m_logger;
+
+    int getParser(std::shared_ptr<ConfigParser> &assConfig) NOTHROW;
 
     void reset();
 
-    int execConfig(std::shared_ptr<SubFXAssInit> &assConfig,
-                   std::shared_ptr<ConfigData> &config,
+    int execConfig(std::shared_ptr<ConfigData> &config,
                    py::list &dialogs);
 
     void pExecConfigWarning(std::string &input);
@@ -48,20 +57,18 @@ private:
     template<class T>
     void pExecConfigError(T &error)
     {
-        std::string lastError(error.what());
-
         const char *now(getCurrentTime());
         if (now)
         {
-            fputs(now, logFile);
+            m_logger->writeErr(now);
         }
         else
         {
-            fputs("CANNOT get current time!", logFile);
+            m_logger->writeErr("CANNOT get current time!\n");
         }
 
-        fputs(lastError.c_str(), logFile);
-        fputs("\n", logFile);
+        m_logger->writeErr(error.what());
+        m_logger->writeErr("\n");
     }
 
     const char *getCurrentTime();

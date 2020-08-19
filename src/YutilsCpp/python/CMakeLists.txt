@@ -2,6 +2,15 @@ add_library(${CMAKE_PROJECT_NAME}_YutilsPy SHARED
     yutilspy.cpp
 )
 
+add_library(${CMAKE_PROJECT_NAME}::YutilsPy
+    ALIAS
+    ${CMAKE_PROJECT_NAME}_YutilsPy
+)
+
+file(WRITE
+    ${CMAKE_BINARY_DIR}/YutilsCpp/python/${CMAKE_PROJECT_NAME}_YutilsPyConfig.cmake
+    "")
+
 add_dependencies(${CMAKE_PROJECT_NAME}_YutilsPy ${CMAKE_PROJECT_NAME}YutilsCpp)
 
 #python

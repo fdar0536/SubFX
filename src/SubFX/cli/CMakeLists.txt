@@ -1,18 +1,37 @@
-add_executable(SubFXCLI
+add_executable(${CMAKE_PROJECT_NAME}CLI
     main.cpp
-    launcher.cpp
+    asslauncher.hpp
     asslauncher.cpp
+    ../common/configparser.hpp
     ../common/configparser.cpp
-    ../common/subfxassinit.cpp
-    ../common/assparserpy.cpp
 )
 
-add_dependencies(SubFXCLI YutilsCpp)
+set(${CMAKE_PROJECT_NAME}_YutilsPy_DIR "${CMAKE_BINARY_DIR}/YutilsCpp/python")
+find_package(${CMAKE_PROJECT_NAME}_YutilsPy CONFIG REQUIRED)
+add_dependencies(${CMAKE_PROJECT_NAME}CLI ${CMAKE_PROJECT_NAME}_YutilsPy)
 
-LIST(APPEND SubFXCLI_includes ${nlohmann_json_INCLUDE_DIRS})
-LIST(APPEND SubFXCLI_includes ${PYTHON_INCLUDE_DIRS})
-LIST(APPEND SubFXCLI_includes ${pybind11_INCLUDE_DIRS})
-LIST(APPEND SubFXCLI_libs ${PYTHON_LIBRARIES})
+set(${CMAKE_PROJECT_NAME}Utils_DIR "${CMAKE_BINARY_DIR}/utils")
+find_package(${CMAKE_PROJECT_NAME}Utils CONFIG REQUIRED)
+add_dependencies(${CMAKE_PROJECT_NAME}CLI ${CMAKE_PROJECT_NAME}Utils)
 
-target_link_libraries(SubFXCLI PRIVATE ${SubFXCLI_libs} YutilsCpp)
-target_include_directories(SubFXCLI PUBLIC ${SubFXCLI_includes})
+set(${CMAKE_PROJECT_NAME}YutilsCpp_DIR "${CMAKE_BINARY_DIR}/YutilsCpp")
+find_package(${CMAKE_PROJECT_NAME}YutilsCpp CONFIG REQUIRED)
+add_dependencies(${CMAKE_PROJECT_NAME}CLI ${CMAKE_PROJECT_NAME}YutilsCpp)
+
+add_dependencies(${CMAKE_PROJECT_NAME}CLI BaseCommon)
+
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${nlohmann_json_INCLUDE_DIRS})
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${PYTHON_INCLUDE_DIRS})
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${pybind11_INCLUDE_DIRS})
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${PYTHON_LIBRARIES})
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${CMAKE_PROJECT_NAME}::Utils)
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${CMAKE_PROJECT_NAME}::Yutils)
+
+target_link_libraries(SubFXCLI PRIVATE ${${CMAKE_PROJECT_NAME}CLI_libs})
+target_include_directories(${CMAKE_PROJECT_NAME}CLI
+    SYSTEM BEFORE
+    PUBLIC
+    ${${CMAKE_PROJECT_NAME}CLI_includes}
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+)

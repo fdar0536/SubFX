@@ -4,8 +4,11 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <stdexcept>
 
 #include "nlohmann/json.hpp"
+
+#include "internal/basecommon.h"
 
 using json = nlohmann::json;
 
@@ -37,35 +40,39 @@ class ConfigParser
 {
 public:
 
-    std::string getSubName() const;
+    static std::shared_ptr<ConfigParser>
+    create(std::string &jsonFileName) THROW;
 
-    std::string getLogFileName() const;
+    std::string getSubName() const NOTHROW;
 
-    std::string getOutputFileName() const;
+    std::string getLogFileName() const NOTHROW;
 
-    std::vector<std::shared_ptr<ConfigData>> getConfigDatas() const;
+    std::string getOutputFileName() const NOTHROW;
+
+    std::vector<std::shared_ptr<ConfigData>>
+    getConfigDatas() const NOTHROW;
 
 protected:
 
     ConfigParser() :
-        subName(""),
-        logFile(""),
-        outputFile(""),
-        configDatas(std::vector<std::shared_ptr<ConfigData>>())
+        m_subName(""),
+        m_logFile(""),
+        m_outputFile(""),
+        m_configDatas(std::vector<std::shared_ptr<ConfigData>>())
     {}
 
-    std::string subName;
+    std::string m_subName;
 
-    std::string logFile;
+    std::string m_logFile;
 
-    std::string outputFile;
+    std::string m_outputFile;
 
-    std::vector<std::shared_ptr<ConfigData>> configDatas;
+    std::vector<std::shared_ptr<ConfigData>> m_configDatas;
 
-    const char *parseConfig(std::string &jsonFileName);
+    void parseConfig(std::string &jsonFileName) THROW;
 
     template<class T>
-    const char *getConfigItem(T &dst, json &config, const char *entry)
+    void getConfigItem(T &dst, json &config, const char *entry) THROW
     {
         try
         {
@@ -73,11 +80,8 @@ protected:
         }
         catch (nlohmann::detail::type_error &e)
         {
-            std::string err(e.what());
-            return err.c_str();
+            throw std::invalid_argument(e.what());
         }
-
-        return nullptr;
     }
 };
 
