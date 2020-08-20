@@ -76,13 +76,13 @@ int main(int argc, char **argv)
 
         if (result.count("template"))
         {
-            std::string outFile(result["template"].as<std::string>());
+            std::string outFile = result["template"].as<std::string>();
             return printAssPyScriptTemplate(outFile);
         }
 
         if (result.count("example"))
         {
-            std::string output(result["template"].as<std::string>());
+            std::string output = result["template"].as<std::string>();
             if (output.empty())
             {
                 ConfigParser::printExample(std::cout);
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 
         if (result.count("check"))
         {
-            std::string target(result["check"].as<std::string>());
+            std::string target = result["check"].as<std::string>();
             try
             {
                 ConfigParser::checkConfig(target);
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
         {
             py::scoped_interpreter guard{};
 
-            std::string jsonFileName(result["parse"].as<std::string>());
+            std::string jsonFileName = result["parse"].as<std::string>();
             std::shared_ptr<ConfigParser> assConfig;
             try
             {
