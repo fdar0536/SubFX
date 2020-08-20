@@ -1,6 +1,7 @@
 #include <fstream>
 #include <regex>
 #include <map>
+#include <iomanip>
 
 #include "internal/basecommon.h"
 #include "configparser.hpp"
@@ -24,6 +25,58 @@ std::shared_ptr<ConfigParser>
     // here may throw exception
     ret->parseConfig(jsonFileName);
     return std::shared_ptr<ConfigParser>(ret);
+}
+
+void ConfigParser::printExample(std::ostream &out) NOTHROW
+{
+    json output;
+    output["subtitle"] = "your_subtitle.ass";
+    output["logFile"] = "your_log.log";
+    output["outputFile"] = "your_output_subtitle.ass";
+
+    json scripts;
+    scripts.push_back(
+    {
+        {"script", "effeect1.py"},
+        {"mode", "line"},
+        {"startLine", 0},
+        {"endLine", -1}
+    });
+
+    scripts.push_back(
+    {
+        {"script", "M:/path/to/effeect2.py"},
+        {"mode", "syl"},
+        {"startLine", 2},
+        {"endLine", 4}
+    });
+
+    scripts.push_back(
+    {
+        {"script", "effeect3.py"},
+        {"mode", "word"},
+        {"startLine", 3},
+        {"endLine", 7}
+    });
+
+    scripts.push_back(
+    {
+        {"script", "effeect4.py"},
+        {"mode", "char"},
+        {"startLine", 6},
+        {"endLine", 10}
+    });
+
+    out << std::setw(4) << output << std::endl;
+}
+
+void ConfigParser::checkConfig(std::string &jsonFileName) THROW
+{
+    auto ret(create(jsonFileName));
+    if (ret == nullptr)
+    {
+        throw std::runtime_error("Fail to allocate memory.");
+    }
 }
 
 std::string ConfigParser::getSubName() const NOTHROW

@@ -4,6 +4,7 @@ add_executable(${CMAKE_PROJECT_NAME}CLI
     asslauncher.cpp
     ../common/configparser.hpp
     ../common/configparser.cpp
+    ../common/print_script_template.hpp
 )
 
 set(${CMAKE_PROJECT_NAME}_YutilsPy_DIR "${CMAKE_BINARY_DIR}/YutilsCpp/python")
@@ -20,9 +21,12 @@ add_dependencies(${CMAKE_PROJECT_NAME}CLI ${CMAKE_PROJECT_NAME}YutilsCpp)
 
 add_dependencies(${CMAKE_PROJECT_NAME}CLI BaseCommon)
 
+find_package(cxxopts 2.2.0 REQUIRED)
+
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${nlohmann_json_INCLUDE_DIRS})
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${PYTHON_INCLUDE_DIRS})
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${pybind11_INCLUDE_DIRS})
+LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_includes ${cxxopts_INCLUDE_DIRS})
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${PYTHON_LIBRARIES})
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${CMAKE_PROJECT_NAME}::Utils)
 LIST(APPEND ${CMAKE_PROJECT_NAME}CLI_libs ${CMAKE_PROJECT_NAME}::Yutils)

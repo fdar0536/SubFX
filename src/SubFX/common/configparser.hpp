@@ -1,6 +1,7 @@
 #ifndef CONFIGPARSER_HPP
 #define CONFIGPARSER_HPP
 
+#include <ostream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -45,6 +46,10 @@ public:
 
     static std::shared_ptr<ConfigParser>
     create(std::string &jsonFileName) THROW;
+
+    static void printExample(std::ostream &out) NOTHROW;
+
+    static void checkConfig(std::string &jsonFileName) THROW;
 
     std::string getSubName() const NOTHROW;
 
