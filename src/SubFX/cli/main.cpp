@@ -14,7 +14,7 @@ namespace py = pybind11;
 
 template<class T> int handleError(T &e);
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     std::string name(PROJ_NAME);
     name += "CLI";
@@ -60,7 +60,12 @@ int main(int argc, const char **argv)
 
     try
     {
-        auto result(options.parse(argc, argv));
+#ifdef _MSC_VER // fix me, this is caused by cxxopts, and just work around
+        char **argvs(argv);
+#else
+        const char **argvs(const_cast<const char **>(argv));
+#endif
+        auto result = options.parse(argc, argvs);
 
         if (result.count("help"))
         {
