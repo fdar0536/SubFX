@@ -6,7 +6,7 @@
 #include <memory>
 #include <stdexcept>
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER // fix me, this is just a workaround
 #undef snprintf
 #endif
 #include "nlohmann/json.hpp"
