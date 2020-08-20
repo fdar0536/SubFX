@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
     try
     {
-#ifdef _MSC_VER // fix me, this is caused by cxxopts, and just work around
+#ifdef _MSC_VER // fix me, this is caused by cxxopts, and just workaround
         char **argvs(argv);
 #else
         const char **argvs(const_cast<const char **>(argv));
