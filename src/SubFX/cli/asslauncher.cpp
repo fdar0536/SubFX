@@ -1,17 +1,13 @@
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif    /* _MSC_VER */
-
 #include <iostream>
 #include <iomanip>
 
 #include <ctime>
 
+#include "asslauncher.hpp"
+
 #include "pybind11/cast.h"
 #include "pybind11/attr.h"
 #include "pybind11/stl.h"
-
-#include "asslauncher.hpp"
 
 namespace py = pybind11;
 

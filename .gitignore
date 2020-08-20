@@ -1,5 +1,3 @@
-src/build
-src/build/*
 src/*.o
 src/.vs
 src/.vs/*
@@ -12,7 +10,11 @@ src/*.user
 src/*.user*
 src/out
 src/out/*
-build*
-build*/*
+src/vcpkg
+src/vcpkg/*
+src/build-*
+src/build-*/*
+build-*
+build-*/*
 *.json
 *.ass

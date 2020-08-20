@@ -6,6 +6,9 @@
 #include <memory>
 #include <stdexcept>
 
+#ifdef _MSC_VER
+#undef snprintf
+#endif
 #include "nlohmann/json.hpp"
 
 #include "internal/basecommon.h"

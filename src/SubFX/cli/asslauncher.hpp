@@ -1,9 +1,10 @@
 #ifndef ASSLAUNCHER_HPP
 #define ASSLAUNCHER_HPP
 
+#include "internal/basecommon.h"
+
 #include "pybind11/pybind11.h"
 
-#include "internal/basecommon.h"
 #include "../common/configparser.hpp"
 #include "Utils"
 

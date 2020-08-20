@@ -30,7 +30,7 @@ namespace Utils
 std::shared_ptr<Logger>
 Logger::create(FILE *out,
                FILE *err,
-               bool autoCloseFiles)
+               bool autoCloseFiles) NOTHROW
 {
     if (!out || !err)
     {
@@ -42,7 +42,7 @@ Logger::create(FILE *out,
 
 std::shared_ptr<Logger>
 Logger::create(const std::string &outFile,
-               const std::string &errFile)
+               const std::string &errFile) NOTHROW
 {
     FILE *out(nullptr);
     FILE *err(nullptr);
@@ -78,22 +78,22 @@ Logger::~Logger()
     }
 }
 
-void Logger::writeOut(const char *msg)
+void Logger::writeOut(const char *msg) NOTHROW
 {
     fprintf(m_out, "%s", msg);
 }
 
-void Logger::writeOut(std::string &msg)
+void Logger::writeOut(std::string &msg) NOTHROW
 {
     return writeOut(msg.c_str());
 }
 
-void Logger::writeErr(const char *msg)
+void Logger::writeErr(const char *msg) NOTHROW
 {
     fprintf(m_err, "%s", msg);
 }
 
-void Logger::writeErr(std::string &msg)
+void Logger::writeErr(std::string &msg) NOTHROW
 {
     return writeErr(msg.c_str());
 }

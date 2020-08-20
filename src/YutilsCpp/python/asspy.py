@@ -22,7 +22,6 @@ if (sys.platform == "win32"):
     if (info.major >= 3 and info.minor >= 8): # python >= 3.8
         import os
         os.add_dll_directory(os.path.join(os.environ["SUBFX_HOME"], "bin"))
-        os.add_dll_directory(os.path.join(os.environ["ICU_HOME"], "bin"))
 
         try:
             import SubFX_YutilsPy as Yutils
