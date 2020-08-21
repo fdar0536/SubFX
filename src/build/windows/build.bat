@@ -8,7 +8,6 @@ call bootstrap-vcpkg.bat
 rem install libraries
 vcpkg install ^
     boost-regex[icu]:x64-windows boost-locale[icu]:x64-windows ^
-    python3[enable-shared]:x64-windows python3:x64-windows ^
     pybind11:x64-windows nlohmann-json:x64-windows ^
     cxxopts:x64-windows
 

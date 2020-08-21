@@ -1,0 +1,7 @@
+version: '{branch}-{build}'
+cache: C:\Users\appveyor\AppData\Local\vcpkg
+build_script:
+- cmd: >-
+    cd /D c:\projects\SubFX\src
+
+    call appveyor.build.bat
