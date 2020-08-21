@@ -39,6 +39,22 @@ copy "..\..\..\vcpkg\installed\x64-windows\bin\icuuc67.dll" ^
 copy "..\..\..\vcpkg\installed\x64-windows\bin\icudt67.dll" ^
     "icudt67.dll"
 
+rem prepare for testing
 cd ../..
+
+rem install font for testing cases
+powershell -Command "(New-Object Net.WebClient).DownloadFile('https://github.com/adobe-fonts/source-code-pro/blob/release/TTF/SourceCodePro-Regular.ttf?raw=true', 'SourceCodePro-Regular.ttf')"
+reg add "HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" /v "Source Code Pro (TrueType)" /t REG_SZ /d SourceCodePro-Regular.ttf /f
+
+set PATH=%PATH%%CD%\SubFX-Release\bin
+cd YutilsCpp\test\assparser\Release
+copy "..\in.ass" "in.ass"
+cd ../../../../
+msbuild RUN_TESTS.vcxproj /p:Configuration=Release
+if errorlevel (
+    pause
+    exit /b 1
+)
+
 7z.exe a -t7z SubFX-Release.7z SubFX-Release
 pause

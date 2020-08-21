@@ -28,5 +28,10 @@ fi
 cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DCMAKE_INSTALL_PREFIX=$install_prefix ..
 make -j`getconf _NPROCESSORS_ONLN`
+make test
+if [ $? -ne 0 ] then
+    exit 1
+fi
+
 make install
 echo "Done."
