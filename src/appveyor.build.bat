@@ -8,7 +8,7 @@ rem update vcpkg packages
 vcpkg upgrade --no-dry-run
 
 vcpkg install boost-regex[icu]:x64-windows boost-locale[icu]:x64-windows ^
-    pybind11:x64 nlohmann-json:x64-windows cxxopts:x64-windows
+    pybind11:x64-windows nlohmann-json:x64-windows cxxopts:x64-windows
 
 rem start build project
 cd /
