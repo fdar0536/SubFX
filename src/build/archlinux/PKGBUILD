@@ -1,0 +1,53 @@
+_name=SubFX
+_pkgname=subfx
+pkgname=${_pkgname}-git
+pkgver=r0.0.1.167.g0f97842
+pkgrel=1
+pkgdesc="A scripting tool for creating karaoke subtitle effects."
+arch=('x86_64')
+url='https://github.com/fdar0536/SubFX'
+license=('CUSTOM')
+depends=('pango'
+         'python'
+         'boost-libs'
+         )
+makedepends=('git'
+             'cmake'
+             'boost'
+             'pybind11'
+             'python-setuptools'
+             'nlohmann-json'
+             'cxxopts-git')
+checkdepends=('adobe-source-code-pro-fonts')
+provides=("${_pkgname}")
+conflicts=("${_pkgname}")
+source=("git+https://github.com/fdar0536/${_name}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${_name}"
+  echo "$(git describe --long --tags | tr - .)"
+}
+
+prepare() {
+  mkdir build
+  cd build
+  cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ../${_name}/src
+}
+
+build() {
+  cd build
+  make
+}
+
+check() {
+  cd build
+  make test
+}
+
+package() {
+  cd build
+  DESTDIR="${pkgdir}" make install
+  cd ../${_name}
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+}
