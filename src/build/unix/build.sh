@@ -12,7 +12,7 @@ chmod +x bootstrap-vcpkg.sh
 vcpkg install \
     boost-regex[icu] boost-locale[icu] \
     python3[enable-shared] python3 \
-    pybind11 nlohmann-json
+    pybind11 nlohmann-json cxxopts
 
 cd ..
 mkdir build-unix
