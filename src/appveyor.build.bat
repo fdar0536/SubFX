@@ -14,6 +14,7 @@ rem start build project
 cd /D c:\projects\SubFX\src
 mkdir build-windows
 cd build-windows
+set PATH=C:\Python38-x64;%PATH%
 cmake -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
     -G "Visual Studio 16 2019" -DPython_ROOT_DIR=C:/Python38-x64 ^
     -DCMAKE_INSTALL_PREFIX="SubFX-Release" ..
