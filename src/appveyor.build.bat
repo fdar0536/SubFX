@@ -1,7 +1,5 @@
 rem update vcpkg
-rmdir /S /Q C:\Tools\vcpkg
-git clone https://github.com/microsoft/vcpkg.git
-cd vcpkg
+cd /D c:\Tools\vcpkg
 git pull
 call bootstrap-vcpkg.bat
 vcpkg integrate install
@@ -13,10 +11,10 @@ vcpkg install boost-regex[icu]:x64-windows boost-locale[icu]:x64-windows ^
     pybind11:x64-windows nlohmann-json:x64-windows cxxopts:x64-windows
 
 rem start build project
-cd ..
+cd /D c:\projects\SubFX\src
 mkdir build-windows
 cd build-windows
-cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ^
+cmake -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
     -G "Visual Studio 16 2019" -DPython_ROOT_DIR=C:/Python38-x64 ^
     -DCMAKE_INSTALL_PREFIX="SubFX-Release" ..
 msbuild SubFX.sln /p:Configuration=Release /target:ALL_BUILD
