@@ -37,7 +37,9 @@ if (UNIX)
         endif (ENABLE_AVX)
     endif(ENABLE_SIMD)
 
-    add_link_options(-Wl,--unresolved-symbols=report-all)
+    if (NOT APPLE)
+        add_link_options(-Wl,--unresolved-symbols=report-all)
+    endif (NOT APPLE)
 else () # Windows
     if (MINGW)
         add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -fvisibility-inlines-hidden)

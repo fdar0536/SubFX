@@ -15,6 +15,7 @@ archlinux:
     - python-setuptools
     - nlohmann-json
     - cxxopts-git
+    - qt5-base
   mount:
     - ~/.pkg-cache:/var/cache/pacman/pkg
   before_install:

@@ -801,7 +801,7 @@ void AssParser::parseDialogs() THROW
         bool result(false);
         while (true)
         {
-#ifdef _MSC_VER
+#if (defined _MSC_VER) || (defined __APPLE__)
             try
             {
                 result = boost::u32regex_search(tmpString, match, u32reg);

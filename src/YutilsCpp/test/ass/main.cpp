@@ -56,6 +56,8 @@ int main()
 
 #ifdef _WIN32
     printf("case 1's result is: %lld\n", ms);
+#elif __APPLE__
+    printf("case 1's result is: %llu\n", ms);
 #else
     printf("case 1's result is: %ld\n", ms);
 #endif

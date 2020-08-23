@@ -1,4 +1,5 @@
 version: '{branch}-{build}'
+skip_non_tags: true
 cache: C:\Users\appveyor\AppData\Local\vcpkg
 build_script:
 - cmd: >-

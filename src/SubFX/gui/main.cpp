@@ -10,13 +10,9 @@ namespace py = pybind11;
 
 int main(int argc, char **argv)
 {
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
-    std::cerr << "Sorry, this program is not ready." << std::endl;
-    return 0;
-    /*
-    QApplication a(argc, argv);
     py::scoped_interpreter guard{};
+
+    QApplication a(argc, argv);
 
     MainWindow *w(MainWindow::create(nullptr));
     if (!w)
@@ -26,8 +22,7 @@ int main(int argc, char **argv)
     }
 
     w->show();
-    int ret = a.exec();
+    const int ret(a.exec());
     delete w;
     return ret;
-    */
 }

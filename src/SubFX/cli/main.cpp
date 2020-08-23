@@ -60,10 +60,13 @@ int main(int argc, char **argv)
 
     try
     {
-#ifdef _MSC_VER // fix me, this is caused by cxxopts, and just workaround
-        char **argvs(argv);
-#else
+        // fix me, it's caused by cxxopts
+        // a temporary cannot bind to a non-const reference when using gcc
+        // but macOS' clang still has __GNUC__
+#if (defined __GNUC__) && (!defined __APPLE__)
         const char **argvs(const_cast<const char **>(argv));
+#else
+        char **argvs(argv);
 #endif
         auto result = options.parse(argc, argvs);
 
