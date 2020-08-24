@@ -106,6 +106,9 @@ install(
 
 add_subdirectory(utils)
 
+# BLAS
+option(ENABLE_BLAS "Enable BLAS backend" ON)
+
 # python
 option(ENABLE_PYTHON "Enable python binding" ON)
 if (ENABLE_PYTHON)

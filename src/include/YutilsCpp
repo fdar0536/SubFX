@@ -24,4 +24,5 @@
 #include "internal/yutilscpp/asswriter.hpp"
 #include "internal/yutilscpp/fonthandle.hpp"
 #include "internal/yutilscpp/math.hpp"
+#include "internal/yutilscpp/matrix.hpp"
 #include "internal/yutilscpp/shape.hpp"

@@ -46,6 +46,8 @@ add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
     math.cpp
     internal/math_internal.hpp
     internal/math_internal.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp
+    matrix.cpp
     ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
     shape.cpp
     internal/shape_internal.hpp
@@ -70,6 +72,16 @@ LIST(APPEND YutilsCpp_libs ${Boost_REGEX_LIBRARY})
 if (WIN32)
     LIST(APPEND YutilsCpp_libs ${Boost_LOCALE_LIBRARY})
 endif (WIN32)
+
+# eigen
+find_package(Eigen3 3.3.7 REQUIRED)
+LIST(APPEND YutilsCpp_libs Eigen3::Eigen)
+
+# BLAS
+if (ENABLE_BLAS)
+    find_package(BLAS REQUIRED)
+    LIST(APPEND YutilsCpp_libs BLAS::BLAS)
+endif (ENABLE_BLAS)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}YutilsCpp PUBLIC ${YutilsCpp_libs})
 target_include_directories(${CMAKE_PROJECT_NAME}YutilsCpp
@@ -99,6 +111,7 @@ ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp"
 )
 

@@ -24,3 +24,4 @@
 #define PROJ_NAMESPACE @CMAKE_PROJECT_NAME@
 #cmakedefine ENABLE_SIMD
 #cmakedefine ENABLE_AVX
+#cmakedefine ENABLE_BLAS
