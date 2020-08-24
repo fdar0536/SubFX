@@ -9,6 +9,8 @@ archlinux:
     - cmake
     - boost
     - pango
+    - eigen
+    - blas
     - adobe-source-code-pro-fonts
     - pybind11
     - python
