@@ -42,7 +42,7 @@ Now is under development.
 ## TODO
 
 - [ ] Nicer name
-- [ ] Nice frontend
+- [ ] Nice wrapper
 - [ ] Document
 
 ## Licence
