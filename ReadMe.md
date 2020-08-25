@@ -17,6 +17,9 @@ Now is under development.
   - Lexical Cast
   - Locale (Windows only)
 - [Pango](https://pango.gnome.org) (Non-Windows only)
+- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+- BLAS api (Optional)
+  - for example: [LAPACK](https://www.netlib.org/lapack), [OpenBLAS](https://github.com/xianyi/OpenBLAS), [Intel MKL](https://software.intel.com/en-us/mkl)
 - [pybind11](https://github.com/pybind/pybind11) (Optional)
 - [Python3](https://www.python.org) or later (Optional)
 
@@ -30,7 +33,7 @@ Now is under development.
 
 #### CLI
 
-- No extra dependency needed
+- [cxxopts](https://github.com/jarro2783/cxxopts)
 
 #### GUI
 
