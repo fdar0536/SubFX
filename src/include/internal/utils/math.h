@@ -19,7 +19,25 @@
 
 #pragma once
 
-#include "internal/utils/logger.hpp"
-#include "internal/utils/math.hpp"
-#include "internal/utils/misc.hpp"
-#include "internal/utils/utf8.hpp"
+#include "../basecommon.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+SYMBOL_SHOW
+double *subfx_utils_math_rotate2d(double, double, double);
+
+// math.rad
+SYMBOL_SHOW double subfx_utils_math_rad(double angle);
+
+// math.deg
+SYMBOL_SHOW double subfx_utils_math_deg(double r);
+
+// math.random
+SYMBOL_SHOW double subfx_utils_math_random(double min, double max);
+
+#ifdef __cplusplus
+}
+#endif

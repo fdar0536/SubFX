@@ -20,38 +20,27 @@
 #pragma once
 
 #include <string>
-#include <memory>
 
 #include <cstdio>
 
-#include "../basecommon.h"
-
-namespace PROJ_NAMESPACE
-{
-
-namespace Utils
-{
+#include "internal/basecommon.h"
 
 class SYMBOL_SHOW Logger
 {
 public:
 
-    static std::shared_ptr<Logger> create(FILE *out = stdout,
-                                          FILE *err = stderr,
-                                          bool autoCloseFiles = true) NOTHROW;
+    static Logger *create(FILE *out = stdout,
+                          FILE *err = stderr,
+                          bool autoCloseFiles = true) NOTHROW;
 
-    static std::shared_ptr<Logger> create(const std::string &outFile,
-                                          const std::string &errFile) NOTHROW;
+    static Logger *create(const char *outFile,
+                          const char *errFile) NOTHROW;
 
     ~Logger();
 
     void writeOut(const char *) NOTHROW;
 
-    void writeOut(std::string &) NOTHROW;
-
     void writeErr(const char *) NOTHROW;
-
-    void writeErr(std::string &) NOTHROW;
 
 private:
 
@@ -61,10 +50,10 @@ private:
         m_haveToCloseFiles(false)
     {}
 
-    static std::shared_ptr<Logger> createInternal(FILE *out,
-                                                  FILE *err,
-                                                  bool autoCloseFiles,
-                                                  bool haveToClose);
+    static Logger *createInternal(FILE *out,
+                                  FILE *err,
+                                  bool autoCloseFiles,
+                                  bool haveToClose);
 
     static void closeFiles(FILE *out, FILE *err);
 
@@ -81,7 +70,3 @@ private:
     bool m_haveToCloseFiles;
 
 };
-
-} // end namespace Utils
-
-} // end namespace PROJ_NAMESPACE

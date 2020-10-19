@@ -1,14 +1,17 @@
 add_library(${CMAKE_PROJECT_NAME}Utils
     SHARED
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/logger.h
     logger.cpp
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/math.hpp
-    math.cpp
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp
-    misc.cpp
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.hpp
+    internal/logger.hpp
+    internal/logger.cpp
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/math.h
+    math.c
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/misc.h
+    misc.c
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.h
     utf8.cpp
-    ${CMAKE_SOURCE_DIR}/include/Utils
+    ${CMAKE_SOURCE_DIR}/include/internal/utils.h
+    ${CMAKE_SOURCE_DIR}/include/SubFX.h
 )
 
 add_library(${CMAKE_PROJECT_NAME}::Utils ALIAS ${CMAKE_PROJECT_NAME}Utils)
@@ -31,13 +34,14 @@ set_target_properties(${CMAKE_PROJECT_NAME}Utils
     VERSION ${PROJECT_VERSION}
 
     PUBLIC_HEADER
-    "${CMAKE_SOURCE_DIR}/include/Utils"
+    "${CMAKE_SOURCE_DIR}/include/SubFX.h"
 
     PRIVATE_HEADER
-    "${CMAKE_SOURCE_DIR}/include/internal/utils/logger.hpp;\
-${CMAKE_SOURCE_DIR}/include/internal/utils/math.hpp;\
-${CMAKE_SOURCE_DIR}/include/internal/utils/misc.hpp;\
-${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.hpp"
+    "${CMAKE_SOURCE_DIR}/include/internal/utils/logger.h;\
+${CMAKE_SOURCE_DIR}/include/internal/utils/math.h;\
+${CMAKE_SOURCE_DIR}/include/internal/utils/misc.h;\
+${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.h;\
+${CMAKE_SOURCE_DIR}/include/internal/utils.h"
 )
 
 install(

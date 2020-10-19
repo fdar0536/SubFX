@@ -17,25 +17,33 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include "Utils"
+#include <string>
+#include <vector>
 
-using namespace PROJ_NAMESPACE::Utils;
+#include <cstring>
 
-SYMBOL_SHOW uint32_t Utf8::stringLen(std::string &input) NOTHROW
+#include "SubFX.h"
+
+extern "C"
+{
+
+SYMBOL_SHOW uint32_t subfx_utils_utf8_stringLen(const char *utf8str)
 {
     uint32_t len(0);
-    for (size_t i = 0; i < input.length(); ++i)
+    size_t strsize(strlen(utf8str));
+    for (size_t i = 0; i < strsize; ++i)
     {
-        len += ((static_cast<uint8_t>(input.at(i)) & 0xc0) != 0x80);
+        len += ((static_cast<uint8_t>(utf8str[i]) & 0xc0) != 0x80);
     }
 
     return len;
-}
+} // end subfx_utils_utf8_stringLen
 
-SYMBOL_SHOW std::vector<std::string>
-Utf8::stringSplit(std::string &input) NOTHROW
+SYMBOL_SHOW
+char **subfx_utils_utf8_stringSplit(const char *utf8str)
 {
     std::vector<std::string> ret;
+    std::string input(utf8str);
     ret.reserve(20);
 
     for(size_t i = 0; i < input.length();)
@@ -54,5 +62,37 @@ Utf8::stringSplit(std::string &input) NOTHROW
         i += len;
     }
 
-    return ret;
-}
+    // copy back to array
+    char **retptr(reinterpret_cast<char **>(
+                  calloc(ret.size() + 1, sizeof(char *))));
+    if (!retptr)
+    {
+        return nullptr;
+    }
+
+    int allocatedCount(0);
+    for (size_t i = 0; i < ret.size(); ++i)
+    {
+        retptr[i] = reinterpret_cast<char *>(
+                    calloc(ret.at(i).length() + 1, sizeof(char)));
+        if (!retptr[i])
+        {
+            for (int j = 0; j < allocatedCount; ++j)
+            {
+                free(retptr[j]);
+            }
+
+            free(retptr);
+            return nullptr;
+        }
+
+        std::copy(ret.at(i).begin(), ret.at(i).end(), retptr[i]);
+        retptr[i][ret.at(i).length()] = '\0';
+        ++allocatedCount;
+    }
+
+    retptr[ret.size()] = nullptr;
+    return retptr;
+} // end subfx_utils_utf8_stringSplit
+
+} // end extern "C"

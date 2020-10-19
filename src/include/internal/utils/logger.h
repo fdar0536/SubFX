@@ -19,27 +19,35 @@
 
 #pragma once
 
-#include <istream>
-#include <string>
+#include <stdio.h>
 
 #include "../basecommon.h"
 
-namespace PROJ_NAMESPACE
+typedef void subfx_utils_logger;
+
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-namespace Utils
-{
+SYMBOL_SHOW
+void *subfx_utils_logger_create(FILE *out,
+                                FILE *err,
+                                int autoCloseFiles);
 
-namespace Misc
-{
+SYMBOL_SHOW
+void *subfx_utils_logger_create2(const char *outFile,
+                                 const char *errFile);
 
-SYMBOL_SHOW std::string doubleToString(double input) NOTHROW;
+SYMBOL_SHOW
+void subfx_utils_logger_destory(subfx_utils_logger *);
 
-// https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
-SYMBOL_SHOW std::istream &safeGetline(std::istream &is, std::string &t) NOTHROW;
+SYMBOL_SHOW
+void subfx_utils_logger_writeOut(subfx_utils_logger *, const char *);
 
+SYMBOL_SHOW
+void subfx_utils_logger_writeErr(subfx_utils_logger *, const char *);
+
+#ifdef __cplusplus
 }
-
-} // end namespace Utils
-
-} // end namespace PROJ_NAMESPACE
+#endif

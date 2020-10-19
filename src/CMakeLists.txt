@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(SubFX
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 0.0.2
 )
 
@@ -24,7 +24,7 @@ if(ENABLE_SIMD)
 endif(ENABLE_SIMD)
 
 if (UNIX)
-    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -fvisibility-inlines-hidden)
+    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
@@ -42,7 +42,7 @@ if (UNIX)
     endif (NOT APPLE)
 else () # Windows
     if (MINGW)
-        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -fvisibility-inlines-hidden)
+        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)
@@ -116,11 +116,11 @@ if (ENABLE_PYTHON)
     find_package(Python 3.7.0 REQUIRED COMPONENTS Interpreter Development)
 endif(ENABLE_PYTHON)
 
-add_subdirectory(YutilsCpp)
+# add_subdirectory(YutilsCpp)
 
 configure_file(config.h.in config.h @ONLY)
 
-# frontend
-if (ENABLE_PYTHON)
-    include(SubFX/CMakeLists.txt)
-endif (ENABLE_PYTHON)
+# wrapper
+# if (ENABLE_PYTHON)
+#     include(SubFX/CMakeLists.txt)
+# endif (ENABLE_PYTHON)

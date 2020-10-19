@@ -17,134 +17,76 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include <new>
+#include "SubFX.h"
+#include "internal/logger.hpp"
 
-#include "Utils"
-
-namespace PROJ_NAMESPACE
+extern "C"
 {
 
-namespace Utils
+SYMBOL_SHOW
+void *subfx_utils_logger_create(FILE *out,
+                                FILE *err,
+                                int autoCloseFiles)
 {
-
-std::shared_ptr<Logger>
-Logger::create(FILE *out,
-               FILE *err,
-               bool autoCloseFiles) NOTHROW
-{
-    if (!out || !err)
-    {
-        return nullptr;
-    }
-
-    return createInternal(out, err, autoCloseFiles, false);
-}
-
-std::shared_ptr<Logger>
-Logger::create(const std::string &outFile,
-               const std::string &errFile) NOTHROW
-{
-    FILE *out(nullptr);
-    FILE *err(nullptr);
-
-    out = fopen(outFile.c_str(), "a");
-    if (!out)
-    {
-        return nullptr;
-    }
-
-    if (outFile == errFile)
-    {
-        err = out;
-    }
-    else
-    {
-        err = fopen(errFile.c_str(), "a");
-        if (!err)
-        {
-            fclose(out);
-            return nullptr;
-        }
-    }
-
-    return createInternal(out, err, true, true);
-}
-
-Logger::~Logger()
-{
-    if (m_haveToCloseFiles)
-    {
-        closeFiles(m_out, m_err);
-    }
-}
-
-void Logger::writeOut(const char *msg) NOTHROW
-{
-    fprintf(m_out, "%s", msg);
-}
-
-void Logger::writeOut(std::string &msg) NOTHROW
-{
-    return writeOut(msg.c_str());
-}
-
-void Logger::writeErr(const char *msg) NOTHROW
-{
-    fprintf(m_err, "%s", msg);
-}
-
-void Logger::writeErr(std::string &msg) NOTHROW
-{
-    return writeErr(msg.c_str());
-}
-
-// private member functions
-std::shared_ptr<Logger>
-Logger::createInternal(FILE *out,
-                       FILE *err,
-                       bool autoCloseFiles,
-                       bool haveToCloseFiles)
-{
-    Logger *ret(new(std::nothrow) Logger());
+    Logger *ret(Logger::create(out, err, autoCloseFiles));
     if (!ret)
     {
-        if (haveToCloseFiles)
-        {
-            closeFiles(out, err);
-        }
-
         return nullptr;
     }
 
-    ret->m_out = out;
-    ret->m_err = err;
-    ret->m_haveToCloseFiles = autoCloseFiles;
-
-    return std::shared_ptr<Logger>(ret);
+    return reinterpret_cast<void *>(ret);
 }
 
-void Logger::closeFiles(FILE *out, FILE *err)
+SYMBOL_SHOW
+void *subfx_utils_logger_create2(const char *outFile,
+                                 const char *errFile)
 {
-    if (out != stdout &&
-        out != stderr &&
-        err != stdout &&
-        err != stderr)
+    Logger *ret(Logger::create(outFile, errFile));
+    if (!ret)
     {
-        if (out == err)
-        {
-            fclose(out);
-        }
-        else
-        {
-            fclose(out);
-            fclose(err);
-        }
-
-        out = nullptr;
-        err = nullptr;
+        return nullptr;
     }
+
+    return reinterpret_cast<void *>(ret);
 }
 
-} // end namespace Utils
+SYMBOL_SHOW
+void subfx_utils_logger_destory(subfx_utils_logger *input)
+{
+    if (!input)
+    {
+        return;
+    }
 
-} // end namespace PROJ_NAMESPACE
+    Logger *logger(reinterpret_cast<Logger *>(input));
+    delete logger;
+    input = nullptr;
+}
+
+SYMBOL_SHOW
+void subfx_utils_logger_writeOut(subfx_utils_logger *input,
+                                 const char *msg)
+{
+    if (!input)
+    {
+        return;
+    }
+
+    Logger *logger(reinterpret_cast<Logger *>(input));
+    logger->writeOut(msg);
+}
+
+SYMBOL_SHOW
+void subfx_utils_logger_writeErr(subfx_utils_logger *input,
+                                 const char *msg)
+{
+    if (!input)
+    {
+        return;
+    }
+
+    Logger *logger(reinterpret_cast<Logger *>(input));
+    logger->writeErr(msg);
+}
+
+} // end extern "C"

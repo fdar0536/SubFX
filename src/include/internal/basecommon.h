@@ -50,3 +50,16 @@
 #define NOTHROW
 #define UNUSED(x) (void)x
 #endif
+
+typedef enum subfx_exitstate
+{
+    subfx_success,
+    subfx_successWithWarning,
+    subfx_failed
+} subfx_exitstate;
+
+#define subfx_pError(buf, msg) \
+    if (buf) \
+    { \
+        sprintf(buf, "%s", msg); \
+    }
