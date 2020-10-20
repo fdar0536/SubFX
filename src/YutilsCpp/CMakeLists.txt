@@ -31,28 +31,29 @@ set(${CMAKE_PROJECT_NAME}Utils_DIR "${CMAKE_BINARY_DIR}/utils")
 find_package(${CMAKE_PROJECT_NAME}Utils CONFIG REQUIRED)
 
 add_library(${CMAKE_PROJECT_NAME}YutilsCpp SHARED
-    ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
-    ass.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
-    assparser.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp
-    asswriter.cpp
-    internal/asswriter_internal.hpp
-    internal/asswriter_internal.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
-    fonthandle.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/math.hpp
-    math.cpp
-    internal/math_internal.hpp
-    internal/math_internal.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp
-    matrix.cpp
-    ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
-    shape.cpp
-    internal/shape_internal.hpp
-    internal/shape_internal.cpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
+    # ass.cpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
+    # assparser.cpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp
+    # asswriter.cpp
+    # internal/asswriter_internal.hpp
+    # internal/asswriter_internal.cpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
+    # fonthandle.cpp
+    ${YUTILSCPP_INCLUDE_PREFIX}/math.h
+    math.c
+    internal/math_internal.h
+    internal/math_internal.c
+    # ${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp
+    # matrix.cpp
+    # ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp
+    # shape.cpp
+    # internal/shape_internal.hpp
+    # internal/shape_internal.cpp
     ${CMAKE_SOURCE_DIR}/include/YutilsCpp
+    ${CMAKE_SOURCE_DIR}/include/internal/yutils.h
 )
 
 add_library(${CMAKE_PROJECT_NAME}::Yutils ALIAS ${CMAKE_PROJECT_NAME}YutilsCpp)
@@ -110,7 +111,7 @@ ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp;\
-${YUTILSCPP_INCLUDE_PREFIX}/math.hpp;\
+${YUTILSCPP_INCLUDE_PREFIX}/math.h;\
 ${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp;\
 ${YUTILSCPP_INCLUDE_PREFIX}/shape.hpp"
 )
@@ -154,10 +155,10 @@ install(
 
 option(BUILD_TESTING_CASES "Build testing cases" ON)
 
-if (ENABLE_PYTHON)
-    add_subdirectory(python)
-endif (ENABLE_PYTHON)
+# if (ENABLE_PYTHON)
+#     add_subdirectory(python)
+# endif (ENABLE_PYTHON)
 
-if (BUILD_TESTING_CASES)
-    include(test/CMakeLists.txt)
-endif (BUILD_TESTING_CASES)
+# if (BUILD_TESTING_CASES)
+#     include(test/CMakeLists.txt)
+# endif (BUILD_TESTING_CASES)

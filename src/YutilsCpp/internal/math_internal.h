@@ -19,36 +19,23 @@
 
 #pragma once
 
-#include <stdio.h>
-
-#include "../basecommon.h"
-
-typedef void subfx_utils_logger;
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-SYMBOL_SHOW
-subfx_utils_logger
-*subfx_utils_logger_create(FILE *out,
-                           FILE *err,
-                           int autoCloseFiles);
+void bezier2(double pct, double **pts, int is3D, double *dst);
 
-SYMBOL_SHOW
-subfx_utils_logger
-*subfx_utils_logger_create2(const char *outFile,
-                            const char *errFile);
+void bezier3(double pct, double **pts, int is3D, double *dst);
 
-SYMBOL_SHOW
-void subfx_utils_logger_destory(subfx_utils_logger *);
+void bezier4(double pct, double **pts, int is3D, double *dst);
 
-SYMBOL_SHOW
-void subfx_utils_logger_writeOut(subfx_utils_logger *, const char *);
+void bezierN(double pct, double **pts, size_t ptsCount,
+             int is3D, double *dst);
 
-SYMBOL_SHOW
-void subfx_utils_logger_writeErr(subfx_utils_logger *, const char *);
+double fac(double n);
 
 #ifdef __cplusplus
 }

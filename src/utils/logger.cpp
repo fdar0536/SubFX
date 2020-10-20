@@ -24,9 +24,10 @@ extern "C"
 {
 
 SYMBOL_SHOW
-void *subfx_utils_logger_create(FILE *out,
-                                FILE *err,
-                                int autoCloseFiles)
+subfx_utils_logger
+*subfx_utils_logger_create(FILE *out,
+                           FILE *err,
+                           int autoCloseFiles)
 {
     Logger *ret(Logger::create(out, err, autoCloseFiles));
     if (!ret)
@@ -38,8 +39,9 @@ void *subfx_utils_logger_create(FILE *out,
 }
 
 SYMBOL_SHOW
-void *subfx_utils_logger_create2(const char *outFile,
-                                 const char *errFile)
+subfx_utils_logger
+*subfx_utils_logger_create2(const char *outFile,
+                            const char *errFile)
 {
     Logger *ret(Logger::create(outFile, errFile));
     if (!ret)

@@ -37,6 +37,7 @@ if (UNIX)
         endif (ENABLE_AVX)
     endif(ENABLE_SIMD)
 
+    add_link_options(-lm)
     if (NOT APPLE)
         add_link_options(-Wl,--unresolved-symbols=report-all)
     endif (NOT APPLE)
@@ -55,7 +56,7 @@ else () # Windows
             endif (ENABLE_AVX)
         endif(ENABLE_SIMD)
 
-        add_link_options(-Wl,--unresolved-symbols=report-all)
+        add_link_options(-Wl,--unresolved-symbols=report-all -lm)
     else () # msvc or icc
         add_compile_options(/W4 /WX /wd4819)
         if(ENABLE_SIMD)
@@ -116,7 +117,7 @@ if (ENABLE_PYTHON)
     find_package(Python 3.7.0 REQUIRED COMPONENTS Interpreter Development)
 endif(ENABLE_PYTHON)
 
-# add_subdirectory(YutilsCpp)
+add_subdirectory(YutilsCpp)
 
 configure_file(config.h.in config.h @ONLY)
 

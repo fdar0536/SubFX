@@ -19,37 +19,4 @@
 
 #pragma once
 
-#include <stdio.h>
-
-#include "../basecommon.h"
-
-typedef void subfx_utils_logger;
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-SYMBOL_SHOW
-subfx_utils_logger
-*subfx_utils_logger_create(FILE *out,
-                           FILE *err,
-                           int autoCloseFiles);
-
-SYMBOL_SHOW
-subfx_utils_logger
-*subfx_utils_logger_create2(const char *outFile,
-                            const char *errFile);
-
-SYMBOL_SHOW
-void subfx_utils_logger_destory(subfx_utils_logger *);
-
-SYMBOL_SHOW
-void subfx_utils_logger_writeOut(subfx_utils_logger *, const char *);
-
-SYMBOL_SHOW
-void subfx_utils_logger_writeErr(subfx_utils_logger *, const char *);
-
-#ifdef __cplusplus
-}
-#endif
+#include "yutilscpp/math.h"
