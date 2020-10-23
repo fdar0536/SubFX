@@ -63,3 +63,21 @@ typedef enum subfx_exitstate
     { \
         sprintf(buf, "%s", msg); \
     }
+
+typedef enum subfx_types
+{
+    subfx_int8_t,
+    subfx_uint8_t,
+    subfx_int16_t,
+    subfx_uint16_t,
+    subfx_int32_t,
+    subfx_uint32_t,
+    subfx_int64_t,
+    suffx_uint64_t,
+    subfx_float,
+    subfx_double,
+    subfx_other
+} subfx_types;
+
+typedef int (*subfx_cmpFunc)(const void *, const void *);
+typedef void (*subfx_freeFunc)(void *);

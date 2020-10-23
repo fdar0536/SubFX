@@ -8,6 +8,8 @@ add_library(${CMAKE_PROJECT_NAME}Utils
     math.c
     ${CMAKE_SOURCE_DIR}/include/internal/utils/misc.h
     misc.c
+    ${CMAKE_SOURCE_DIR}/include/internal/utils/ptrvector.h
+    ptrvector.c
     ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.h
     utf8.cpp
     ${CMAKE_SOURCE_DIR}/include/internal/utils.h

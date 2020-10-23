@@ -19,8 +19,39 @@
 
 #pragma once
 
-#include "utils/logger.h"
-#include "utils/math.h"
-#include "utils/misc.h"
-#include "utils/utf8.h"
-#include "utils/vector.h"
+#include <stddef.h>
+#include <inttypes.h>
+
+#include "../basecommon.h"
+
+typedef void subfx_ptrVector;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+SYMBOL_SHOW
+subfx_ptrVector *subfx_ptrVector_create(subfx_freeFunc dataFreeFunc);
+
+SYMBOL_SHOW
+void subfx_ptrVector_free(subfx_ptrVector *);
+
+SYMBOL_SHOW
+size_t subfx_ptrVector_size(subfx_ptrVector *, char *errMsg);
+
+SYMBOL_SHOW
+size_t subfx_ptrVector_capacity(subfx_ptrVector *, char *errMsg);
+
+SYMBOL_SHOW
+subfx_exitstate subfx_ptrVector_reserve(subfx_ptrVector *, size_t);
+
+SYMBOL_SHOW
+subfx_exitstate subfx_ptrVector_pushback(subfx_ptrVector *, void *);
+
+SYMBOL_SHOW
+const void *subfx_ptrVector_at(subfx_ptrVector *, size_t);
+
+#ifdef __cplusplus
+}
+#endif
