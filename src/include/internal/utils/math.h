@@ -19,24 +19,21 @@
 
 #pragma once
 
-#include "../basecommon.h"
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-SYMBOL_SHOW
-double *subfx_utils_math_rotate2d(double, double, double);
+typedef struct subfx_utils_math
+{
+    double *(*rotate2d)(double x, double y, double angle);
 
-// math.rad
-SYMBOL_SHOW double subfx_utils_math_rad(double angle);
+    double (*rad)(double angle);
 
-// math.deg
-SYMBOL_SHOW double subfx_utils_math_deg(double r);
+    double (*deg)(double r);
 
-// math.random
-SYMBOL_SHOW double subfx_utils_math_random(double min, double max);
+    double (*random)(double min, double max);
+} subfx_utils_math;
 
 #ifdef __cplusplus
 }

@@ -17,29 +17,13 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4127)
 #endif // _MSC_VER
-
-#pragma once
-
-#include "config.h"
-
-#ifdef _WIN32
-#define NOMINMAX
-#endif
-
-#if defined _WIN32 || defined __CYGWIN__
-#ifdef __MINGW32__
-#define SYMBOL_SHOW __attribute__((dllexport))
-#else
-#define SYMBOL_SHOW __declspec(dllexport)
-#endif // __MINGW32__
-#else
-#define SYMBOL_SHOW __attribute__((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 #define THROW noexcept(false)
@@ -51,33 +35,8 @@
 #define UNUSED(x) (void)x
 #endif
 
-typedef enum subfx_exitstate
-{
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_failed
-} subfx_exitstate;
-
 #define subfx_pError(buf, msg) \
     if (buf) \
     { \
         sprintf(buf, "%s", msg); \
     }
-
-typedef enum subfx_types
-{
-    subfx_int8_t,
-    subfx_uint8_t,
-    subfx_int16_t,
-    subfx_uint16_t,
-    subfx_int32_t,
-    subfx_uint32_t,
-    subfx_int64_t,
-    suffx_uint64_t,
-    subfx_float,
-    subfx_double,
-    subfx_other
-} subfx_types;
-
-typedef int (*subfx_cmpFunc)(const void *, const void *);
-typedef void (*subfx_freeFunc)(void *);

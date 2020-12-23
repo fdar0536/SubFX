@@ -20,9 +20,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SubFX.h"
+#include "misc.h"
+#include "internal/common.h"
 
-SYMBOL_SHOW
+subfx_utils_misc *subfx_utils_misc_init()
+{
+    subfx_utils_misc *misc = calloc(1, sizeof(subfx_utils_misc));
+    if (!misc)
+    {
+        return NULL;
+    }
+
+    misc->doubleToString = subfx_utils_misc_doubleToString;
+    misc->getLine = subfx_utils_misc_getLine;
+
+    return misc;
+}
+
 char *subfx_utils_misc_doubleToString(double input)
 {
     double *buffer = calloc(500, sizeof(double));
@@ -36,7 +50,6 @@ char *subfx_utils_misc_doubleToString(double input)
     return (char *)(buffer);
 }
 
-SYMBOL_SHOW
 subfx_exitstate
 subfx_utils_misc_getLine(char *buffer,
                          int bufferSize,

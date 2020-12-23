@@ -2,8 +2,8 @@ add_executable(testFontHandle
     main.cpp
 )
 
-add_dependencies(testFontHandle ${CMAKE_PROJECT_NAME}YutilsCpp)
-target_link_libraries(testFontHandle PRIVATE ${CMAKE_PROJECT_NAME}YutilsCpp)
+add_dependencies(testFontHandle SubFX)
+target_link_libraries(testFontHandle PRIVATE SubFX)
 target_include_directories(testFontHandle
     SYSTEM BEFORE
     PRIVATE

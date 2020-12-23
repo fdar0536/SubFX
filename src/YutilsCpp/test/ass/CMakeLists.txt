@@ -2,8 +2,8 @@ add_executable(testAss
     main.cpp
 )
 
-add_dependencies(testAss ${CMAKE_PROJECT_NAME}YutilsCpp)
-target_link_libraries(testAss PRIVATE ${CMAKE_PROJECT_NAME}YutilsCpp)
+add_dependencies(testAss SubFX)
+target_link_libraries(testAss PRIVATE SubFX)
 target_include_directories(testAss
     SYSTEM BEFORE
     PRIVATE

@@ -20,7 +20,31 @@
 #pragma once
 
 #include "utils/logger.h"
+#include "utils/map.h"
 #include "utils/math.h"
 #include "utils/misc.h"
+#include "utils/pair.h"
 #include "utils/ptrvector.h"
+#include "utils/tuple.h"
 #include "utils/utf8.h"
+#include "utils/vector.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+typedef struct subfx_utils
+{
+    subfx_utils_logger *logger;
+
+    subfx_utils_math *math;
+
+    subfx_utils_misc *misc;
+
+    subfx_utils_utf8 *utf8;
+} subfx_utils;
+
+#ifdef __cplusplus
+}
+#endif

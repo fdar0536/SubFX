@@ -4,8 +4,8 @@ add_executable(testAssParser
     assdumper.cpp
 )
 
-add_dependencies(testAssParser ${CMAKE_PROJECT_NAME}YutilsCpp)
-target_link_libraries(testAssParser PRIVATE ${CMAKE_PROJECT_NAME}YutilsCpp)
+add_dependencies(testAssParser SubFX)
+target_link_libraries(testAssParser PRIVATE SubFX)
 target_include_directories(testAssParser
     SYSTEM BEFORE
     PRIVATE

@@ -21,7 +21,6 @@
 
 #define PROJ_VERSION "@PROJECT_VERSION@"
 #define PROJ_NAME "@CMAKE_PROJECT_NAME@"
-#define PROJ_NAMESPACE @CMAKE_PROJECT_NAME@
-#cmakedefine ENABLE_SIMD
-#cmakedefine ENABLE_AVX
-#cmakedefine ENABLE_BLAS
+#cmakedefine SUBFX_ENABLE_SIMD
+#cmakedefine SUBFX_ENABLE_AVX
+#cmakedefine SUBFX_ENABLE_BLAS

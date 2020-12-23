@@ -21,19 +21,19 @@
 
 #include <inttypes.h>
 
-#include "../basecommon.h"
+#include "../defines.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-SYMBOL_SHOW
-uint32_t subfx_utils_utf8_stringLen(const char *);
+typedef struct subfx_utils_utf8
+{
+    uint32_t (*stringLen)(const char *str);
 
-// https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
-SYMBOL_SHOW
-char **subfx_utils_utf8_stringSplit(const char *);
+    subfx_handle (*stringSplit)(const char *str, char *msg);
+} subfx_utils_utf8;
 
 #ifdef __cplusplus
 }

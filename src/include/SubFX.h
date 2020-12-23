@@ -19,6 +19,50 @@
 
 #pragma once
 
-#include "internal/basecommon.h"
+#include "internal/defines.h"
 #include "internal/utils.h"
-#include "internal/yutils.h"
+// #include "internal/yutils.h"
+
+#if defined _WIN32 || defined __CYGWIN__
+#ifdef __MINGW32__
+#define SUBFX_API __attribute__((dllexport))
+#else
+#define SUBFX_API __declspec(dllexport)
+#endif // __MINGW32__
+#else
+#define SUBFX_API __attribute__((visibility("default")))
+#endif
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+typedef struct SubFX
+{
+    subfx_map *map;
+
+    subfx_pair *pair;
+
+    subfx_ptrVector *ptrVector;
+
+    subfx_tuple *tuple;
+
+    subfx_utils *utils;
+
+    subfx_vector *vector;
+
+    subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
+
+    subfx_exitstate (*closeHandle)(subfx_handle handle);
+
+    const char *(*version)();
+} SubFX;
+
+SUBFX_API SubFX *SubFX_init();
+
+SUBFX_API void SubFX_destroy(SubFX *);
+
+#ifdef __cplusplus
+}
+#endif

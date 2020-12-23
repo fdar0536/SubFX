@@ -20,12 +20,27 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "SubFX.h"
+#include "utils/math.h"
 
 #define PI \
     3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651e+00
 
-SYMBOL_SHOW
+subfx_utils_math *subfx_utils_math_init()
+{
+    subfx_utils_math *math = calloc(1, sizeof(subfx_utils_math));
+    if (!math)
+    {
+        return NULL;
+    }
+
+    math->rotate2d = subfx_utils_math_rotate2d;
+    math->rad = subfx_utils_math_rad;
+    math->deg = subfx_utils_math_deg;
+    math->random = subfx_utils_math_random;
+
+    return math;
+}
+
 double *subfx_utils_math_rotate2d(double x, double y, double angle)
 {
     double *ret = calloc(2, sizeof(double));
@@ -41,19 +56,19 @@ double *subfx_utils_math_rotate2d(double x, double y, double angle)
 }
 
 // math.rad
-SYMBOL_SHOW double subfx_utils_math_rad(double angle)
+double subfx_utils_math_rad(double angle)
 {
     return (angle * PI / 180.);
 }
 
 // math.deg
-SYMBOL_SHOW double subfx_utils_math_deg(double r)
+double subfx_utils_math_deg(double r)
 {
     return (r * 180. / PI);
 }
 
 // math.random
-SYMBOL_SHOW double subfx_utils_math_random(double min, double max)
+double subfx_utils_math_random(double min, double max)
 {
     return ((max - min) * rand() / (RAND_MAX + 1.0) + min);
 }

@@ -1,4 +1,4 @@
-add_subdirectory(test/ass)
-add_subdirectory(test/assparser)
-add_subdirectory(test/fonthandle)
-add_subdirectory(test/math)
+#add_subdirectory(YutilsCpp/test/ass)
+#add_subdirectory(YutilsCpp/test/assparser)
+#add_subdirectory(YutilsCpp/test/fonthandle)
+add_subdirectory(YutilsCpp/test/math)

@@ -4,8 +4,8 @@ add_executable(testYMath
     testingcase.cpp
 )
 
-add_dependencies(testYMath ${CMAKE_PROJECT_NAME}YutilsCpp)
-target_link_libraries(testYMath PRIVATE ${CMAKE_PROJECT_NAME}YutilsCpp)
+add_dependencies(testYMath SubFX)
+target_link_libraries(testYMath PRIVATE SubFX)
 target_include_directories(testYMath
     SYSTEM BEFORE
     PRIVATE

@@ -17,30 +17,20 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
 #include <string.h>
 
-#include "SubFX.h"
-#include "internal/math_internal.h"
+#include "YutilsCpp/math.h"
+#include "internal/common.h"
+// #include "internal/math_internal.h"
 
 #define subfx_max(x, y) x > y ? x : y
 #define subfx_min(x, y) x < y ? x : y
 
-#define CHECK_TMP_PTR(x) \
-    if (!x) \
-    { \
-        subfx_pError(errMsg, "arc_curve: Fail to allocate memory.") \
-        subfx_yutils_math_free_double_vector(curves); \
-        return NULL; \
-    }
-
-#define FREE_PTR(x) \
-    free(x); \
-    x = NULL
-
-SYMBOL_SHOW subfx_double_vector
+subfx_handle
 subfx_yutils_math_arc_curve(double x, double y,
                             double cx, double cy,
                             double angle,
@@ -64,7 +54,7 @@ subfx_yutils_math_arc_curve(double x, double y,
     // four pieces of data will be generated in each loop
     // so totalSize = (angle / 90 + 1) * 4
     size_t totalSize = (((size_t)(angle / 90) + 1) << 2);
-    subfx_double_vector
+    subfx_handle
             curves = subfx_yutils_math_create_double_vector(totalSize, 2);
     if (!curves)
     {
@@ -156,44 +146,6 @@ subfx_yutils_math_arc_curve(double x, double y,
     }
 
     return curves;
-}
-
-#undef CHECK_TMP_PTR
-
-SYMBOL_SHOW subfx_double_vector
-subfx_yutils_math_create_double_vector(size_t row, size_t col)
-{
-    // one more to NULL
-    subfx_double_vector ret = calloc(row + 1, sizeof(double *));
-    if (!ret)
-    {
-        return NULL;
-    }
-
-    // the last position of the array is for NULL
-    double *tmpPtr = calloc(row * col, sizeof(double));
-    if (!tmpPtr)
-    {
-        free(ret);
-        return NULL;
-    }
-
-    size_t index;
-    for (index = 0; index < row; ++index, tmpPtr += col)
-    {
-        ret[index] = tmpPtr;
-    }
-
-    ret[row] = NULL;
-    return ret;
-}
-
-SYMBOL_SHOW void
-subfx_yutils_math_free_double_vector(subfx_double_vector input)
-{
-    free(input[0]);
-    free(input);
-    input = NULL;
 }
 
 SYMBOL_SHOW double

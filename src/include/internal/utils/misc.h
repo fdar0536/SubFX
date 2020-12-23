@@ -21,22 +21,22 @@
 
 #include <stdio.h>
 
-#include "../basecommon.h"
+#include "../defines.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-SYMBOL_SHOW
-char *subfx_utils_misc_doubleToString(double input);
+typedef struct subfx_utils_misc
+{
+    char *(*doubleToString)(double input);
 
-SYMBOL_SHOW
-subfx_exitstate
-subfx_utils_misc_getLine(char *buffer,
-                         int bufferSize,
-                         FILE *file,
-                         char *errMsg);
+    subfx_exitstate (*getLine)(char *buffer,
+                               int bufferSize,
+                               FILE *file,
+                               char *errMsg);
+} subfx_utils_misc;
 
 #ifdef __cplusplus
 }

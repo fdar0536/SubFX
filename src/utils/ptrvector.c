@@ -17,172 +17,315 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "SubFX.h"
+#include "internal/types.h"
+#include "ptrvector.h"
 
-typedef struct ptrVector
+typedef struct vector
 {
-    void **m_data;
-    subfx_freeFunc m_dataFreeFunc;
+    subfx_types id;
 
-    size_t m_size;
-    size_t m_capacity;
-} ptrVector;
+    uint8_t **data;
 
-SYMBOL_SHOW
-subfx_ptrVector *subfx_ptrVector_create(subfx_freeFunc dataFreeFunc)
+    subfx_freeFunc freeFunc;
+
+    size_t size;
+
+    size_t capacity;
+} vector;
+
+subfx_ptrVector *subfx_ptrVector_init()
 {
-    if (!dataFreeFunc)
-    {
-        return NULL;
-    }
-
-    ptrVector *ret = malloc(sizeof(ptrVector));
+    subfx_ptrVector *ret = calloc(1, sizeof(subfx_ptrVector));
     if (!ret)
     {
         return NULL;
     }
 
-    ret->m_data = NULL;
-    ret->m_dataFreeFunc = dataFreeFunc;
-    ret->m_size = 0;
-    ret->m_capacity = 0;
+    ret->create = subfx_ptrVector_create;
+    ret->at = subfx_ptrVector_at;
+    ret->setValue = subfx_ptrVector_setValue;
+    ret->clear = subfx_ptrVector_clear;
+    ret->size = subfx_ptrVector_size;
+    ret->capacity = subfx_ptrVector_capacity;
+    ret->reserve = subfx_ptrVector_reserve;
+    ret->pushback = subfx_ptrVector_pushback;
+    ret->resize = subfx_ptrVector_resize;
 
     return ret;
 }
 
-SYMBOL_SHOW
-void subfx_ptrVector_free(subfx_ptrVector *input)
+subfx_handle subfx_ptrVector_create(subfx_freeFunc freeFunc)
 {
-    if (!input)
+    if (!freeFunc)
     {
-        return;
+        return NULL;
     }
 
-    ptrVector *vec = (ptrVector *)input;
-    if (vec->m_capacity != 0)
+    vector *ret = calloc(1, sizeof(vector));
+    if (!ret)
     {
-        size_t index;
-        char **data = (char **)vec->m_data;
-        for (index = 0; index < vec->m_size; ++index)
-        {
-            vec->m_dataFreeFunc(data[index]);
-        }
-
-        free(data);
+        return NULL;
     }
 
-    free(vec);
-    input = NULL;
+    ret->id = subfx_types_ptrVector;
+    ret->data = NULL;
+    ret->freeFunc = freeFunc;
+    ret->size = 0;
+    ret->capacity = 0;
+
+    return ret;
 }
 
-SYMBOL_SHOW
-size_t subfx_ptrVector_size(subfx_ptrVector *input, char *errMsg)
+subfx_exitstate subfx_ptrVector_destroy(subfx_handle in)
 {
-    if (!input)
-    {
-        subfx_pError(errMsg, "subfx_ptrVector_size: No input.")
-        return 0;
-    }
-
-    ptrVector *vec = (ptrVector *)input;
-    return vec->m_size;
-}
-
-SYMBOL_SHOW
-size_t subfx_ptrVector_capacity(subfx_ptrVector *input, char *errMsg)
-{
-    if (!input)
-    {
-        subfx_pError(errMsg, "subfx_ptrVector_capacity: No input.")
-        return 0;
-    }
-
-    ptrVector *vec = (ptrVector *)input;
-    return vec->m_capacity;
-}
-
-SYMBOL_SHOW
-subfx_exitstate subfx_ptrVector_reserve(subfx_ptrVector *input, size_t newSize)
-{
-    if (!input)
+    if (subfx_checkInput(in, subfx_types_ptrVector))
     {
         return subfx_failed;
     }
 
-    ptrVector *vec = (ptrVector *)input;
-    if (newSize <= vec->m_capacity)
+    vector *vec = (vector *)in;
+    if (vec->data)
+    {
+        size_t i = 0;
+        for (i = 0; i < vec->size; ++i)
+        {
+            vec->freeFunc(vec->data[i]);
+        }
+
+        free(vec->data);
+    }
+
+    free(in);
+    return subfx_success;
+}
+
+void *subfx_ptrVector_at(subfx_handle in, size_t index)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return NULL;
+    }
+
+    vector *vec = (vector *)in;
+    if (index >= vec->size)
+    {
+        return NULL;
+    }
+
+    uint8_t **data = vec->data;
+    data += index;
+
+    return data[0];
+}
+
+subfx_exitstate subfx_ptrVector_setValue(subfx_handle in,
+                                         size_t index,
+                                         void *src)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return subfx_failed;
+    }
+
+    if (!src)
+    {
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+    if (index >= vec->size)
+    {
+        return subfx_failed;
+    }
+
+    vec->freeFunc(vec->data[index]);
+    vec->data[index] = src;
+
+    return subfx_success;
+}
+
+subfx_exitstate subfx_ptrVector_clear(subfx_handle in)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+
+    size_t i = 0;
+    for (i = 0; i < vec->size; ++i)
+    {
+        vec->freeFunc(vec->data[i]);
+        vec->data[i] = NULL;
+    }
+
+    vec->size = 0;
+    return subfx_success;
+}
+
+subfx_exitstate subfx_ptrVector_size(subfx_handle in, size_t *dst)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return subfx_failed;
+    }
+
+    if (!dst)
+    {
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+    *dst = vec->size;
+
+    return subfx_success;
+}
+
+subfx_exitstate subfx_ptrVector_capacity(subfx_handle in, size_t *dst)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return subfx_failed;
+    }
+
+    if (!dst)
+    {
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+    *dst = vec->capacity;
+
+    return subfx_success;
+}
+
+subfx_exitstate subfx_ptrVector_reserve(subfx_handle in, size_t newSize)
+{
+    if (subfx_checkInput(in, subfx_types_ptrVector))
+    {
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+    if (newSize <= vec->capacity)
     {
         // do nothing
         return subfx_success;
     }
 
-    // newSize > vec->m_capacity
-    char **newData = calloc(newSize, sizeof(char *));
+    uint8_t **newData = calloc(newSize, sizeof(uint8_t *));
     if (!newData)
     {
         return subfx_failed;
     }
 
-    char **data = (char **)vec->m_data;
-    memcpy(newData, data, vec->m_size * sizeof(char *));
-    free(data);
-    vec->m_data = (void **)newData;
-    vec->m_capacity = newSize;
+    if (vec->data)
+    {
+        size_t i;
+        for (i = 0; i < vec->size; ++i)
+        {
+            newData[i] = vec->data[i];
+        }
+
+        free(vec->data);
+    }
+
+    vec->data = newData;
+    vec->capacity = newSize;
 
     return subfx_success;
 }
 
-
-SYMBOL_SHOW
-subfx_exitstate subfx_ptrVector_pushback(subfx_ptrVector *input, void *value)
+subfx_exitstate subfx_ptrVector_pushback(subfx_handle in, void *src)
 {
-    if (!input || !value)
+    if (subfx_checkInput(in, subfx_types_ptrVector))
     {
         return subfx_failed;
     }
 
-    ptrVector *vec = (ptrVector *)input;
-    if (vec->m_size == vec->m_capacity)
+    if (!src)
     {
-        // vector is full
-        if (subfx_ptrVector_reserve(vec, vec->m_size + 1) == subfx_failed)
+        return subfx_failed;
+    }
+
+    vector *vec = (vector *)in;
+    if (vec->size == vec->capacity)
+    {
+        if (subfx_ptrVector_reserve(vec, vec->capacity + 1) == subfx_failed)
         {
             return subfx_failed;
         }
     }
 
-    char **data = (char **)vec->m_data;
-    size_t last = vec->m_size - 1;
+    uint8_t **data = vec->data;
 
-    data[last] = calloc(1, sizeof(char *));
-    if (!data[last])
-    {
-        return subfx_failed;
-    }
-
-    memcpy(data[last], value, sizeof(char *));
+    // array just contain pointer
+    data += vec->size;
+    data[0] = src;
+    ++vec->size;
 
     return subfx_success;
 }
 
-SYMBOL_SHOW
-const void *subfx_ptrVector_at(subfx_ptrVector *input, size_t pos)
+subfx_exitstate subfx_ptrVector_resize(subfx_handle in,
+                                       size_t amount,
+                                       void *src,
+                                       void *(*deepCopyFunc)(void *))
 {
-    if (!input)
+    if (subfx_checkInput(in, subfx_types_ptrVector))
     {
-        return NULL;
+        return subfx_failed;
     }
 
-    ptrVector *vec = (ptrVector *)input;
-    if (pos >= vec->m_size)
+    if (!src)
     {
-        // out of range
-        return NULL;
+        return subfx_failed;
     }
 
-    char **data = (char **)vec->m_data;
-    return (const void *)data[pos];
+    vector *vec = (vector *)in;
+    if (vec->capacity < amount)
+    {
+        if (subfx_ptrVector_reserve(in, amount) == subfx_failed)
+        {
+            return subfx_failed;
+        }
+    }
+
+    size_t i;
+    if (vec->size > amount)
+    {
+        for (i = amount; i < vec->size; ++i)
+        {
+            vec->freeFunc(vec->data[i]);
+            vec->data[i] = NULL;
+        }
+
+        vec->size = amount;
+    }
+    else if (vec->size < amount)
+    {
+        // vec->capacity >= amount
+
+        void *toBeInsert = NULL;
+        for (i = vec->size; i < amount; ++i)
+        {
+            toBeInsert = deepCopyFunc(src);
+            if (!toBeInsert)
+            {
+                return subfx_failed;
+            }
+
+            if (subfx_ptrVector_pushback(vec, toBeInsert) == subfx_failed)
+            {
+                return subfx_failed;
+            }
+        }
+    }
+
+    return subfx_success;
 }

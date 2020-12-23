@@ -19,10 +19,29 @@
 
 #pragma once
 
-#include "internal/yutilscpp/ass.hpp"
-#include "internal/yutilscpp/assparser.hpp"
-#include "internal/yutilscpp/asswriter.hpp"
-#include "internal/yutilscpp/fonthandle.hpp"
-#include "internal/yutilscpp/math.hpp"
-#include "internal/yutilscpp/matrix.hpp"
-#include "internal/yutilscpp/shape.hpp"
+#include "../defines.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+typedef struct subfx_pair
+{
+    subfx_handle (*create)(void *first, subfx_freeFunc firstFreeFunc,
+                           void *second, subfx_freeFunc secondFreeFunc);
+
+    void *(*first)(subfx_handle pair);
+
+    subfx_exitstate (*setFirst)(subfx_handle pair,
+                                void *first, subfx_freeFunc firstFreeFunc);
+
+    void *(*second)(subfx_handle pair);
+
+    subfx_exitstate (*setSecond)(subfx_handle pair,
+                                 void *second, subfx_freeFunc secondFreeFunc);
+} subfx_pair;
+
+#ifdef __cplusplus
+}
+#endif

@@ -19,39 +19,42 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <inttypes.h>
+#include "inttypes.h"
 
-#include "../basecommon.h"
-
-typedef void subfx_ptrVector;
+#include "../defines.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-SYMBOL_SHOW
-subfx_ptrVector *subfx_ptrVector_create(subfx_freeFunc dataFreeFunc);
+typedef struct subfx_ptrVector
+{
+    subfx_handle (*create)(subfx_freeFunc freeFunc);
 
-SYMBOL_SHOW
-void subfx_ptrVector_free(subfx_ptrVector *);
+    void *(*at)(subfx_handle ptrVector, size_t index);
 
-SYMBOL_SHOW
-size_t subfx_ptrVector_size(subfx_ptrVector *, char *errMsg);
+    subfx_exitstate (*setValue)(subfx_handle ptrVector,
+                                size_t index,
+                                void *src);
 
-SYMBOL_SHOW
-size_t subfx_ptrVector_capacity(subfx_ptrVector *, char *errMsg);
+    subfx_exitstate (*clear)(subfx_handle ptrVector);
 
-SYMBOL_SHOW
-subfx_exitstate subfx_ptrVector_reserve(subfx_ptrVector *, size_t);
+    subfx_exitstate (*size)(subfx_handle ptrVector, size_t *dst);
 
-SYMBOL_SHOW
-subfx_exitstate subfx_ptrVector_pushback(subfx_ptrVector *, void *);
+    subfx_exitstate (*capacity)(subfx_handle ptrVector, size_t *dst);
 
-SYMBOL_SHOW
-const void *subfx_ptrVector_at(subfx_ptrVector *, size_t);
+    subfx_exitstate (*reserve)(subfx_handle ptrVector, size_t newSize);
+
+    subfx_exitstate (*pushback)(subfx_handle ptrVector, void *src);
+
+    subfx_exitstate (*resize)(subfx_handle vector,
+                              size_t newSize,
+                              void *src,
+                              void *(*deepCopyFunc)(void *));
+} subfx_ptrVector;
 
 #ifdef __cplusplus
 }
 #endif
+
