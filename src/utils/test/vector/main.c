@@ -207,7 +207,11 @@ int main()
         return 1;
     }
 
+#ifdef _WIN32
     printf("Before clear: size = %lld, capacity = %lld\n", size, capacity);
+#else
+    printf("Before clear: size = %ld, capacity = %ld\n", size, capacity);
+#endif
 
     if (vecApi->clear(vec) == subfx_failed)
     {
@@ -245,7 +249,11 @@ int main()
         return 1;
     }
 
+#ifdef _WIN32
     printf("After clear: size = %lld, capacity = %lld\n", size, capacity);
+#else
+    printf("After clear: size = %ld, capacity = %ld\n", size, capacity);
+#endif
 
     if (api->closeHandle(vec) == subfx_failed)
     {
