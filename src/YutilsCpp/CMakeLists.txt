@@ -83,7 +83,3 @@ endif (ENABLE_BLAS)
 # if (ENABLE_PYTHON)
 #     add_subdirectory(python)
 # endif (ENABLE_PYTHON)
-
-if (BUILD_TESTING_CASES)
-    include(YutilsCpp/test/CMakeLists.txt)
-endif (BUILD_TESTING_CASES)

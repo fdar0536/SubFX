@@ -142,5 +142,5 @@ configure_file(config.h.in config.h @ONLY)
 
 if (BUILD_TESTING_CASES)
     include(utils/test/CMakeLists.txt)
-    #include(YutilsCpp/test/CMakeLists.txt)
+    include(YutilsCpp/test/CMakeLists.txt)
 endif(BUILD_TESTING_CASES)
