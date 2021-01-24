@@ -28,6 +28,7 @@ typedef enum subfx_exitstate
 {
     subfx_success,
     subfx_successWithWarning,
+    subfx_eof,
     subfx_failed
 } subfx_exitstate;
 

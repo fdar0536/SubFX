@@ -90,7 +90,16 @@ subfx_utils_misc_getLine(char *buffer,
     }
     else
     {
-        buffer[0] = '\0';
+        if (feof(file))
+        {
+            buffer[0] = '\0';
+            return subfx_eof;
+        }
+        else
+        {
+            subfx_pError(errMsg, "Fail to get line.")
+            return subfx_failed;
+        }
     }
 
     return subfx_success;

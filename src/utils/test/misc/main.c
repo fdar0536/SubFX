@@ -21,8 +21,10 @@
  * SOFTWARE.
  */
 
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include "SubFX.h"
@@ -36,31 +38,73 @@ int main()
         return 1;
     }
 
-    subfx_utils_math *math = api->utils->math;
-
-    double *pRet = math->rotate2d(1., 0., 90.);
-    if (!pRet)
+    subfx_utils_misc *misc = api->utils->misc;
+    char *string = misc->doubleToString(sqrt(2.));
+    if (!string)
     {
-        fputs("Fail due to \"rotate2d\"", stderr);
+        fputs("Fail due to \"doubleToString\"", stderr);
         SubFX_destroy(api);
         return 1;
     }
 
-    printf("%lf, %lf\n", pRet[0], pRet[1]);
-    free(pRet);
-    pRet = NULL;
+    puts(string);
 
-    double ret = math->rad(180);
-    printf("%lf\n", ret);
-    printf("%lf\n", math->deg(ret));
+    char errMsg[1000];
+    errMsg[0] = '\0';
 
-    srand(time(NULL));
-    uint8_t i;
-    for (i = 0; i < 5; ++i)
+    FILE *ass = fopen("in.ass", "r");
+    if (!ass)
     {
-        printf("%lf\n", math->random(-1., 1.));
+        fputs("Fail to open file", stderr);
+        free(string);
+        SubFX_destroy(api);
+        return 1;
     }
 
+    size_t strSize = 500 * sizeof(double);
+    subfx_exitstate state = 0;
+    uint8_t flag = 1;
+    while (flag)
+    {
+        state = misc->getLine(string, strSize, ass, errMsg);
+
+        switch (state)
+        {
+        case subfx_success:
+        case subfx_successWithWarning:
+        {
+            puts(string);
+            break;
+        }
+        case subfx_eof:
+        {
+            flag = 0;
+            break;
+        }
+        case subfx_failed:
+        {
+            fputs(errMsg, stderr);
+            fclose(ass);
+            free(string);
+            SubFX_destroy(api);
+            return 1;
+        }
+        default:
+        {
+            fputs("You should NEVER see this line", stderr);
+            fclose(ass);
+            free(string);
+            SubFX_destroy(api);
+            return 1;
+        }
+        }
+
+        string[0] = '\0';
+    }
+
+    // clean up
+    fclose(ass);
+    free(string);
     SubFX_destroy(api);
 
     return 0;
