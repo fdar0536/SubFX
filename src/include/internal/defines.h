@@ -40,12 +40,6 @@ typedef enum subfx_types
     subfx_types_vector
 } subfx_types;
 
-typedef enum subfx_bool
-{
-    subfx_false,
-    subfx_true
-} subfx_bool;
-
 typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
 typedef void (*subfx_freeFunc)(void *toBeFree);
 typedef void* subfx_handle;

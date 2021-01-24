@@ -43,7 +43,7 @@ subfx_utils_logger
 subfx_handle
 subfx_utils_logger_create(FILE *out,
                           FILE *err,
-                          subfx_bool autoCloseFiles)
+                          bool autoCloseFiles)
 {
     if (!out || !err)
     {
@@ -53,7 +53,7 @@ subfx_utils_logger_create(FILE *out,
     return subfx_utils_logger_createInternal(out,
                                              err,
                                              autoCloseFiles,
-                                             subfx_false);
+                                             false);
 }
 
 subfx_handle
@@ -83,7 +83,7 @@ subfx_utils_logger_create2(const char *outFile,
         }
     }
 
-    return subfx_utils_logger_createInternal(out, err, subfx_true, subfx_true);
+    return subfx_utils_logger_createInternal(out, err, true, true);
 }
 
 subfx_exitstate subfx_utils_logger_destroy(subfx_handle in)
@@ -94,7 +94,7 @@ subfx_exitstate subfx_utils_logger_destroy(subfx_handle in)
     }
 
     Logger *logger = (Logger *)in;
-    if (logger->haveToCloseFiles == subfx_true)
+    if (logger->haveToCloseFiles == true)
     {
         subfx_utils_logger_closeFiles(logger->out, logger->err);
     }
@@ -134,13 +134,13 @@ subfx_exitstate subfx_utils_logger_writeErr(subfx_handle in,
 
 subfx_handle subfx_utils_logger_createInternal(FILE *out,
                                                FILE *err,
-                                               subfx_bool autoCloseFiles,
-                                               subfx_bool haveToCloseFiles)
+                                               bool autoCloseFiles,
+                                               bool haveToCloseFiles)
 {
     Logger *ret = calloc(1, sizeof(Logger));
     if (!ret)
     {
-        if (haveToCloseFiles == subfx_true)
+        if (haveToCloseFiles == true)
         {
             subfx_utils_logger_closeFiles(out, err);
         }

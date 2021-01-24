@@ -20,6 +20,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "include/internal/defines.h"
 #include "include/internal/utils/logger.h"
@@ -37,7 +38,7 @@ typedef struct Logger
 
     FILE *err;
 
-    subfx_bool haveToCloseFiles;
+    bool haveToCloseFiles;
 } Logger;
 
 subfx_utils_logger
@@ -46,7 +47,7 @@ subfx_utils_logger
 subfx_handle
 subfx_utils_logger_create(FILE *,
                           FILE *,
-                          subfx_bool);
+                          bool);
 
 subfx_handle
 subfx_utils_logger_create2(const char *,
@@ -60,8 +61,8 @@ subfx_exitstate subfx_utils_logger_writeErr(subfx_handle, const char *);
 
 subfx_handle subfx_utils_logger_createInternal(FILE *,
                                                FILE *,
-                                               subfx_bool,
-                                               subfx_bool);
+                                               bool,
+                                               bool);
 
 void subfx_utils_logger_closeFiles(FILE *, FILE *);
 

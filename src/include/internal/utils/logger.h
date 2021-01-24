@@ -20,6 +20,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "../defines.h"
 
@@ -32,7 +33,7 @@ typedef struct subfx_utils_logger
 {
     subfx_handle (*create)(FILE *out,
                            FILE *err,
-                           subfx_bool autoCloseFiles);
+                           bool autoCloseFiles);
 
     subfx_handle (*create2)(const char *outFile,
                             const char *errFile);

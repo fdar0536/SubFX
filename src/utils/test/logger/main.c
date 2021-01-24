@@ -55,7 +55,7 @@ int main()
 
     subfx_utils_logger *loggerApi = api->utils->logger;
 
-    subfx_handle logger = loggerApi->create(stdout, stderr, subfx_false);
+    subfx_handle logger = loggerApi->create(stdout, stderr, false);
     if (!logger)
     {
         fputs("Fail to create logger via create.", stderr);
