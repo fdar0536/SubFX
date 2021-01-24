@@ -21,32 +21,43 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-#include "YutilsCpp"
+#include "testingcase.h"
 
-int testArcCurve();
+#define TESTING(x) \
+    if (x) \
+    { \
+        return 1; \
+    }
 
-int testBezier();
+int main()
+{
+    puts("Testing subfx->yutils->math");
+#ifdef _WIN32
+    srand((unsigned int)time(NULL));
+#else
+    srand(time(NULL));
+#endif // _WIN32
 
-int testDegree();
+    TESTING(testInit())
+    TESTING(testArcCurve())
+    TESTING(testBezier())
+    TESTING(testDegree())
+    TESTING(testDistance())
+    TESTING(testLineIntersect())
+    TESTING(testOrtho())
+    TESTING(testRandomsteps())
+    TESTING(testRound())
+    TESTING(testStretch())
+    TESTING(testTrim())
+    TESTING(testEllipse())
+    TESTING(testRandomway())
+    TESTING(testRotate())
 
-int testDistance();
-
-int testLineIntersect();
-
-int testOrtho();
-
-int testRandomsteps();
-
-int testRound();
-
-int testStretch();
-
-int testTrim();
-
-int testEllipse();
-
-int testRandomway();
-
-int testRotate();
+    testFin();
+    puts("All done!");
+    return 0;
+}

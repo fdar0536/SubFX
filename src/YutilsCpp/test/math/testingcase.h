@@ -21,41 +21,34 @@
  * SOFTWARE.
  */
 
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
+#pragma once
 
-#include "testingcase.hpp"
+int testInit();
 
-#define TESTING(x) \
-    if (x) \
-    { \
-        return 1; \
-    }
+int testArcCurve();
 
-int main()
-{
-    puts("Testing math.hpp");
-#ifdef _WIN32
-    srand(static_cast<unsigned int>(time(nullptr)));
-#else
-    srand(time(nullptr));
-#endif // _WIN32
+int testBezier();
 
-    TESTING(testArcCurve())
-    TESTING(testBezier())
-    TESTING(testDegree())
-    TESTING(testDistance())
-    TESTING(testLineIntersect())
-    TESTING(testOrtho())
-    TESTING(testRandomsteps())
-    TESTING(testRound())
-    TESTING(testStretch())
-    TESTING(testTrim())
-    TESTING(testEllipse())
-    TESTING(testRandomway())
-    TESTING(testRotate())
+int testDegree();
 
-    std::cout << "All done!" << std::endl;
-    return 0;
-}
+int testDistance();
+
+int testLineIntersect();
+
+int testOrtho();
+
+int testRandomsteps();
+
+int testRound();
+
+int testStretch();
+
+int testTrim();
+
+int testEllipse();
+
+int testRandomway();
+
+int testRotate();
+
+void testFin();

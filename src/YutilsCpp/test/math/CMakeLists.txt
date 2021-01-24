@@ -1,7 +1,7 @@
 add_executable(testYMath
-    main.cpp
-    testingcase.hpp
-    testingcase.cpp
+    main.c
+    testingcase.h
+    testingcase.c
 )
 
 add_dependencies(testYMath SubFX)
