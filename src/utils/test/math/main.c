@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "SubFX.h"
 
@@ -38,13 +39,27 @@ int main()
 
     subfx_utils_math *math = api->utils->math;
 
-
-    if (api->closeHandle(map) == subfx_failed)
+    double *pRet = math->rotate2d(1., 0., 90.);
+    if (!pRet)
     {
-        fputs("Fail to close handle.\n", stderr);
-
+        fputs("Fail due to \"rotate2d\"", stderr);
         SubFX_destroy(api);
         return 1;
+    }
+
+    printf("%lf, %lf\n", pRet[0], pRet[1]);
+    free(pRet);
+    pRet = NULL;
+
+    double ret = math->rad(180);
+    printf("%lf\n", ret);
+    printf("%lf\n", math->deg(ret));
+
+    srand(time(NULL));
+    uint8_t i;
+    for (i = 0; i < 5; ++i)
+    {
+        printf("%lf\n", math->random(-1., 1.));
     }
 
     SubFX_destroy(api);

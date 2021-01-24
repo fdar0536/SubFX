@@ -23,10 +23,8 @@
 #include "internal/subfx.h"
 #include "utils/init.h"
 #include "utils/map.h"
-#include "utils/tuple.h"
 #include "utils/ptrvector.h"
 #include "utils/vector.h"
-#include "utils/pair.h"
 
 SUBFX_API SubFX *SubFX_init()
 {
