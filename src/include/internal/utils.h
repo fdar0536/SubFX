@@ -23,9 +23,7 @@
 #include "utils/map.h"
 #include "utils/math.h"
 #include "utils/misc.h"
-#include "utils/pair.h"
 #include "utils/ptrvector.h"
-#include "utils/tuple.h"
 #include "utils/utf8.h"
 #include "utils/vector.h"
 

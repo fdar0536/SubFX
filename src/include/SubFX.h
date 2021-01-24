@@ -42,11 +42,7 @@ typedef struct SubFX
 {
     subfx_map *map;
 
-    subfx_pair *pair;
-
     subfx_ptrVector *ptrVector;
-
-    subfx_tuple *tuple;
 
     subfx_utils *utils;
 

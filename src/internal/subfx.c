@@ -68,14 +68,6 @@ subfx_exitstate subfx_closeHandle(subfx_handle in)
     {
         return subfx_map_destroy(in);
     }
-    case subfx_types_pair:
-    {
-        return subfx_pair_destroy(in);
-    }
-    case subfx_types_tuple:
-    {
-        return subfx_tuple_destroy(in);
-    }
     default:
     {
         return subfx_failed;

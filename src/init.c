@@ -26,6 +26,7 @@
 #include "utils/tuple.h"
 #include "utils/ptrvector.h"
 #include "utils/vector.h"
+#include "utils/pair.h"
 
 SUBFX_API SubFX *SubFX_init()
 {
@@ -37,7 +38,6 @@ SUBFX_API SubFX *SubFX_init()
 
     ret->map = NULL;
     ret->ptrVector = NULL;
-    ret->tuple = NULL;
     ret->utils = NULL;
     ret->vector = NULL;
 
@@ -50,13 +50,6 @@ SUBFX_API SubFX *SubFX_init()
 
     ret->ptrVector = subfx_ptrVector_init();
     if (!ret->ptrVector)
-    {
-        SubFX_destroy(ret);
-        return NULL;
-    }
-
-    ret->tuple = subfx_tuple_init();
-    if (!ret->tuple)
     {
         SubFX_destroy(ret);
         return NULL;
@@ -91,7 +84,6 @@ SUBFX_API void SubFX_destroy(SubFX *in)
 
     if (in->map) free(in->map);
     if (in->ptrVector) free(in->ptrVector);
-    if (in->tuple) free(in->tuple);
     if (in->utils) subfx_utils_destory(in->utils);
     if (in->vector) free(in->vector);
     free(in);

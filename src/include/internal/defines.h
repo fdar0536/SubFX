@@ -35,9 +35,7 @@ typedef enum subfx_types
 {
     subfx_types_utils_logger,
     subfx_type_map,
-    subfx_types_pair,
     subfx_types_ptrVector,
-    subfx_types_tuple,
     subfx_types_vector
 } subfx_types;
 

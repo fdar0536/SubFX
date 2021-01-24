@@ -8,9 +8,7 @@ set(utils_headers
     ${CMAKE_SOURCE_DIR}/include/internal/utils/map.h
     ${CMAKE_SOURCE_DIR}/include/internal/utils/math.h
     ${CMAKE_SOURCE_DIR}/include/internal/utils/misc.h
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/pair.h
     ${CMAKE_SOURCE_DIR}/include/internal/utils/ptrvector.h
-    ${CMAKE_SOURCE_DIR}/include/internal/utils/tuple.h
     ${CMAKE_SOURCE_DIR}/include/internal/utils/utf8.h
     ${CMAKE_SOURCE_DIR}/include/internal/utils/vector.h
 )
@@ -21,9 +19,7 @@ set(utils_priv_headers
     utils/map.h
     utils/math.h
     utils/misc.h
-    utils/pair.h
     utils/ptrvector.h
-    utils/tuple.h
     utils/utf8.h
     utils/vector.h
 )
@@ -34,9 +30,7 @@ set(utils_src
     utils/map.c
     utils/math.c
     utils/misc.c
-    utils/pair.c
     utils/ptrvector.c
-    utils/tuple.c
     utils/utf8.c
     utils/vector.c
 )
