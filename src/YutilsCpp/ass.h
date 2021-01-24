@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -19,35 +19,26 @@
 
 #pragma once
 
-#include <string>
-#include <tuple>
-#include <vector>
+#include "include/internal/yutilscpp/ass.h"
 
-#include <cstdint>
-
-#include "../basecommon.h"
-
-namespace PROJ_NAMESPACE
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-namespace Yutils
-{
+subfx_yutils_ass *subfx_yutils_ass_init();
 
-namespace Ass
-{
+subfx_exitstate subfx_yutils_ass_stringToMs(const char *ass_ms,
+                                            uint64_t *dst,
+                                            char *errMsg);
 
-SYMBOL_SHOW uint64_t stringToMs(std::string &ass_ms) THROW;
+char *subfx_yutils_ass_msToString(uint64_t ms_ass);
 
-SYMBOL_SHOW std::string msToString(uint64_t ms_ass) NOTHROW;
+uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *input, char *errMsg);
 
-SYMBOL_SHOW std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
-stringToColorAlpha(std::string &input) THROW;
+char *subfx_yutils_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
+                                          char *errMsg);
 
-SYMBOL_SHOW std::string
-colorAlphaToString(std::vector<uint8_t> &input) THROW;
-
-} // end namespace Ass
-
-} // end namespace Yutils
-
-} // end namespace PROJ_NAMESPACE
+#ifdef __cplusplus
+}
+#endif

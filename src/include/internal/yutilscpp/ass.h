@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -19,35 +19,30 @@
 
 #pragma once
 
-#include <string>
-#include <tuple>
-#include <vector>
+#include <inttypes.h>
+#include <stddef.h>
 
-#include <cstdint>
+#include "../defines.h"
 
-#include "../basecommon.h"
-
-namespace PROJ_NAMESPACE
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-namespace Yutils
+typedef struct subfx_yutils_ass
 {
+    subfx_exitstate (*stringToMs)(const char *ass_ms,
+                                  uint64_t *dst,
+                                  char *errMsg);
 
-namespace Ass
-{
+    char *(*msToString)(uint64_t ms_ass);
 
-SYMBOL_SHOW uint64_t stringToMs(std::string &ass_ms) THROW;
+    uint8_t *(*stringToColorAlpha)(const char *input, char *errMsg);
 
-SYMBOL_SHOW std::string msToString(uint64_t ms_ass) NOTHROW;
+    char *(*colorAlphaToString)(uint8_t *input,
+                                size_t inputSize, char *errMsg);
+} subfx_yutils_ass;
 
-SYMBOL_SHOW std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
-stringToColorAlpha(std::string &input) THROW;
-
-SYMBOL_SHOW std::string
-colorAlphaToString(std::vector<uint8_t> &input) THROW;
-
-} // end namespace Ass
-
-} // end namespace Yutils
-
-} // end namespace PROJ_NAMESPACE
+#ifdef __cplusplus
+}
+#endif

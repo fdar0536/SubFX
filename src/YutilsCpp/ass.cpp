@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -17,73 +17,106 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif    /* _MSC_VER */
-
 #include <regex>
-#include <stdexcept>
+#include <string>
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 #include "boost/lexical_cast.hpp"
 
-#include "YutilsCpp"
+#include "internal/common.h"
+#include "ass.h"
 
-using namespace PROJ_NAMESPACE::Yutils;
-
-SYMBOL_SHOW uint64_t Ass::stringToMs(std::string &ass_ms) THROW
+extern "C"
 {
-    std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
-    if (!std::regex_match(ass_ms, reg))
+
+subfx_yutils_ass *subfx_yutils_ass_init()
+{
+    subfx_yutils_ass *ret(reinterpret_cast<subfx_yutils_ass *>
+                          (calloc(1, sizeof(subfx_yutils_ass))));
+    if (!ret)
     {
-        throw std::invalid_argument("stringToMs: ASS timestamp expected");
+        return nullptr;
     }
 
-    using boost::lexical_cast;
-    using boost::bad_lexical_cast;
-    uint64_t ret(0);
-
-    try
-    {
-        // hour
-        ret = lexical_cast<uint64_t>(ass_ms.substr(0, 1)) * 3600000;
-
-        // minute
-        ret += (lexical_cast<uint64_t>(ass_ms.substr(2, 2)) * 60000);
-
-        //second
-        ret += (lexical_cast<uint64_t>(ass_ms.substr(5, 2)) * 1000);
-
-        // centisecond
-        ret += (lexical_cast<uint64_t>(ass_ms.substr(8, 2)) * 10);
-    }
-    catch (const bad_lexical_cast &) // for safety
-    {
-        throw std::invalid_argument("stringToMs: Cannot convert!");
-    }
+    ret->stringToMs = subfx_yutils_ass_stringToMs;
+    ret->msToString = subfx_yutils_ass_msToString;
+    ret->stringToColorAlpha = subfx_yutils_ass_stringToColorAlpha;
+    ret->colorAlphaToString = subfx_yutils_ass_colorAlphaToString;
 
     return ret;
 }
 
-SYMBOL_SHOW std::string Ass::msToString(uint64_t ms_ass) NOTHROW
+subfx_exitstate subfx_yutils_ass_stringToMs(const char *in,
+                                            uint64_t *dst,
+                                            char *errMsg)
 {
+    std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
+    if (!std::regex_match(in, reg))
+    {
+        subfx_pError(errMsg, "stringToMs: ASS timestamp expected");
+        return subfx_failed;
+    }
+
+    using boost::lexical_cast;
+    using boost::bad_lexical_cast;
+
+    std::string ass_ms = std::string(in);
+
+    try
+    {
+        // hour
+        *dst = lexical_cast<uint64_t>(ass_ms.substr(0, 1)) * 3600000;
+
+        // minute
+        *dst += (lexical_cast<uint64_t>(ass_ms.substr(2, 2)) * 60000);
+
+        //second
+        *dst += (lexical_cast<uint64_t>(ass_ms.substr(5, 2)) * 1000);
+
+        // centisecond
+        *dst += (lexical_cast<uint64_t>(ass_ms.substr(8, 2)) * 10);
+    }
+    catch (const bad_lexical_cast &) // for safety
+    {
+        subfx_pError(errMsg, "stringToMs: Cannot convert!");
+        return subfx_failed;
+    }
+
+    return subfx_success;
+}
+
+char *subfx_yutils_ass_msToString(uint64_t ms_ass)
+{
+    char *buf(reinterpret_cast<char *>(calloc(500, sizeof(char))));
+    if (!buf)
+    {
+        return nullptr;
+    }
+
     uint32_t hr(static_cast<int>(floor(ms_ass / 3600000)) % 10); //hour
     uint32_t mins(static_cast<uint32_t>(floor(ms_ass % 3600000 / 60000))); // minutes
     uint32_t sec(static_cast<uint32_t>(floor(ms_ass % 60000 / 1000))); // second
     uint32_t csec(static_cast<uint32_t>(floor(ms_ass % 1000 / 10))); // centisecond
 
-    char buf[500];
     sprintf(buf, "%d:%02d:%02d.%02d", hr, mins, sec, csec);
-    return std::string(buf);
+    return buf;
 }
 
-SYMBOL_SHOW std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>
-Ass::stringToColorAlpha(std::string &input) THROW
+uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *in, char *errMsg)
 {
+    uint8_t *ret(reinterpret_cast<uint8_t *>(calloc(4, sizeof(uint8_t))));
+    if (!ret)
+    {
+        subfx_pError(errMsg, "stringToColorAlpha: Fail to allocate memory");
+        return nullptr;
+    }
+
     uint8_t r(0), g(0), b(0), a(0);
     std::string tmpString;
+    std::string input = std::string(in);
     if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{2}&$")))
     {
         // alpha only &HAA&
@@ -119,51 +152,67 @@ Ass::stringToColorAlpha(std::string &input) THROW
     }
     else
     {
-        throw std::invalid_argument("stringToColorAlpha: Invalid input");
+        subfx_pError(errMsg, "stringToColorAlpha: Invalid input");
+        free(ret);
+        return nullptr;
     }
 
-    return std::make_tuple(r, g, b, a);
+    ret[0] = r;
+    ret[1] = g;
+    ret[2] = b;
+    ret[3] = a;
+
+    return ret;
 }
 
-SYMBOL_SHOW std::string
-Ass::colorAlphaToString(std::vector<uint8_t> &input) THROW
+char *subfx_yutils_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
+                                          char *errMsg)
 {
-    if (input.size() != 1 &&
-        input.size() != 3 &&
-        input.size() != 4)
+    if (inputSize != 1 &&
+        inputSize != 3 &&
+        inputSize != 4)
     {
-        throw std::invalid_argument("colorAlphaToString: Invalid input!");
+        subfx_pError(errMsg, "colorAlphaToString: Invalid input!");
+        return nullptr;
     }
 
-    char buf[500];
-    switch (input.size())
+    char *buf(reinterpret_cast<char *>(calloc(500, sizeof(char))));
+    if (!buf)
+    {
+        subfx_pError(errMsg, "colorAlphaToString: Fail to allocate memory");
+        return nullptr;
+    }
+
+    switch (inputSize)
     {
     case 1:
     {
         // alpha only &HAA&
-        sprintf(buf, "&H%02X&", input.at(0));
+        sprintf(buf, "&H%02X&", input[0]);
         break;
     }
     case 3:
     {
         // rgb &HBBGGRR&
         sprintf(buf, "&H%02X%02X%02X&",
-                input.at(2),
-                input.at(1),
-                input.at(0));
+                input[2],
+                input[1],
+                input[0]);
         break;
     }
     default:
     {
         // rgba &HAABBGGRR
         sprintf(buf, "&H%02X%02X%02X%02X",
-                input.at(3),
-                input.at(2),
-                input.at(1),
-                input.at(0));
+                input[3],
+                input[2],
+                input[1],
+                input[0]);
         break;
     }
     } // end switch
 
-    return std::string(buf);
+    return buf;
 }
+
+} // end extern "C"
