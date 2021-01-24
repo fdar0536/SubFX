@@ -21,7 +21,7 @@
 
 #include "internal/defines.h"
 #include "internal/utils.h"
-// #include "internal/yutils.h"
+#include "internal/yutils.h"
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
@@ -47,6 +47,8 @@ typedef struct SubFX
     subfx_utils *utils;
 
     subfx_vector *vector;
+
+    subfx_yutils *yutils;
 
     subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
 

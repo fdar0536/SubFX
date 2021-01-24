@@ -25,7 +25,11 @@ if (UNIX)
         ${CAIRO_LIBRARIES})
 endif (UNIX)
 
-set(YutilsCpp_public_header
+set(YutilsCpp_main_headers
+    ${CMAKE_SOURCE_DIR}/include/internal/yutils.h
+)
+
+set(YutilsCpp_headers
     # ${YUTILSCPP_INCLUDE_PREFIX}/ass.hpp
     # ass.cpp
     # ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
@@ -44,14 +48,15 @@ set(YutilsCpp_public_header
     # shape.cpp
     # internal/shape_internal.hpp
     # internal/shape_internal.cpp
-    ${CMAKE_SOURCE_DIR}/include/internal/yutils.h
 )
 
-set(YutilsCpp_priv_header
+set(YutilsCpp_priv_headers
+    YutilsCpp/init.h
     YutilsCpp/math.h
 )
 
 set(YutilsCpp_src
+    YutilsCpp/init.c
     YutilsCpp/math.c
 )
 

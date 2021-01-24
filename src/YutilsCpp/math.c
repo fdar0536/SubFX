@@ -25,10 +25,62 @@
 
 #include "YutilsCpp/math.h"
 #include "internal/common.h"
-// #include "internal/math_internal.h"
+#include "utils/vector.h"
+#include "utils/math.h"
+
+#include "config.h"
+
+#ifdef SUBFX_ENABLE_SIMD
+#ifdef SUBFX_ENABLE_AVX
+#include "immintrin.h" // AVX
+#else
+#include "emmintrin.h" // SSE
+#endif // SUBFX_ENABLE_AVX
+#endif // SUBFX_ENABLE_SIMD
 
 #define subfx_max(x, y) x > y ? x : y
 #define subfx_min(x, y) x < y ? x : y
+
+subfx_yutils_math *subfx_yutils_math_init()
+{
+    subfx_yutils_math *ret = calloc(1, sizeof(subfx_yutils_math));
+    if (!ret)
+    {
+        return NULL;
+    }
+
+    ret->arc_curve = subfx_yutils_math_arc_curve;
+    ret->bezier = subfx_yutils_math_bezier;
+    ret->degree = subfx_yutils_math_degree;
+    ret->distance = subfx_yutils_math_distance;
+    ret->line_intersect = subfx_yutils_math_line_intersect;
+    ret->ortho = subfx_yutils_math_ortho;
+    ret->randomsteps = subfx_yutils_math_randomsteps;
+    ret->round = subfx_yutils_math_round;
+    ret->stretch = subfx_yutils_math_stretch;
+    ret->trim = subfx_yutils_math_trim;
+    ret->ellipse = subfx_yutils_math_ellipse;
+    ret->randomway = subfx_yutils_math_randomway;
+    ret->rotate = subfx_yutils_math_rotate;
+
+    return ret;
+}
+
+#define checkError \
+    if (!ptr) \
+    { \
+        subfx_vector_destroy(curves); \
+        subfx_pError(errMsg, "arc_curve: Fail to allocate memory.") \
+        return NULL; \
+    }
+
+#define pushback(x) \
+    if (subfx_vector_pushback(curves, x) == subfx_failed) \
+    { \
+        subfx_vector_destroy(curves); \
+        subfx_pError(errMsg, "arc_curve: Fail to allocate memory.") \
+        return NULL; \
+    }
 
 subfx_handle
 subfx_yutils_math_arc_curve(double x, double y,
@@ -49,21 +101,15 @@ subfx_yutils_math_arc_curve(double x, double y,
         return NULL;
     }
 
-    angle = (angle < 0. ? angle * -1. : angle);
-    // angle / 90 + 1 = total loop count
-    // four pieces of data will be generated in each loop
-    // so totalSize = (angle / 90 + 1) * 4
-    size_t totalSize = (((size_t)(angle / 90) + 1) << 2);
-    subfx_handle
-            curves = subfx_yutils_math_create_double_vector(totalSize, 2);
+    subfx_handle *curves = subfx_vector_create(sizeof(double));
     if (!curves)
     {
-        subfx_pError(errMsg, "arc_curve: Fail to allocate memory.")
+        subfx_pError(errMsg, "arc_curve: Fail to create vector.")
         return NULL;
     }
 
     // Factor for bezier control points distance to node points
-    double kappa = (4. * (sqrt(2.) - 1.) / 3.);
+    double kappa = 4. * (sqrt(2.) - 1.) / 3.;
     double rx0, ry0, rx1, ry1, rx2, ry2, rx3 = 0., ry3, rx03, ry03;
 
     rx0 = x - cx;
@@ -71,23 +117,35 @@ subfx_yutils_math_arc_curve(double x, double y,
 
     double cw = (angle > 0. ? 1. : -1.);
 
+    // convert do-while-loop to while-loop
+    size_t curves_n = 4;
+
+    // 4 * 2 = 8
+    if (subfx_vector_reserve(curves, 8) == subfx_failed)
+    {
+        subfx_vector_destroy(curves);
+        subfx_pError(errMsg, "arc_curve: Fail to allocate memory.")
+        return NULL;
+    }
+
     double angle_sum = 0.;
     double cur_angle_pct;
+    // std::pair<double, double> tmpPair;
+    double *ptr;
     double tmpDouble;
 
-    size_t index;
-    double *tmpPtr;
-    // convert do-while-loop to for-loop
-    for (index = 0; index < totalSize; index += 4, angle_sum += 90.)
+    while (angle_sum < angle)
     {
         cur_angle_pct = subfx_min((angle - angle_sum),
-                                  (double)90.) / 90.;
-        tmpPtr = subfx_utils_math_rotate2d(rx0, ry0, cw * 90. * cur_angle_pct);
-        CHECK_TMP_PTR(tmpPtr)
+                                  ((double)90. / 90.));
 
-        rx3 = tmpPtr[0];
-        ry3 = tmpPtr[1];
-        FREE_PTR(tmpPtr);
+        ptr = subfx_utils_math_rotate2d(rx0, ry0,
+                                        cw * 90. * cur_angle_pct);
+        checkError
+
+        rx3 = ptr[0];
+        ry3 = ptr[1];
+        free(ptr);
 
         // arc start to end vector
         rx03 = rx3 - rx0;
@@ -97,61 +155,84 @@ subfx_yutils_math_arc_curve(double x, double y,
         tmpDouble = subfx_yutils_math_distance(rx03, ry03, 0.);
         tmpDouble = pow(tmpDouble, 2) / 2.;
         tmpDouble = sqrt(tmpDouble);
-        tmpPtr = subfx_yutils_math_stretch(rx03, ry03, 0,
-                                           tmpDouble * kappa);
-        CHECK_TMP_PTR(tmpPtr)
 
-        rx03 = tmpPtr[0];
-        ry03 = tmpPtr[1];
-        FREE_PTR(tmpPtr);
+        ptr = subfx_yutils_math_stretch(rx03, ry03, 0,
+                                        tmpDouble * kappa);
+        checkError
+
+        rx03 = ptr[0];
+        ry03 = ptr[1];
+        free(ptr);
+
+        ptr = subfx_utils_math_rotate2d(rx03, ry03,
+                                        cw * (-45.) * cur_angle_pct);
+        checkError
 
         // Get curve control points
-        tmpPtr = subfx_utils_math_rotate2d(
-                    rx03, ry03, cw * (-45.) * cur_angle_pct);
-        CHECK_TMP_PTR(tmpPtr)
-        rx1 = rx0 + tmpPtr[0];
-        ry1 = ry0 + tmpPtr[1];
-        FREE_PTR(tmpPtr);
+        rx1 = rx0 + ptr[0];
+        ry1 = ry0 + ptr[1];
+        free(ptr);
 
-        tmpPtr = subfx_utils_math_rotate2d(
-                    rx03, ry03, cw * (-45.) * cur_angle_pct);
-        CHECK_TMP_PTR(tmpPtr)
-        rx1 = rx0 + tmpPtr[0];
-        ry1 = ry0 + tmpPtr[1];
-        FREE_PTR(tmpPtr);
+        ptr = subfx_utils_math_rotate2d(rx03 * -1., ry03 * -1.,
+                                        cw * 45. * cur_angle_pct);
+        checkError
 
-        tmpPtr = subfx_utils_math_rotate2d(
-                    rx03 * -1., ry03 * -1., cw * 45. * cur_angle_pct);
-        CHECK_TMP_PTR(tmpPtr)
-        rx2 = rx3 + tmpPtr[0];
-        ry2 = ry3 + tmpPtr[1];
-        FREE_PTR(tmpPtr);
+        rx2 = rx3 + ptr[0];
+        ry2 = ry3 + ptr[1];
+        free(ptr);
 
         // Insert curve to output
-        curves[index][0] = cx + rx0;
-        curves[index][1] = cy + ry0;
+        tmpDouble = cx + rx0;
+        pushback(&tmpDouble);
 
-        curves[index + 1][0] = cx + rx1;
-        curves[index + 1][1] = cy + ry1;
+        tmpDouble = cy + ry0;
+        pushback(&tmpDouble);
 
-        curves[index + 2][0] = cx + rx2;
-        curves[index + 2][1] = cy + ry2;
+        tmpDouble = cx + rx1;
+        pushback(&tmpDouble);
 
-        curves[index + 3][0] = cx + rx3;
-        curves[index + 3][1] = cy + ry3;
+        tmpDouble = cy + ry1;
+        pushback(&tmpDouble);
+
+        tmpDouble = cx + rx2;
+        pushback(&tmpDouble);
+
+        tmpDouble = cy + ry2;
+        pushback(&tmpDouble);
+
+        tmpDouble = cx + rx3;
+        pushback(&tmpDouble);
+
+        tmpDouble = cy + ry3;
+        pushback(&tmpDouble);
+
+        curves_n += 4;
+
+        if (subfx_vector_reserve(curves, curves_n << 1)
+                == subfx_failed)
+        {
+            subfx_vector_destroy(curves);
+            subfx_pError(errMsg, "arc_curve: Fail to allocate memory.")
+            return NULL;
+        }
 
         // Prepare next curve
         rx0 = rx3;
         ry0 = ry3;
+        angle_sum += 90.;
     }
 
     return curves;
 }
 
-SYMBOL_SHOW double
+#undef checkError
+#undef pushback
+
+double
 *subfx_yutils_math_bezier(double pct,
-                          subfx_double_vector pts,
-                          int is3D,
+                          double *pts,
+                          size_t ptsCount,
+                          bool is3D,
                           char *errMsg)
 {
     if (pct < 0. || pct > 1.)
@@ -166,15 +247,7 @@ SYMBOL_SHOW double
         return NULL;
     }
 
-    size_t count = 0;
-    double **tmpPtr = pts;
-    while(tmpPtr != NULL)
-    {
-        ++count;
-        ++tmpPtr;
-    }
-
-    if (count < 2)
+    if (ptsCount < 2)
     {
         subfx_pError(errMsg, "bezier: at least 2 points expected.")
         return NULL;
@@ -187,7 +260,7 @@ SYMBOL_SHOW double
         return NULL;
     }
 
-    switch(count)
+    switch(ptsCount)
     {
     case 2:
     {
@@ -206,7 +279,7 @@ SYMBOL_SHOW double
     }
     default:
     {
-        bezierN(pct, pts, count, is3D, ret);
+        bezierN(pct, pts, ptsCount, is3D, ret);
         break;
     }
     } // end switch
@@ -214,7 +287,7 @@ SYMBOL_SHOW double
     return ret;
 }
 
-SYMBOL_SHOW double
+double
 subfx_yutils_math_degree(double x1, double y1, double z1,
                          double x2, double y2, double z2)
 {
@@ -237,13 +310,13 @@ subfx_yutils_math_degree(double x1, double y1, double z1,
     return degree;
 }
 
-SYMBOL_SHOW double
+double
 subfx_yutils_math_distance(double x, double y, double z)
 {
     return sqrt(x * x + y * y + z * z);
 }
 
-SYMBOL_SHOW double
+double
 *subfx_yutils_math_line_intersect(double x0, double y0,
                                   double x1, double y1,
                                   double x2, double y2,
@@ -303,7 +376,7 @@ SYMBOL_SHOW double
     return ret;
 }
 
-SYMBOL_SHOW double
+double
 *subfx_yutils_math_ortho(double x1,double y1,double z1,
                          double x2,double y2,double z2)
 {
@@ -319,7 +392,7 @@ SYMBOL_SHOW double
     return ret;
 }
 
-SYMBOL_SHOW double
+double
 subfx_yutils_math_randomsteps(double min, double max,
                               double step, char *errMsg)
 {
@@ -335,7 +408,7 @@ subfx_yutils_math_randomsteps(double min, double max,
                      max);
 }
 
-SYMBOL_SHOW double
+double
 subfx_yutils_math_round(double x, double dec)
 {
     // Return number rounded to wished decimal size
@@ -348,7 +421,7 @@ subfx_yutils_math_round(double x, double dec)
     return floor(x + 0.5);
 }
 
-SYMBOL_SHOW double
+double
 *subfx_yutils_math_stretch(double x, double y, double z, double length)
 {
     double *ret = calloc(3, sizeof(double));
@@ -370,7 +443,7 @@ SYMBOL_SHOW double
     return ret;
 }
 
-SYMBOL_SHOW double
+double
 subfx_yutils_math_trim(double x, double min, double max, char *errMsg)
 {
     if (max < min)
@@ -382,7 +455,7 @@ subfx_yutils_math_trim(double x, double min, double max, char *errMsg)
     return (x < min ? min : (x > max ? max : x));
 }
 
-SYMBOL_SHOW double
+double
 *subfx_yutils_math_ellipse(double x, double y,
                            double w, double h,double a)
 {
@@ -398,7 +471,7 @@ SYMBOL_SHOW double
     return ret;
 }
 
-SYMBOL_SHOW double subfx_yutils_math_randomway()
+double subfx_yutils_math_randomway()
 {
     double ret;
     while(1)
@@ -413,7 +486,7 @@ SYMBOL_SHOW double subfx_yutils_math_randomway()
     return (ret < 0. ? -1. : 1.);
 }
 
-SYMBOL_SHOW double
+double
 *subfx_yutils_math_rotate(const double *p,
                           const char *axis,
                           double angle,
@@ -457,6 +530,335 @@ SYMBOL_SHOW double
     }
 
     return ret;
+}
+
+void bezier2(double pct, double *pts, bool is3D, double *dst)
+{
+    double pct_inv = 1 - pct;
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+
+    double pctArray[] = {pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv};
+
+    __m128d pctArray_reg = _mm_loadu_pd(pctArray);
+    __m128d pct_inv_array_reg = _mm_loadu_pd(pct_inv_array);
+    __m128d ctrl0_reg = _mm_loadu_pd(pts);
+    __m128d ctrl1_reg = _mm_loadu_pd(pts + 4);
+
+    __m128d tmp_reg = _mm_mul_pd(pct_inv_array_reg, ctrl0_reg);
+    __m128d res_reg = _mm_mul_pd(pctArray_reg, ctrl1_reg);
+    res_reg = _mm_add_pd(tmp_reg, res_reg);
+    _mm_storeu_pd(dst, res_reg);
+
+    if (is3D)
+    {
+        // 0 * 4 + 2 = 2
+        // 1 * 4 + 2 = 6
+        dst[2] = pct_inv * pts[2] + pct * pts[6];
+    }
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+    double pctArray[] = {pct, pct, pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv, pct_inv, pct_inv};
+
+    __m256d pctArray_reg = _mm256_loadu_pd(pctArray);
+    __m256d pct_inv_array_reg = _mm256_loadu_pd(pct_inv_array);
+    __m256d ctrl0_reg = _mm256_loadu_pd(pts);
+    __m256d ctrl1_reg = _mm256_loadu_pd(pts + 4);
+
+    __m256d tmp_reg = _mm256_mul_pd(pct_inv_array_reg, ctrl0_reg);
+    __m256d res_reg = _mm256_mul_pd(pctArray_reg, ctrl1_reg);
+    res_reg = _mm256_add_pd(tmp_reg, res_reg);
+    _mm256_storeu_pd(dst, res_reg);
+
+    if (!is3D)
+    {
+        dst[2] = 0.;
+    }
+#else // pure c
+    // 0 * 4 + 0 = 0
+    // 1 * 4 + 0 = 4
+    dst[0] = pct_inv * pts[0] + pct * pts[4];
+
+    // 0 * 4 + 1 = 1
+    // 1 * 4 + 1 = 5
+    dst[1] = pct_inv * pts[1] + pct * pts[5];
+
+    if (is3D)
+    {
+        // 0 * 4 + 2 = 2
+        // 1 * 4 + 2 = 6
+        dst[2] = pct_inv * pts[2] + pct * pts[6];
+    }
+#endif
+}
+
+void bezier3(double pct, double *pts, bool is3D, double *dst)
+{
+    double pct_inv = 1 - pct;
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+    double pctArray[] = {pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv};
+    double twoArray[] = {2., 2.};
+
+    __m128d pctArray_reg = _mm_loadu_pd(pctArray);
+    __m128d pct_inv_array_reg = _mm_loadu_pd(pct_inv_array);
+    __m128d twoArray_reg = _mm_loadu_pd(twoArray);
+    __m128d ctrl0_reg = _mm_loadu_pd(pts);
+    __m128d ctrl1_reg = _mm_loadu_pd(pts + 4);
+    __m128d ctrl2_reg = _mm_loadu_pd(pts + 8);
+
+    __m128d res_reg = _mm_mul_pd(pct_inv_array_reg, pct_inv_array_reg);
+    res_reg = _mm_mul_pd(pct_inv_array_reg, ctrl0_reg);
+
+    __m128d tmp_reg = _mm_mul_pd(twoArray_reg, pct_inv_array_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, pctArray_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, ctrl1_reg);
+    res_reg = _mm_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm_mul_pd(pctArray_reg, pctArray_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, ctrl2_reg);
+    res_reg = _mm_add_pd(res_reg, tmp_reg);
+    _mm_storeu_pd(dst, res_reg);
+
+    if (is3D)
+    {
+        // 0 * 4 + 2 = 2
+        // 1 * 4 + 2 = 6
+        // 2 * 4 + 2 = 10
+        dst[2] = pct_inv * pct_inv * pts[2];
+        dst[2] += (2. * pct_inv * pct * pts[6]);
+        dst[2] += (pct * pct * pts[10]);
+    }
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+    double pctArray[] = {pct, pct, pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv, pct_inv, pct_inv};
+    double twoArray[] = {2., 2., 2., 2.};
+
+    __m256d pctArray_reg = _mm256_loadu_pd(pctArray);
+    __m256d pct_inv_array_reg = _mm256_loadu_pd(pct_inv_array);
+    __m256d twoArray_reg = _mm256_loadu_pd(twoArray);
+    __m256d ctrl0_reg = _mm256_loadu_pd(pts);
+    __m256d ctrl1_reg = _mm256_loadu_pd(pts + 4);
+    __m256d ctrl2_reg = _mm256_loadu_pd(pts + 8);
+
+    __m256d res_reg = _mm256_mul_pd(pct_inv_array_reg, pct_inv_array_reg);
+    res_reg = _mm256_mul_pd(pct_inv_array_reg, ctrl0_reg);
+
+    __m256d tmp_reg = _mm256_mul_pd(twoArray_reg, pct_inv_array_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, pctArray_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, ctrl1_reg);
+    res_reg = _mm256_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm256_mul_pd(pctArray_reg, pctArray_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, ctrl2_reg);
+    res_reg = _mm256_add_pd(res_reg, tmp_reg);
+    _mm256_storeu_pd(dst, res_reg);
+
+    if (!is3D)
+    {
+        dst[2] = 0.;
+    }
+#else
+    dst[0] = pct_inv * pct_inv * pts[0]; // 0 * 4 + 0 = 0
+    dst[0] += (2. * pct_inv * pct * pts[4]); // 1 * 4 + 0 = 4
+    dst[0] += (pct * pct * pts[8]); // 2 * 4 + 0 = 8
+
+    dst[1] = pct_inv * pct_inv * pts[1]; // 0 * 4 + 1 = 1
+    dst[1] += (2. * pct_inv * pct * pts[5]); // 1 * 4 + 1 = 5
+    dst[1] += (pct * pct * pts[9]); // 2 * 4 + 1 = 9
+
+    if (is3D)
+    {
+        dst[2] = pct_inv * pct_inv * pts[2]; // 0 * 4 + 2 = 2
+        dst[2] += (2. * pct_inv * pct * pts[6]); // 1 * 4 + 2 = 6
+        dst[2] += (pct * pct * pts[10]); // 2 * 4 + 2 = 10
+    }
+#endif
+}
+
+void bezier4(double pct, double *pts, bool is3D, double *dst)
+{
+    double pct_inv = 1 - pct;
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+    double pctArray[] = {pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv};
+    double threeArray[] = {3., 3.};
+
+    __m128d pctArray_reg = _mm_loadu_pd(pctArray);
+    __m128d pct_inv_array_reg = _mm_loadu_pd(pct_inv_array);
+    __m128d threeArray_reg = _mm_loadu_pd(threeArray);
+    __m128d ctrl0_reg = _mm_loadu_pd(pts);
+    __m128d ctrl1_reg = _mm_loadu_pd(pts + 4);
+    __m128d ctrl2_reg = _mm_loadu_pd(pts + 8);
+    __m128d ctrl3_reg = _mm_loadu_pd(pts + 12);
+
+    __m128d pct2Array_reg = _mm_mul_pd(pctArray_reg, pctArray_reg);
+    __m128d pct_inv2_array_reg =
+            _mm_mul_pd(pct_inv_array_reg, pct_inv_array_reg);
+
+    __m128d res_reg = _mm_mul_pd(pct_inv2_array_reg, pct_inv_array_reg);
+    res_reg = _mm_mul_pd(res_reg, ctrl0_reg);
+
+    __m128d tmp_reg = _mm_mul_pd(threeArray_reg, pct_inv2_array_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, pctArray_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, ctrl1_reg);
+    res_reg = _mm_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm_mul_pd(threeArray_reg, pct_inv_array_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, pct2Array_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, ctrl2_reg);
+    res_reg = _mm_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm_mul_pd(pct2Array_reg, pctArray_reg);
+    tmp_reg = _mm_mul_pd(tmp_reg, ctrl3_reg);
+    res_reg = _mm_add_pd(res_reg, tmp_reg);
+    _mm_storeu_pd(dst, res_reg);
+
+    if (is3D)
+    {
+        // 0 * 4 + 2 = 2
+        // 1 * 4 + 2 = 6
+        // 2 * 4 + 2 = 10
+        // 3 * 4 + 2 = 14
+        dst[2] = pct_inv * pct_inv * pct_inv * pts[2];
+        dst[2] += (3. * pct_inv * pct_inv * pct * pts[6]);
+        dst[2] += (3. * pct_inv * pct * pct * pts[10]);
+        dst[2] += (pct * pct * pct * pts[14]);
+    }
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+    double pctArray[] = {pct, pct, pct, pct};
+    double pct_inv_array[] = {pct_inv, pct_inv, pct_inv, pct_inv};
+    double threeArray[] = {3., 3., 3., 3.};
+
+    __m256d pctArray_reg = _mm256_loadu_pd(pctArray);
+    __m256d pct_inv_array_reg = _mm256_loadu_pd(pct_inv_array);
+    __m256d threeArray_reg = _mm256_loadu_pd(threeArray);
+    __m256d ctrl0_reg = _mm256_loadu_pd(pts);
+    __m256d ctrl1_reg = _mm256_loadu_pd(pts + 4);
+    __m256d ctrl2_reg = _mm256_loadu_pd(pts + 8);
+    __m256d ctrl3_reg = _mm256_loadu_pd(pts + 12);
+
+    __m256d pct2Array_reg = _mm256_mul_pd(pctArray_reg, pctArray_reg);
+    __m256d pct_inv2_array_reg =
+            _mm256_mul_pd(pct_inv_array_reg, pct_inv_array_reg);
+
+    __m256d res_reg = _mm256_mul_pd(pct_inv2_array_reg, pct_inv_array_reg);
+    res_reg = _mm256_mul_pd(res_reg, ctrl0_reg);
+
+    __m256d tmp_reg = _mm256_mul_pd(threeArray_reg, pct_inv2_array_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, pctArray_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, ctrl1_reg);
+    res_reg = _mm256_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm256_mul_pd(threeArray_reg, pct_inv_array_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, pct2Array_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, ctrl2_reg);
+    res_reg = _mm256_add_pd(res_reg, tmp_reg);
+
+    tmp_reg = _mm256_mul_pd(pct2Array_reg, pctArray_reg);
+    tmp_reg = _mm256_mul_pd(tmp_reg, ctrl3_reg);
+    res_reg = _mm256_add_pd(res_reg, tmp_reg);
+    _mm256_storeu_pd(dst, res_reg);
+
+    if (!is3D)
+    {
+        dst[2] = 0.;
+    }
+#else
+    dst[0] = pct_inv * pct_inv * pct_inv * pts[0]; // 0 * 4 + 0 = 0
+    dst[0] += (3.f * pct_inv * pct_inv * pct * pts[4]); // 1 * 4 + 0 = 4
+    dst[0] += (3.f * pct_inv * pct * pct * pts[8]); // 2 * 4 + 0 = 8
+    dst[0] += (pct * pct * pct * pts[12]); // 3 * 4 + 0 = 12
+
+    dst[1] = pct_inv * pct_inv * pct_inv * pts[1]; // 0 * 4 + 1 = 1
+    dst[1] += (3.f * pct_inv * pct_inv * pct * pts[5]); // 1 * 4 + 1 = 5
+    dst[1] += (3.f * pct_inv * pct * pct * pts[9]); // 2 * 4 + 1 = 9
+    dst[1] += (pct * pct * pct * pts[13]); // 3 * 4 + 1 = 13
+
+    if (is3D)
+    {
+        dst[2] = pct_inv * pct_inv * pct_inv * pts[2]; // 0 * 4 + 2 = 2
+        dst[2] += (3. * pct_inv * pct_inv * pct * pts[6]); // 1 * 4 + 2 = 6
+        dst[2] += (3. * pct_inv * pct * pct * pts[10]); // 2 * 4 + 2 = 10
+        dst[2] += (pct * pct * pct * pts[14]); // 3 * 4 + 2 = 14
+    }
+#endif
+}
+
+void bezierN(double pct, double *pts, size_t ptsCount,
+             bool is3D, double *dst)
+{
+    double pct_inv = 1 - pct;
+    size_t ni = ptsCount - 1;
+    double nd = (double)ni;
+    double bern = 0;
+    double *pt;
+    double *tmpPt = pts;
+
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+    double retArray[] = {0., 0.};
+    __m128d ret_reg = _mm_loadu_pd(retArray);
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+    double retArray[] = {0., 0., 0., 0.};
+    __m256d ret_reg = _mm256_loadu_pd(retArray);
+#endif
+    for (size_t i = 0; i <= ni; ++i, tmpPt += 4)
+    {
+        pt = tmpPt;
+
+        // Bernstein polynom
+        // Binomial coefficient
+        bern = fac(nd) / (fac((double)i) * fac((double)ni - i));
+        bern *= pow(pct, (double)i);
+        bern += pow(pct_inv, (double)(ni - i));
+
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+        double bernArray[] = {bern, bern};
+        __m128d bern_reg = _mm_loadu_pd(bernArray);
+        __m128d pt_reg = _mm_loadu_pd(pt);
+
+        __m128d tmp_reg = _mm_mul_pd(pt_reg, bern_reg);
+        ret_reg = _mm_add_pd(ret_reg, tmp_reg);
+        if (is3D)
+        {
+            dst[2] += (pt[2] * bern);
+        }
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+        double bernArray[] = {bern, bern, bern, bern};
+        __m256d bern_reg = _mm256_loadu_pd(bernArray);
+        __m256d pt_reg = _mm256_loadu_pd(pt);
+
+        __m256d tmp_reg = _mm256_mul_pd(pt_reg, bern_reg);
+        ret_reg = _mm256_add_pd(ret_reg, tmp_reg);
+#else
+        dst[0] += (pt[0] * bern);
+        dst[1] += (pt[1] * bern);
+        if (is3D)
+        {
+            dst[2] += (pt[2] * bern);
+        }
+#endif
+    }
+#if defined(SUBFX_ENABLE_SIMD) && !defined(SUBFX_ENABLE_AVX) // SSE
+    _mm_storeu_pd(dst, ret_reg);
+#elif defined(SUBFX_ENABLE_SIMD) && defined(SUBFX_ENABLE_AVX) // AVX
+    _mm256_storeu_pd(dst, ret_reg);
+    if (!is3D)
+    {
+        dst[2] = 0.;
+    }
+#endif
+}
+
+double fac(double n)
+{
+    double k = 1.;
+    for (double i = 2.; i <= n; ++i)
+    {
+        k *= i;
+    }
+
+    return k;
 }
 
 #undef subfx_max

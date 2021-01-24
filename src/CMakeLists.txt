@@ -70,7 +70,7 @@ endif (UNIX) # end if (UNIX)
 enable_testing()
 
 include(utils/CMakeLists.txt)
-#include(YutilsCpp/CMakeLists.txt)
+include(YutilsCpp/CMakeLists.txt)
 
 set(subfx_main_header
     ${CMAKE_SOURCE_DIR}/include/SubFX.h
@@ -99,8 +99,9 @@ add_library(SubFX
     ${utils_src}
 
     #YutilsCpp
-    ${YutilsCpp_public_header}
-    ${YutilsCpp_priv_header}
+    ${YutilsCpp_main_headers}
+    ${YutilsCpp_headers}
+    ${YutilsCpp_priv_headers}
     ${YutilsCpp_src}
 
     #api entry

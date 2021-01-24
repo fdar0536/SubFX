@@ -263,8 +263,6 @@ subfx_exitstate subfx_map_deleteNode(subfx_handle in, void *key)
         destroyNode(y, tree->keyFreeFunc, tree->valueFreeFunc);
     }
 
-    y = tree->nil;
-
     if (color == black)
     {
         subfx_map_deleteFixedUp(tree, x);

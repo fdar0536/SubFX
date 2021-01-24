@@ -25,6 +25,7 @@
 #include "utils/map.h"
 #include "utils/ptrvector.h"
 #include "utils/vector.h"
+#include "YutilsCpp/init.h"
 
 SUBFX_API SubFX *SubFX_init()
 {
@@ -38,6 +39,7 @@ SUBFX_API SubFX *SubFX_init()
     ret->ptrVector = NULL;
     ret->utils = NULL;
     ret->vector = NULL;
+    ret->yutils = NULL;
 
     ret->map = subfx_map_init();
     if (!ret->map)
@@ -67,6 +69,13 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
+    ret->yutils = subfx_yutils_init();
+    if (!ret->yutils)
+    {
+        SubFX_destroy(ret);
+        return NULL;
+    }
+
     ret->getHandleType = subfx_getHandleType;
     ret->closeHandle = subfx_closeHandle;
     ret->version = subfx_version;
@@ -84,5 +93,6 @@ SUBFX_API void SubFX_destroy(SubFX *in)
     if (in->ptrVector) free(in->ptrVector);
     if (in->utils) subfx_utils_destory(in->utils);
     if (in->vector) free(in->vector);
+    if (in->yutils) subfx_yutils_destroy(in->yutils);
     free(in);
 }

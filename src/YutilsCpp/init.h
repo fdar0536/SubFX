@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -19,23 +19,16 @@
 
 #pragma once
 
-#include <stddef.h>
+#include "include/internal/yutils.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void bezier2(double pct, double **pts, int is3D, double *dst);
+subfx_yutils *subfx_yutils_init();
 
-void bezier3(double pct, double **pts, int is3D, double *dst);
-
-void bezier4(double pct, double **pts, int is3D, double *dst);
-
-void bezierN(double pct, double **pts, size_t ptsCount,
-             int is3D, double *dst);
-
-double fac(double n);
+void subfx_yutils_destroy(subfx_yutils *);
 
 #ifdef __cplusplus
 }

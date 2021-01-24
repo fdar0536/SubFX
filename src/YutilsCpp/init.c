@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -17,20 +17,38 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <stdlib.h>
 
-#include "yutilscpp/math.h"
+#include "YutilsCpp/init.h"
+#include "YutilsCpp/math.h"
 
-#ifdef __cplusplus
-extern "C"
+subfx_yutils *subfx_yutils_init()
 {
-#endif
+    subfx_yutils *ret = calloc(1, sizeof(subfx_yutils));
+    if (!ret)
+    {
+        return NULL;
+    }
 
-typedef struct subfx_yutils
-{
-    subfx_yutils_math *math;
-} subfx_yutils;
+    ret->math = NULL;
 
-#ifdef __cplusplus
+    ret->math = subfx_yutils_math_init();
+    if (!ret->math)
+    {
+        subfx_yutils_destroy(ret);
+        return NULL;
+    }
+
+    return ret;
 }
-#endif
+
+void subfx_yutils_destroy(subfx_yutils *in)
+{
+    if (!in)
+    {
+        return;
+    }
+
+    if (in->math) free(in->math);
+    free(in);
+}
