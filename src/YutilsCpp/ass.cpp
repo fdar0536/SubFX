@@ -38,7 +38,7 @@ subfx_yutils_ass *subfx_yutils_ass_init()
                           (calloc(1, sizeof(subfx_yutils_ass))));
     if (!ret)
     {
-        return nullptr;
+        return NULL;
     }
 
     ret->stringToMs = subfx_yutils_ass_stringToMs;
@@ -53,6 +53,12 @@ subfx_exitstate subfx_yutils_ass_stringToMs(const char *in,
                                             uint64_t *dst,
                                             char *errMsg)
 {
+    if (!dst)
+    {
+        subfx_pError(errMsg, "stringToMs: No output!");
+        return subfx_failed;
+    }
+
     std::regex reg("^\\d:\\d\\d:\\d\\d\\.\\d\\d$");
     if (!std::regex_match(in, reg))
     {
@@ -93,7 +99,7 @@ char *subfx_yutils_ass_msToString(uint64_t ms_ass)
     char *buf(reinterpret_cast<char *>(calloc(500, sizeof(char))));
     if (!buf)
     {
-        return nullptr;
+        return NULL;
     }
 
     uint32_t hr(static_cast<int>(floor(ms_ass / 3600000)) % 10); //hour
@@ -111,7 +117,7 @@ uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *in, char *errMsg)
     if (!ret)
     {
         subfx_pError(errMsg, "stringToColorAlpha: Fail to allocate memory");
-        return nullptr;
+        return NULL;
     }
 
     uint8_t r(0), g(0), b(0), a(0);
@@ -121,40 +127,40 @@ uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *in, char *errMsg)
     {
         // alpha only &HAA&
         tmpString = input.substr(2, 2);
-        a = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        a = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
     }
     else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{6}&$")))
     {
         // ass color &HBBGGRR&
         tmpString = input.substr(2, 2);
-        b = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        b = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
 
         tmpString = input.substr(4, 2);
-        g = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        g = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
 
         tmpString = input.substr(6, 2);
-        r = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        r = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
     }
     else if (std::regex_match(input, std::regex("^&[Hh]{1}[0-9a-fA-F]{8}$")))
     {
         // both &HAABBGGRR
         tmpString = input.substr(2, 2);
-        a = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        a = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
 
         tmpString = input.substr(4, 2);
-        b = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        b = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
 
         tmpString = input.substr(6, 2);
-        g = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        g = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
 
         tmpString = input.substr(8, 2);
-        r = static_cast<uint8_t>(stoul(tmpString, nullptr, 16));
+        r = static_cast<uint8_t>(stoul(tmpString, NULL, 16));
     }
     else
     {
         subfx_pError(errMsg, "stringToColorAlpha: Invalid input");
         free(ret);
-        return nullptr;
+        return NULL;
     }
 
     ret[0] = r;
@@ -173,14 +179,14 @@ char *subfx_yutils_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
         inputSize != 4)
     {
         subfx_pError(errMsg, "colorAlphaToString: Invalid input!");
-        return nullptr;
+        return NULL;
     }
 
     char *buf(reinterpret_cast<char *>(calloc(500, sizeof(char))));
     if (!buf)
     {
         subfx_pError(errMsg, "colorAlphaToString: Fail to allocate memory");
-        return nullptr;
+        return NULL;
     }
 
     switch (inputSize)
