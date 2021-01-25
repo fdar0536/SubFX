@@ -1,12 +1,12 @@
-add_executable(testYMath
+add_executable(testYutilsCppMath
     main.c
     testingcase.h
     testingcase.c
 )
 
-add_dependencies(testYMath SubFX)
-target_link_libraries(testYMath PRIVATE SubFX)
-target_include_directories(testYMath
+add_dependencies(testYutilsCppMath SubFX)
+target_link_libraries(testYutilsCppMath PRIVATE SubFX)
+target_include_directories(testYutilsCppMath
     SYSTEM BEFORE
     PRIVATE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -16,15 +16,15 @@ target_include_directories(testYMath
 if (WIN32)
     if (MINGW)
         add_custom_command(
-            TARGET testYMath
+            TARGET testYutilsCppMath
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll"
             "${CMAKE_BINARY_DIR}/utils/libSubFXUtils.dll.a"
             "${CMAKE_BINARY_DIR}/YutilsCpp/libSubFXYutilsCpp.dll"
             "${CMAKE_BINARY_DIR}/YutilsCpp/libSubFXYutilsCpp.dll.a"
-            $<TARGET_FILE_DIR:testYMath>)
+            $<TARGET_FILE_DIR:testYutilsCppMath>)
     endif(MINGW)
 endif(WIN32)
 
-add_test(YutilsCppMath testYMath)
+add_test(YutilsCppMath testYutilsCppMath)
