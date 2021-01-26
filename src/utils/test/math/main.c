@@ -25,6 +25,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include <inttypes.h>
+#endif
+
 #include "SubFX.h"
 
 int main()
@@ -53,8 +57,11 @@ int main()
     double ret = math->rad(180);
     printf("%lf\n", ret);
     printf("%lf\n", math->deg(ret));
-
+#ifdef _WIN32
+    srand((uint32_t)time(NULL));
+#else
     srand(time(NULL));
+#endif
     uint8_t i;
     for (i = 0; i < 5; ++i)
     {

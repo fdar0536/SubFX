@@ -35,7 +35,7 @@ char *subfx_utils_misc_doubleToString(double input);
 
 subfx_exitstate
 subfx_utils_misc_getLine(char *buffer,
-                         int bufferSize,
+                         size_t bufferSize,
                          FILE *file,
                          char *errMsg);
 

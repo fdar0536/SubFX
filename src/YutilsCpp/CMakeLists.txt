@@ -38,8 +38,7 @@ set(YutilsCpp_headers
     # asswriter.cpp
     # internal/asswriter_internal.hpp
     # internal/asswriter_internal.cpp
-    # ${YUTILSCPP_INCLUDE_PREFIX}/fonthandle.hpp
-    # fonthandle.cpp
+    ${CMAKE_SOURCE_DIR}/include/internal/yutilscpp/fonthandle.h
     ${CMAKE_SOURCE_DIR}/include/internal/yutilscpp/math.h
     # ${YUTILSCPP_INCLUDE_PREFIX}/matrix.hpp
     # matrix.cpp
@@ -51,6 +50,7 @@ set(YutilsCpp_headers
 
 set(YutilsCpp_priv_headers
     YutilsCpp/ass.h
+    YutilsCpp/fonthandle.h
     YutilsCpp/init.h
     YutilsCpp/math.h
 )
@@ -59,6 +59,7 @@ set(YutilsCpp_src
     YutilsCpp/ass.cpp
     YutilsCpp/init.c
     YutilsCpp/math.c
+    YutilsCpp/fonthandle.cpp
 )
 
 #ICU

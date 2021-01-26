@@ -67,7 +67,7 @@ subfx_handle subfx_map_create(subfx_cmpFunc keyCmpFunc,
     ret->nil->left = ret->nil;
     ret->nil->right = ret->nil;
 
-    ret->id = subfx_type_map;
+    ret->id = subfx_types_map;
     ret->root = ret->nil;
     ret->keyCmpFunc = keyCmpFunc;
     ret->keyFreeFunc = keyFreeFunc;
@@ -78,7 +78,7 @@ subfx_handle subfx_map_create(subfx_cmpFunc keyCmpFunc,
 
 subfx_exitstate subfx_map_destroy(subfx_handle in)
 {
-    if (subfx_checkInput(in, subfx_type_map))
+    if (subfx_checkInput(in, subfx_types_map))
     {
         return subfx_failed;
     }
@@ -94,7 +94,7 @@ subfx_exitstate subfx_map_destroy(subfx_handle in)
 
 void *subfx_map_at(subfx_handle in, void *key)
 {
-    if (subfx_checkInput(in, subfx_type_map))
+    if (subfx_checkInput(in, subfx_types_map))
     {
         return NULL;
     }
@@ -116,7 +116,7 @@ void *subfx_map_at(subfx_handle in, void *key)
 
 subfx_exitstate subfx_map_insertNode(subfx_handle in, void *key, void *value)
 {
-    if (subfx_checkInput(in, subfx_type_map))
+    if (subfx_checkInput(in, subfx_types_map))
     {
         return subfx_failed;
     }
@@ -187,7 +187,7 @@ subfx_exitstate subfx_map_insertNode(subfx_handle in, void *key, void *value)
 
 subfx_exitstate subfx_map_deleteNode(subfx_handle in, void *key)
 {
-    if (subfx_checkInput(in, subfx_type_map))
+    if (subfx_checkInput(in, subfx_types_map))
     {
         return subfx_failed;
     }

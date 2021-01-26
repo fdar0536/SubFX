@@ -52,7 +52,7 @@ char *subfx_utils_misc_doubleToString(double input)
 
 subfx_exitstate
 subfx_utils_misc_getLine(char *buffer,
-                         int bufferSize,
+                         size_t bufferSize,
                          FILE *file,
                          char *errMsg)
 {
@@ -64,7 +64,7 @@ subfx_utils_misc_getLine(char *buffer,
 
     // note that "newline" just have two situations
     // crlf(\r\n) or lf(\n)
-    if (fgets(buffer, bufferSize, file))
+    if (fgets(buffer, (int)bufferSize, file))
     {
         size_t length = strlen(buffer);
         // for safety

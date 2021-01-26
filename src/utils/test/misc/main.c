@@ -67,7 +67,6 @@ int main()
     while (flag)
     {
         state = misc->getLine(string, strSize, ass, errMsg);
-
         switch (state)
         {
         case subfx_success:

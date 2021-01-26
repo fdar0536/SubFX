@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -17,85 +17,144 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include <vector>
-#include <stdexcept>
-#include <iterator>
-#include <algorithm>
-#include <sstream>
 #include <new>
 
-#ifdef _WIN32
 #include <cstring>
 
+#ifdef _WIN32
+#include <string>
+
+#include "windows.h"
 #include "boost/locale.hpp"
+#else
+#include "pango/pangocairo.h"
 #endif
 
-#include "YutilsCpp"
+#include "internal/common.h"
+#include "internal/types.h"
+#include "utils/misc.h"
+#include "utils/ptrvector.h"
+#include "YutilsCpp/fonthandle.h"
+#include "YutilsCpp/math.h"
 
-using namespace PROJ_NAMESPACE::Yutils;
+#define FONT_PRECISION 64
 
-std::shared_ptr<FontHandle>
-FontHandle::create(std::string &family,
-                   bool bold,
-                   bool italic,
-                   bool underline,
-                   bool strikeout,
-                   int size,
-                   double xscale,
-                   double yscale,
-                   double hspace) THROW
+extern "C"
+{
+
+typedef struct FontHandle
+{
+    subfx_types id;
+
+#ifdef _WIN32
+    HDC dc;
+
+    HFONT font;
+
+    HGDIOBJ old_font;
+
+    double hspace;
+
+    int upscale;
+#else
+    cairo_surface_t *surface;
+
+    cairo_t *context;
+
+    PangoLayout *layout;
+
+    double fonthack_scale;
+#endif
+
+    double xscale;
+
+    double yscale;
+
+    double downscale;
+} FontHandle;
+
+subfx_yutils_fonthandle *subfx_yutils_fonthandle_init()
+{
+    subfx_yutils_fonthandle *ret(reinterpret_cast<subfx_yutils_fonthandle *>
+                                 (calloc(1, sizeof(subfx_yutils_fonthandle))));
+    if (!ret)
+    {
+        return NULL;
+    }
+
+    ret->create = subfx_yutils_fonthandle_create;
+    ret->metrics = subfx_yutils_fonthandle_metrics;
+    ret->text_extents = subfx_yutils_fonthandle_text_extents;
+    ret->text_to_shape = subfx_yutils_fonthandle_text_to_shape;
+
+    return ret;
+}
+
+subfx_handle subfx_yutils_fonthandle_create(const char *family,
+                                            bool bold,
+                                            bool italic,
+                                            bool underline,
+                                            bool strikeout,
+                                            int32_t size,
+                                            double xscale, // 1.
+                                            double yscale, // 1.
+                                            double hspace, // 0.
+                                            char *errMsg)
 {
     if (size <= 0)
     {
-        throw std::invalid_argument("FontHandle::create: size cannot lower than 0");
+        subfx_pError(errMsg,
+                     "FontHandle->create: size cannot lower than 0");
+        return NULL;
     }
 
-#ifdef _WIN32
-    FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale, hspace));
-#else
-    FontHandle *ret(new (std::nothrow) FontHandle(xscale, yscale));
-#endif
+    FontHandle *ret(reinterpret_cast<FontHandle *>
+                    (calloc(1, sizeof(FontHandle))));
     if (!ret)
     {
-        return nullptr;
+        return NULL;
     }
 
-#ifndef _WIN32
-    int upscale(FONT_PRECISION);
-    ret->downscale = (1. / static_cast<double>(upscale));
-#else
-    ret->downscale = (1.f / static_cast<double>(ret->upscale));
-#endif
-
+    ret->id = subfx_types_yutils_fonthandle;
+    ret->xscale = xscale;
+    ret->yscale = yscale;
 #ifdef _WIN32
+    ret->hspace = hspace;
+    ret->upscale = FONT_PRECISION;
+    ret->downscale = (1.f / static_cast<double>(ret->upscale));
+    ret->dc = NULL;
+    ret->font = NULL;
+    ret->old_font = NULL;
+
     std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
     if (wcslen(family_dst.c_str()) > 31)
     {
-        delete ret;
-        throw std::invalid_argument("family name too long");
+        subfx_yutils_fonthandle_destroy(ret);
+        subfx_pError(errMsg,
+                     "FontHandle->create: family name too long");
     }
 
-    ret->dc = CreateCompatibleDC(nullptr);
+    ret->dc = CreateCompatibleDC(NULL);
     if (!ret->dc)
     {
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     int res = SetMapMode(ret->dc, MM_TEXT);
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     res = SetBkMode(ret->dc, TRANSPARENT);
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     ret->font = CreateFontW(
@@ -118,26 +177,32 @@ FontHandle::create(std::string &family,
     if (!ret->font)
     {
         DeleteDC(ret->dc);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     ret->old_font = SelectObject(ret->dc, ret->font);
 #else
+    int upscale(FONT_PRECISION);
+    ret->downscale = (1. / static_cast<double>(upscale));
+    ret->surface = NULL;
+    ret->context = NULL;
+    ret->layout = NULL;
+
     // This is almost copypasta from Youka/Yutils
     ret->surface = cairo_image_surface_create(CAIRO_FORMAT_A8, 1, 1);
     if (!ret->surface)
     {
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     ret->context = cairo_create(ret->surface);
     if (!ret->context)
     {
         cairo_surface_destroy(ret->surface);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     ret->layout = pango_cairo_create_layout(ret->context);
@@ -145,8 +210,8 @@ FontHandle::create(std::string &family,
     {
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     //set font to layout
@@ -156,11 +221,11 @@ FontHandle::create(std::string &family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
-    pango_font_description_set_family(font_desc, family.c_str());
+    pango_font_description_set_family(font_desc, family);
     pango_font_description_set_weight(font_desc,
                                       bold ? PANGO_WEIGHT_BOLD :
                                       PANGO_WEIGHT_NORMAL);
@@ -178,8 +243,8 @@ FontHandle::create(std::string &family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     pango_attr_list_insert(attr,
@@ -196,7 +261,7 @@ FontHandle::create(std::string &family,
     PangoFontMetrics *metrics(pango_context_get_metrics(
                               pango_layout_get_context(ret->layout),
                               pango_layout_get_font_description(ret->layout),
-                              nullptr));
+                              NULL));
     if (!metrics)
     {
         pango_attr_list_unref(attr);
@@ -204,8 +269,8 @@ FontHandle::create(std::string &family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        delete ret;
-        return nullptr;
+        subfx_yutils_fonthandle_destroy(ret);
+        return NULL;
     }
 
     double ascent(static_cast<double>(pango_font_metrics_get_ascent(metrics)));
@@ -221,80 +286,157 @@ FontHandle::create(std::string &family,
     pango_font_description_free(font_desc);
 #endif
 
-    return std::shared_ptr<FontHandle>(ret);
+    return ret;
 }
 
-FontHandle::~FontHandle()
+subfx_exitstate subfx_yutils_fonthandle_destroy(subfx_handle in)
 {
+    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    {
+        return subfx_failed;
+    }
+
+    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
+
 #ifdef _WIN32
-    SelectObject(dc, old_font);
-    DeleteObject(font);
-    DeleteDC(dc);
+    SelectObject(handle->dc, handle->old_font);
+    DeleteObject(handle->font);
+    DeleteDC(handle->dc);
 #else
-    g_object_unref(layout);
-    cairo_destroy(context);
-    cairo_surface_destroy(surface);
+    g_object_unref(handle->layout);
+    cairo_destroy(handle->context);
+    cairo_surface_destroy(handle->surface);
 #endif
+
+    free(in);
+
+    return subfx_success;
 }
 
-// public member function
-std::map<std::string, double> FontHandle::metrics() NOTHROW
+double *subfx_yutils_fonthandle_metrics(subfx_handle in)
 {
+    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    {
+        return NULL;
+    }
+
+    double *ret(reinterpret_cast<double *>(calloc(5, sizeof(double))));
+    if (!ret)
+    {
+        return NULL;
+    }
+
+    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
+
 #ifdef _WIN32
     TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
     if (!fontMetrics)
     {
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
 
-    if (GetTextMetricsW(dc, fontMetrics) == 0)
+    if (GetTextMetricsW(handle->dc, fontMetrics) == 0)
     {
         delete fontMetrics;
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
 
-    std::map<std::string, double> ret;
-    ret["height"] = fontMetrics->tmHeight * downscale * yscale;
-    ret["ascent"] = fontMetrics->tmAscent * downscale * yscale;
-    ret["descent"] = fontMetrics->tmDescent * downscale * yscale;
-    ret["internal_leading"] = fontMetrics->tmInternalLeading * downscale * yscale;
-    ret["external_leading"] = fontMetrics->tmExternalLeading * downscale * yscale;
+    ret[subfx_yutils_fonthandle_metrics_height] =
+            fontMetrics->tmHeight *
+            handle->downscale *
+            handle->yscale;
+
+    ret[subfx_yutils_fonthandle_metrics_ascent] =
+            fontMetrics->tmAscent *
+            handle->downscale *
+            handle->yscale;
+
+    ret[subfx_yutils_fonthandle_metrics_descent] =
+            fontMetrics->tmDescent *
+            handle->downscale *
+            handle->yscale;
+
+    ret[subfx_yutils_fonthandle_metrics_internal_leading] =
+            fontMetrics->tmInternalLeading *
+            handle->downscale *
+            handle->yscale;
+
+    ret[subfx_yutils_fonthandle_metrics_external_leading] =
+            fontMetrics->tmExternalLeading *
+            handle->downscale *
+            handle->yscale;
 
     delete fontMetrics;
 #else
     PangoFontMetrics *fontMetrics(pango_context_get_metrics(
-        pango_layout_get_context(layout),
-        pango_layout_get_font_description(layout),
-        nullptr
+        pango_layout_get_context(handle->layout),
+        pango_layout_get_font_description(handle->layout),
+        NULL
     ));
 
     if (!fontMetrics)
     {
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
 
-    double ascent(static_cast<double>(pango_font_metrics_get_ascent(fontMetrics)));
-    ascent = ascent / PANGO_SCALE * downscale;
+    double ascent(
+                static_cast<double>
+                (pango_font_metrics_get_ascent(fontMetrics)));
+    ascent = ascent / PANGO_SCALE * handle->downscale;
 
-    double descent = static_cast<double>(pango_font_metrics_get_descent(fontMetrics));
-    descent = descent / PANGO_SCALE * downscale;
+    double descent =
+            static_cast<double>
+            (pango_font_metrics_get_descent(fontMetrics));
+    descent = descent / PANGO_SCALE * handle->downscale;
     pango_font_metrics_unref(fontMetrics);
 
-    std::map<std::string, double> ret;
-    ret["height"] = (ascent + descent) * yscale * fonthack_scale;
-    ret["ascent"] = ascent * yscale * fonthack_scale;
-    ret["descent"] = descent * yscale * fonthack_scale;
-    ret["internal_leading"] = 0.;
-    ret["external_leading"] = pango_layout_get_spacing(layout) /
-                              PANGO_SCALE * downscale * yscale * fonthack_scale;
+    ret[subfx_yutils_fonthandle_metrics_height] =
+            (ascent + descent) *
+            handle->yscale *
+            handle->fonthack_scale;
+
+    ret[subfx_yutils_fonthandle_metrics_ascent] =
+            ascent *
+            handle->yscale *
+            handle->fonthack_scale;
+
+    ret[subfx_yutils_fonthandle_metrics_descent] =
+            descent *
+            handle->yscale *
+            handle->fonthack_scale;
+
+    ret[subfx_yutils_fonthandle_metrics_internal_leading] = 0.;
+
+    ret[subfx_yutils_fonthandle_metrics_external_leading] =
+            pango_layout_get_spacing(handle->layout) /
+            PANGO_SCALE *
+            handle->downscale *
+            handle->yscale *
+            handle->fonthack_scale;
 #endif
 
     return ret;
 }
 
-std::map<std::string, double>
-FontHandle::text_extents(std::string &text) NOTHROW
+double *subfx_yutils_fonthandle_text_extents(subfx_handle in,
+                                             const char *text)
 {
+    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    {
+        return NULL;
+    }
+
+    double *ret(reinterpret_cast<double *>(calloc(2, sizeof(double))));
+    if (!ret)
+    {
+        return NULL;
+    }
+
+    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
+
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen = wcslen(textDst.c_str());
@@ -302,33 +444,50 @@ FontHandle::text_extents(std::string &text) NOTHROW
     SIZE *size(new (std::nothrow) SIZE);
     if (!size)
     {
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
 
-    if (GetTextExtentPoint32W(dc, textDst.c_str(),
+    if (GetTextExtentPoint32W(handle->dc, textDst.c_str(),
                               static_cast<int>(textLen), size) == 0)
     {
         delete size;
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
-    std::map<std::string, double> ret;
 
-    ret["width"] = (size->cx * downscale + hspace * textLen) * xscale;
-    ret["height"] = size->cy * downscale * yscale;
+    ret[subfx_yutils_fonthandle_text_extents_width] =
+            (size->cx * handle->downscale +
+             handle->hspace * textLen) *
+            handle->xscale;
+
+    ret[subfx_yutils_fonthandle_text_extents_height] =
+            size->cy *
+            handle->downscale *
+            handle->yscale;
 
     delete size;
 #else
-    pango_layout_set_text(layout, text.c_str(), -1);
+    pango_layout_set_text(handle->layout, text, -1);
     PangoRectangle *rect(new (std::nothrow) PangoRectangle);
     if (!rect)
     {
-        return std::map<std::string, double>();
+        free(ret);
+        return NULL;
     }
 
-    pango_layout_get_pixel_extents(layout, nullptr, rect);
-    std::map<std::string, double> ret;
-    ret["width"] = rect->width * downscale * xscale * fonthack_scale;
-    ret["height"] = rect->height * downscale * yscale * fonthack_scale;
+    pango_layout_get_pixel_extents(handle->layout, NULL, rect);
+    ret[subfx_yutils_fonthandle_text_extents_width] =
+            rect->width *
+            handle->downscale *
+            handle->xscale *
+            handle->fonthack_scale;
+
+    ret[subfx_yutils_fonthandle_text_extents_height] =
+            rect->height *
+            handle->downscale *
+            handle->yscale *
+            handle->fonthack_scale;
 
     delete rect;
 #endif
@@ -336,41 +495,76 @@ FontHandle::text_extents(std::string &text) NOTHROW
     return ret;
 }
 
-std::string
-FontHandle::text_to_shape(std::string &text) THROW
+#ifdef _WIN32
+#define cleanUp \
+    AbortPath(handle->dc); \
+    delete[] points; \
+    delete[] types; \
+    if (!charWidths) \
+    { \
+        delete[] charWidths; \
+    } \
+     \
+    if (subfx_ptrVector_destroy(shape) == subfx_failed) \
+    { \
+        subfx_pError(errMsg, "text_to_shape: you should" \
+                             " never see this message."); \
+    }
+#else
+#define cleanUp \
+    cairo_new_path(handle->context); \
+    cairo_path_destroy(path); \
+    if (subfx_ptrVector_destroy(shape) == subfx_failed) \
+    { \
+        subfx_pError(errMsg, "text_to_shape: you should" \
+                             " never see this message."); \
+    }
+#endif
+
+char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
+                                            const char *text, char *errMsg)
 {
+    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    {
+        return NULL;
+    }
+
+    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
+    char *retStr;
+    size_t retSize;
 #ifdef _WIN32
     std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
     size_t textLen(wcslen(textDst.c_str()));
     if (textLen > 8192)
     {
-        throw std::invalid_argument("text_to_shape: text is too long");
+        subfx_pError(errMsg, "text_to_shape: text is too long");
+        return NULL;
     }
 
-    INT *charWidths(nullptr);
-    if (hspace != 0)
+    INT *charWidths(NULL);
+    if (handle->hspace != 0)
     {
         charWidths = new (std::nothrow) INT[textLen];
         if (!charWidths)
         {
-            return std::string();
+            return NULL;
         }
 
         SIZE *size(new (std::nothrow) SIZE);
         if (!size)
         {
             delete[] charWidths;
-            return std::string();
+            return NULL;
         }
 
-        int space(static_cast<int>(hspace * upscale));
+        int space(static_cast<int>(handle->hspace * handle->upscale));
         for (size_t i = 0; i <= (textLen - 1); ++i)
         {
-            if (GetTextExtentPoint32W(dc, textDst.c_str() + i, 1, size) == 0)
+            if (GetTextExtentPoint32W(handle->dc, textDst.c_str() + i, 1, size) == 0)
             {
                 delete[] charWidths;
                 delete size;
-                return std::string();
+                return NULL;
             }
 
             charWidths[i] = size->cx + space;
@@ -379,18 +573,18 @@ FontHandle::text_to_shape(std::string &text) THROW
         delete size;
     } // end if (hspace != 0)
 
-    if (BeginPath(dc) == 0)
+    if (BeginPath(handle->dc) == 0)
     {
         if (!charWidths)
         {
             delete[] charWidths;
         }
 
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
-    if (ExtTextOutW(dc, 0, 0, 0x0, nullptr, textDst.c_str(),
+    if (ExtTextOutW(handle->dc, 0, 0, 0x0, NULL, textDst.c_str(),
                     static_cast<UINT>(textLen), charWidths) == 0)
     {
         if (!charWidths)
@@ -398,22 +592,22 @@ FontHandle::text_to_shape(std::string &text) THROW
             delete[] charWidths;
         }
 
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
-    if (EndPath(dc) == 0)
+    if (EndPath(handle->dc) == 0)
     {
         if (!charWidths)
         {
             delete[] charWidths;
         }
 
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
-    int points_n(GetPath(dc, nullptr, nullptr, 0));
+    int points_n(GetPath(handle->dc, NULL, NULL, 0));
     if (points_n <= 0)
     {
         if (!charWidths)
@@ -421,8 +615,8 @@ FontHandle::text_to_shape(std::string &text) THROW
             delete[] charWidths;
         }
 
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
     POINT *points(new (std::nothrow) POINT[points_n]);
@@ -433,8 +627,8 @@ FontHandle::text_to_shape(std::string &text) THROW
             delete[] charWidths;
         }
 
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
     BYTE *types(new (std::nothrow) BYTE[points_n]);
@@ -446,14 +640,39 @@ FontHandle::text_to_shape(std::string &text) THROW
         }
 
         delete[] points;
-        AbortPath(dc);
-        return std::string();
+        AbortPath(handle->dc);
+        return NULL;
     }
 
-    GetPath(dc, points, types, points_n);
+    GetPath(handle->dc, points, types, points_n);
 
-    std::vector<std::string> shape;
-    shape.reserve(5000); // may be larger or smaller?
+    subfx_handle shape(subfx_ptrVector_create(free));
+    if (!shape)
+    {
+        if (!charWidths)
+        {
+            delete[] charWidths;
+        }
+
+        delete[] points;
+        delete[] types;
+        AbortPath(handle->dc);
+        return NULL;
+    }
+
+    // may be larger or smaller?
+    if (subfx_ptrVector_reserve(shape, 2048) == subfx_failed)
+    {
+        if (!charWidths)
+        {
+            delete[] charWidths;
+        }
+
+        delete[] points;
+        delete[] types;
+        AbortPath(handle->dc);
+        return NULL;
+    }
 
     int i(0);
     BYTE last_type(0xff), cur_type(0xff);
@@ -469,77 +688,262 @@ FontHandle::text_to_shape(std::string &text) THROW
         case PT_MOVETO:
             if (last_type != PT_MOVETO)
             {
-                shape.push_back("m");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "m", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
+
                 last_type = cur_type;
             }
 
-            tmpDouble = Math::round(
-                        cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            tmpDouble =
+                    subfx_yutils_math_round(
+                        cur_point.x *
+                        handle->downscale *
+                        handle->xscale, FP_PRECISION);
 
-            tmpDouble = Math::round(
-                        cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                        cur_point.y *
+                        handle->downscale *
+                        handle->yscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
             ++i;
             break;
         case PT_LINETO:
         case (PT_LINETO + PT_CLOSEFIGURE):
             if (last_type != PT_LINETO)
             {
-                shape.push_back("l");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "l", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
+
                 last_type = cur_type;
             }
 
-            tmpDouble = Math::round(
-                        cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            tmpDouble = subfx_yutils_math_round(
+                        cur_point.x *
+                        handle->downscale *
+                        handle->xscale, FP_PRECISION);
 
-            tmpDouble = Math::round(
-                        cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                        cur_point.y *
+                        handle->downscale *
+                        handle->yscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
             ++i;
             break;
         case PT_BEZIERTO:
         case (PT_BEZIERTO + PT_CLOSEFIGURE):
             if (last_type != PT_BEZIERTO)
             {
-                shape.push_back("b");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "b", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
+
                 last_type = cur_type;
             }
 
-            tmpDouble = Math::round(
-                        cur_point.x * downscale * xscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            tmpDouble = subfx_yutils_math_round(
+                        cur_point.x *
+                        handle->downscale *
+                        handle->xscale, FP_PRECISION);
 
-            tmpDouble = Math::round(
-                        cur_point.y * downscale * yscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
 
-            tmpDouble = Math::round(
-                        points[i + 1].x * downscale * xscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
 
-            tmpDouble = Math::round(
-                        points[i + 1].y * downscale * yscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            tmpDouble = subfx_yutils_math_round(
+                        cur_point.y *
+                        handle->downscale *
+                        handle->yscale, FP_PRECISION);
 
-            tmpDouble = Math::round(
-                        points[i + 2].x * downscale * xscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
 
-            tmpDouble = Math::round(
-                        points[i + 2].y * downscale * yscale, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpDouble));
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                    points[i + 1].x *
+                    handle->downscale *
+                    handle->xscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                    points[i + 1].y *
+                    handle->downscale *
+                    handle->yscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                    points[i + 2].x *
+                    handle->downscale *
+                    handle->xscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpDouble = subfx_yutils_math_round(
+                    points[i + 2].y *
+                    handle->downscale *
+                    handle->yscale, FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
 
             i += 3;
             break;
@@ -550,12 +954,25 @@ FontHandle::text_to_shape(std::string &text) THROW
 
         if ((cur_type & 0x1) == 1) // odd = PT_CLOSEFIGURE
         {
-            shape.push_back("c");
+            retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            memcpy(retStr, "c", 2);
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
         }
     } // end while (i < points_n)
 
     // clean up
-    AbortPath(dc);
+    AbortPath(handle->dc);
     delete[] points;
     delete[] types;
     if (!charWidths)
@@ -564,29 +981,48 @@ FontHandle::text_to_shape(std::string &text) THROW
     }
 #else
     // Set text path to layout
-    cairo_save(context);
-    cairo_scale(context,
-    downscale * xscale * fonthack_scale, downscale * yscale * fonthack_scale);
-    pango_layout_set_text(layout, text.c_str(), -1);
-    pango_cairo_layout_path(context, layout);
-    cairo_restore(context);
+    cairo_save(handle->context);
+    cairo_scale(handle->context,
+                handle->downscale *
+                handle->xscale *
+                handle->fonthack_scale,
+                handle->downscale *
+                handle->yscale *
+                handle->fonthack_scale);
+    pango_layout_set_text(handle->layout, text, -1);
+    pango_cairo_layout_path(handle->context, handle->layout);
+    cairo_restore(handle->context);
 
     // Convert path to shape
-    cairo_path_t *path(cairo_copy_path(context));
+    cairo_path_t *path(cairo_copy_path(handle->context));
     if (!path)
     {
-        return std::string();
+        return NULL;
     }
 
     if (path->status != CAIRO_STATUS_SUCCESS)
     {
-        cairo_new_path(context);
+        cairo_new_path(handle->context);
         cairo_path_destroy(path);
-        return std::string();
+        return NULL;
     }
 
-    std::vector<std::string> shape;
-    shape.reserve(5000); // may be larger or smaller?
+    subfx_handle shape(subfx_ptrVector_create(free));
+    if (!shape)
+    {
+        cairo_new_path(handle->context);
+        cairo_path_destroy(path);
+        return NULL;
+    }
+
+    // may be larger or smaller?
+    if (subfx_ptrVector_reserve(shape, 2048) == subfx_failed)
+    {
+        cairo_new_path(handle->context);
+        cairo_path_destroy(path);
+        return NULL;
+    }
+
     int i(0), cur_type(0), last_type(99999); // first loop has no last_type
     double tmpValue(0.);
     while (i < path->num_data)
@@ -597,65 +1033,272 @@ FontHandle::text_to_shape(std::string &text) THROW
         case CAIRO_PATH_MOVE_TO:
             if (cur_type != last_type)
             {
-                shape.push_back("m");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "m", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
             }
 
-            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            tmpValue =
+                    subfx_yutils_math_round(
+                        path->data[i + 1].point.x,
+                        FP_PRECISION);
 
-            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 1].point.y,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
             break;
         case CAIRO_PATH_LINE_TO:
             if (cur_type != last_type)
             {
-                shape.push_back("l");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "l", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
             }
 
-            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 1].point.x,
+                    FP_PRECISION);
 
-            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 1].point.y,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
             break;
         case CAIRO_PATH_CURVE_TO:
             if (cur_type != last_type)
             {
-                shape.push_back("b");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "b", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
             }
 
-            tmpValue = Math::round(path->data[i + 1].point.x, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 1].point.x,
+                    FP_PRECISION);
 
-            tmpValue = Math::round(path->data[i + 1].point.y, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
 
-            tmpValue = Math::round(path->data[i + 2].point.x, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
 
-            tmpValue = Math::round(path->data[i + 2].point.y, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 1].point.y,
+                    FP_PRECISION);
 
-            tmpValue = Math::round(path->data[i + 3].point.x, FP_PRECISION);
-            shape.push_back(PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
 
-            tmpValue = Math::round(path->data[i + 3].point.y, FP_PRECISION);
-            shape.push_back(
-                        PROJ_NAMESPACE::Utils::Misc::doubleToString(tmpValue));
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 2].point.x,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 2].point.y,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 3].point.x,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
+            tmpValue =
+                    subfx_yutils_math_round(
+                    path->data[i + 3].point.y,
+                    FP_PRECISION);
+
+            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            if (!retStr)
+            {
+                cleanUp;
+                return NULL;
+            }
+
+            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            {
+                cleanUp;
+                free(retStr);
+                return NULL;
+            }
+
             break;
         case CAIRO_PATH_CLOSE_PATH:
             if (cur_type != last_type)
             {
-                shape.push_back("c");
+                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                if (!retStr)
+                {
+                    cleanUp;
+                    return NULL;
+                }
+
+                memcpy(retStr, "c", 2);
+                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                {
+                    cleanUp;
+                    free(retStr);
+                    return NULL;
+                }
             }
+
             break;
         default:
             break;
@@ -665,12 +1308,81 @@ FontHandle::text_to_shape(std::string &text) THROW
         i += path->data[i].header.length;
     }
 
-    cairo_new_path(context);
+    cairo_new_path(handle->context);
     cairo_path_destroy(path);
 #endif
 
-    std::stringstream s;
-    std::copy(shape.begin(), shape.end(),
-              std::ostream_iterator<std::string>(s, " "));
-    return s.str();
+    // calculate how many buffer we need
+    if (subfx_ptrVector_size(shape, &retSize) == subfx_failed)
+    {
+        subfx_pError(errMsg, "text_to_shape: you should"
+                             " never see this message.");
+        static_cast<void>(subfx_ptrVector_destroy(shape));
+        return NULL;
+    }
+
+    size_t length(0);
+    for (size_t index = 0; index < retSize; ++index)
+    {
+        retStr = reinterpret_cast<char *>(subfx_ptrVector_at(shape, index));
+        if (!retStr)
+        {
+            subfx_pError(errMsg, "text_to_shape: you should"
+                                 " never see this message.");
+            static_cast<void>(subfx_ptrVector_destroy(shape));
+            return NULL;
+        }
+
+        length += strlen(retStr);
+    }
+
+    length += (retSize + 1); // for ' ' and '\0'
+
+    retStr = reinterpret_cast<char *>(calloc(length, sizeof(char)));
+    if (!retStr)
+    {
+        if (subfx_ptrVector_destroy(shape) == subfx_failed)
+        {
+            subfx_pError(errMsg, "text_to_shape: you should"
+                                 " never see this message.");
+        }
+
+        return NULL;
+    }
+
+    char *pStr(retStr);
+    char *tmpStr(NULL);
+    for (size_t index = 0; index < retSize; ++index)
+    {
+        tmpStr = reinterpret_cast<char *>(subfx_ptrVector_at(shape, index));
+        if (!tmpStr)
+        {
+            free(retStr);
+            subfx_pError(errMsg, "text_to_shape: you should"
+                                 " never see this message.");
+            static_cast<void>(subfx_ptrVector_destroy(shape));
+            return NULL;
+        }
+
+        length = strlen(tmpStr);
+        memcpy(pStr, tmpStr, length);
+        pStr += length;
+
+        memcpy(pStr, " ", 1);
+        ++pStr;
+    }
+
+    pStr[0] = '\0';
+
+    if (subfx_ptrVector_destroy(shape) == subfx_failed)
+    {
+        subfx_pError(errMsg, "text_to_shape: you should"
+                             " never see this message.");
+        free(retStr);
+        return NULL;
+    }
+
+    return retStr;
 }
+
+} // end extern "C"

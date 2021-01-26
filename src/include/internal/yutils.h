@@ -20,6 +20,7 @@
 #pragma once
 
 #include "yutilscpp/ass.h"
+#include "yutilscpp/fonthandle.h"
 #include "yutilscpp/math.h"
 
 #ifdef __cplusplus
@@ -30,6 +31,8 @@ extern "C"
 typedef struct subfx_yutils
 {
     subfx_yutils_ass *ass;
+
+    subfx_yutils_fonthandle *fontHandle;
 
     subfx_yutils_math *math;
 } subfx_yutils;

@@ -33,7 +33,7 @@ typedef struct subfx_utils_misc
     char *(*doubleToString)(double input);
 
     subfx_exitstate (*getLine)(char *buffer,
-                               int bufferSize,
+                               size_t bufferSize,
                                FILE *file,
                                char *errMsg);
 } subfx_utils_misc;

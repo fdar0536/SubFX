@@ -35,6 +35,8 @@
 #define UNUSED(x) (void)x
 #endif
 
+#define FP_PRECISION 3
+
 #define subfx_pError(buf, msg) \
     if (buf) \
     { \

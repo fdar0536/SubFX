@@ -26,6 +26,7 @@
 #include "utils/map.h"
 #include "utils/vector.h"
 #include "utils/ptrvector.h"
+#include "YutilsCpp/fonthandle.h"
 
 subfx_exitstate subfx_getHandleType(subfx_handle in, subfx_types *dst)
 {
@@ -62,9 +63,13 @@ subfx_exitstate subfx_closeHandle(subfx_handle in)
     {
         return subfx_ptrVector_destroy(in);
     }
-    case subfx_type_map:
+    case subfx_types_map:
     {
         return subfx_map_destroy(in);
+    }
+    case subfx_types_yutils_fonthandle:
+    {
+        return subfx_yutils_fonthandle_destroy(in);
     }
     default:
     {

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "YutilsCpp/ass.h"
+#include "YutilsCpp/fonthandle.h"
 #include "YutilsCpp/init.h"
 #include "YutilsCpp/math.h"
 
@@ -32,10 +33,18 @@ subfx_yutils *subfx_yutils_init()
     }
 
     ret->ass = NULL;
+    ret->fontHandle = NULL;
     ret->math = NULL;
 
     ret->ass = subfx_yutils_ass_init();
     if (!ret->ass)
+    {
+        subfx_yutils_destroy(ret);
+        return NULL;
+    }
+
+    ret->fontHandle = subfx_yutils_fonthandle_init();
+    if (!ret->fontHandle)
     {
         subfx_yutils_destroy(ret);
         return NULL;
@@ -59,6 +68,7 @@ void subfx_yutils_destroy(subfx_yutils *in)
     }
 
     if (in->ass) free(in->ass);
+    if (in->fontHandle) free(in->fontHandle);
     if (in->math) free(in->math);
     free(in);
 }
