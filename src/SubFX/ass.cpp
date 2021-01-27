@@ -26,32 +26,32 @@
 
 #include "boost/lexical_cast.hpp"
 
-#include "internal/common.h"
+#include "common.h"
 #include "ass.h"
 
 extern "C"
 {
 
-subfx_yutils_ass *subfx_yutils_ass_init()
+subfx_ass *subfx_ass_init()
 {
-    subfx_yutils_ass *ret(reinterpret_cast<subfx_yutils_ass *>
-                          (calloc(1, sizeof(subfx_yutils_ass))));
+    subfx_ass *ret(reinterpret_cast<subfx_ass *>
+                          (calloc(1, sizeof(subfx_ass))));
     if (!ret)
     {
         return NULL;
     }
 
-    ret->stringToMs = subfx_yutils_ass_stringToMs;
-    ret->msToString = subfx_yutils_ass_msToString;
-    ret->stringToColorAlpha = subfx_yutils_ass_stringToColorAlpha;
-    ret->colorAlphaToString = subfx_yutils_ass_colorAlphaToString;
+    ret->stringToMs = subfx_ass_stringToMs;
+    ret->msToString = subfx_ass_msToString;
+    ret->stringToColorAlpha = subfx_ass_stringToColorAlpha;
+    ret->colorAlphaToString = subfx_ass_colorAlphaToString;
 
     return ret;
 }
 
-subfx_exitstate subfx_yutils_ass_stringToMs(const char *in,
-                                            uint64_t *dst,
-                                            char *errMsg)
+subfx_exitstate subfx_ass_stringToMs(const char *in,
+                                     uint64_t *dst,
+                                     char *errMsg)
 {
     if (!dst)
     {
@@ -94,7 +94,7 @@ subfx_exitstate subfx_yutils_ass_stringToMs(const char *in,
     return subfx_success;
 }
 
-char *subfx_yutils_ass_msToString(uint64_t ms_ass)
+char *subfx_ass_msToString(uint64_t ms_ass)
 {
     char *buf(reinterpret_cast<char *>(calloc(500, sizeof(char))));
     if (!buf)
@@ -111,7 +111,7 @@ char *subfx_yutils_ass_msToString(uint64_t ms_ass)
     return buf;
 }
 
-uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *in, char *errMsg)
+uint8_t *subfx_ass_stringToColorAlpha(const char *in, char *errMsg)
 {
     uint8_t *ret(reinterpret_cast<uint8_t *>(calloc(4, sizeof(uint8_t))));
     if (!ret)
@@ -171,8 +171,8 @@ uint8_t *subfx_yutils_ass_stringToColorAlpha(const char *in, char *errMsg)
     return ret;
 }
 
-char *subfx_yutils_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
-                                          char *errMsg)
+char *subfx_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
+                                   char *errMsg)
 {
     if (inputSize != 1 &&
         inputSize != 3 &&

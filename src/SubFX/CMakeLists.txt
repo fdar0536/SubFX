@@ -39,6 +39,7 @@ set(subfx_headers
     include/internal/utf8.h
     include/internal/vector.h
 
+    include/internal/ass.h
     include/internal/fonthandle.h
 )
 
@@ -54,6 +55,7 @@ set(subfx_priv_headers
     SubFX/utf8.h
     SubFX/vector.h
 
+    SubFX/ass.h
     SubFX/fonthandle.h
 
     ${CMAKE_BINARY_DIR}/config.h
@@ -72,6 +74,7 @@ set(subfx_src
     SubFX/utf8.c
     SubFX/vector.c
 
+    SubFX/ass.cpp
     SubFX/fonthandle.cpp
 )
 

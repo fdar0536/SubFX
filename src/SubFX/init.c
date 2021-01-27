@@ -29,6 +29,7 @@
 #include "utf8.h"
 #include "vector.h"
 
+#include "ass.h"
 #include "fonthandle.h"
 
 SUBFX_API SubFX *SubFX_init()
@@ -47,6 +48,7 @@ SUBFX_API SubFX *SubFX_init()
     ret->utf8 = NULL;
     ret->vector = NULL;
 
+    ret->ass = NULL;
     ret->fonthandle = NULL;
 
     ret->logger = subfx_logger_init();
@@ -98,6 +100,12 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
+    ret->ass = subfx_ass_init();
+    if (!ret->ass)
+    {
+        SubFX_destroy(ret);
+        return NULL;
+    }
     ret->fonthandle = subfx_fonthandle_init();
     if (!ret->fonthandle)
     {
@@ -125,6 +133,8 @@ SUBFX_API void SubFX_destroy(SubFX *in)
     if (in->math) free(in->math);
     if (in->utf8) free(in->utf8);
     if (in->vector) free(in->vector);
+
+    if (in->ass) free(in->ass);
     if (in->fonthandle) free(in->fonthandle);
     free(in);
 }

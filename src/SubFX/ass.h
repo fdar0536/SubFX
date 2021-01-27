@@ -19,29 +19,25 @@
 
 #pragma once
 
-#include <inttypes.h>
-#include <stddef.h>
-
-#include "../defines.h"
+#include "include/internal/ass.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct subfx_yutils_ass
-{
-    subfx_exitstate (*stringToMs)(const char *ass_ms,
-                                  uint64_t *dst,
-                                  char *errMsg);
+subfx_ass *subfx_ass_init();
 
-    char *(*msToString)(uint64_t ms_ass);
+subfx_exitstate subfx_ass_stringToMs(const char *ass_ms,
+                                     uint64_t *dst,
+                                     char *errMsg);
 
-    uint8_t *(*stringToColorAlpha)(const char *input, char *errMsg);
+char *subfx_ass_msToString(uint64_t ms_ass);
 
-    char *(*colorAlphaToString)(uint8_t *input,
-                                size_t inputSize, char *errMsg);
-} subfx_yutils_ass;
+uint8_t *subfx_ass_stringToColorAlpha(const char *input, char *errMsg);
+
+char *subfx_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
+                                   char *errMsg);
 
 #ifdef __cplusplus
 }

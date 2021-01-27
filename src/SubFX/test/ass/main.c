@@ -58,7 +58,7 @@ int main()
         return 1;
     }
 
-    subfx_yutils_ass *ass = api->yutils->ass;
+    subfx_ass *ass = api->ass;
 
     char errMsg[1024];
     char tmpString[1024];

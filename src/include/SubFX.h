@@ -28,9 +28,8 @@
 #include "internal/utf8.h"
 #include "internal/vector.h"
 
+#include "internal/ass.h"
 #include "internal/fonthandle.h"
-
-// #include "internal/yutils.h"
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
@@ -62,6 +61,8 @@ typedef struct SubFX
     subfx_utf8 *utf8;
 
     subfx_vector *vector;
+
+    subfx_ass *ass;
 
     subfx_fonthandle *fonthandle;
 

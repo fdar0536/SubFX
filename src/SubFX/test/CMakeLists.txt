@@ -6,4 +6,5 @@ add_subdirectory(SubFX/test/ptrvector)
 add_subdirectory(SubFX/test/utf8)
 add_subdirectory(SubFX/test/vector)
 
+add_subdirectory(SubFX/test/ass)
 add_subdirectory(SubFX/test/fonthandle)
