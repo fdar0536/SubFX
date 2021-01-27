@@ -35,7 +35,7 @@ int main()
         return 1;
     }
 
-    subfx_yutils_fonthandle *fontHandle = subfx->yutils->fontHandle;
+    subfx_fonthandle *fontHandle = subfx->fonthandle;
 
     char tmpString[100];
     sprintf(tmpString, "Source Code Pro");
@@ -71,19 +71,19 @@ int main()
     }
 
     printf("font's height: %lf\n",
-           retDouble[subfx_yutils_fonthandle_metrics_height]);
+           retDouble[subfx_fonthandle_metrics_height]);
 
     printf("font's ascent: %lf\n",
-           retDouble[subfx_yutils_fonthandle_metrics_ascent]);
+           retDouble[subfx_fonthandle_metrics_ascent]);
 
     printf("font's descent: %lf\n",
-           retDouble[subfx_yutils_fonthandle_metrics_descent]);
+           retDouble[subfx_fonthandle_metrics_descent]);
 
     printf("font's internal leading: %lf\n",
-           retDouble[subfx_yutils_fonthandle_metrics_internal_leading]);
+           retDouble[subfx_fonthandle_metrics_internal_leading]);
 
     printf("font's external leading: %lf\n",
-           retDouble[subfx_yutils_fonthandle_metrics_external_leading]);
+           retDouble[subfx_fonthandle_metrics_external_leading]);
 
     free(retDouble);
 
@@ -97,10 +97,10 @@ int main()
     }
 
     printf("text's width is: %lf\n",
-           retDouble[subfx_yutils_fonthandle_text_extents_width]);
+           retDouble[subfx_fonthandle_text_extents_width]);
 
     printf("text's height is: %lf\n",
-           retDouble[subfx_yutils_fonthandle_text_extents_height]);
+           retDouble[subfx_fonthandle_text_extents_height]);
 
     free(retDouble);
 

@@ -1,3 +1,30 @@
+if (UNIX)
+    find_package(PANGO REQUIRED)
+    if (NOT PANGOCAIRO_FOUND)
+        message(FATAL_ERROR "CANNOT find PangoCairo!")
+    endif()
+    LIST(APPEND SubFX_includes
+        ${PANGOCAIRO_INCLUDE_DIRS}
+        ${PANGO_INCLUDE_DIRS}
+        ${GLIB2_INCLUDE_DIRS})
+    LIST(APPEND SubFX_libs
+        ${PANGO_LIBRARIES}
+        ${PANGOCAIRO_LIBRARIES}
+        ${GLIB2_LIBRARIES})
+
+    find_package(HarfBuzz REQUIRED)
+    LIST(APPEND SubFX_includes
+        ${HARFBUZZ_INCLUDE_DIRS})
+    LIST(APPEND SubFX_libs
+        ${HARFBUZZ_LIBRARIES})
+
+    find_package(Cairo REQUIRED)
+    LIST(APPEND SubFX_includes
+        ${CAIRO_INCLUDE_DIRS})
+    LIST(APPEND SubFX_libs
+        ${CAIRO_LIBRARIES})
+endif (UNIX)
+
 set(subfx_main_header
     include/SubFX.h
 )
@@ -11,6 +38,8 @@ set(subfx_headers
     include/internal/smath.h
     include/internal/utf8.h
     include/internal/vector.h
+
+    include/internal/fonthandle.h
 )
 
 set(subfx_priv_headers
@@ -24,6 +53,9 @@ set(subfx_priv_headers
     SubFX/smath.h
     SubFX/utf8.h
     SubFX/vector.h
+
+    SubFX/fonthandle.h
+
     ${CMAKE_BINARY_DIR}/config.h
 )
 
@@ -39,6 +71,8 @@ set(subfx_src
     SubFX/smath.c
     SubFX/utf8.c
     SubFX/vector.c
+
+    SubFX/fonthandle.cpp
 )
 
 add_library(SubFX
@@ -50,13 +84,37 @@ add_library(SubFX
     ${subfx_src}
 )
 
+#ICU
+LIST(APPEND SubFX_includes ${ICU_INCLUDE_DIRS})
+LIST(APPEND SubFX_libs ${ICU_LIBRARIES})
+
+# boost
+LIST(APPEND SubFX_libs ${Boost_REGEX_LIBRARY})
+if (WIN32)
+    LIST(APPEND SubFX_libs ${Boost_LOCALE_LIBRARY})
+endif (WIN32)
+
+# eigen
+find_package(Eigen3 3.3.7 REQUIRED)
+LIST(APPEND SubFX_libs Eigen3::Eigen)
+
+# BLAS
+if (ENABLE_BLAS)
+    find_package(BLAS REQUIRED)
+    LIST(APPEND SubFX_libs BLAS::BLAS)
+endif (ENABLE_BLAS)
+
+# if (ENABLE_PYTHON)
+#     add_subdirectory(python)
+# endif (ENABLE_PYTHON)
+
 target_include_directories(SubFX
     SYSTEM BEFORE
     PUBLIC
-    ${YutilsCpp_includes}
+    ${SubFX_includes}
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
 
-target_link_libraries(SubFX PUBLIC ${YutilsCpp_libs})
+target_link_libraries(SubFX PUBLIC ${SubFX_libs})

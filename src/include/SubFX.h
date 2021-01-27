@@ -28,6 +28,8 @@
 #include "internal/utf8.h"
 #include "internal/vector.h"
 
+#include "internal/fonthandle.h"
+
 // #include "internal/yutils.h"
 
 #if defined _WIN32 || defined __CYGWIN__
@@ -61,7 +63,7 @@ typedef struct SubFX
 
     subfx_vector *vector;
 
-    // subfx_yutils *yutils;
+    subfx_fonthandle *fonthandle;
 
     subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
 

@@ -38,7 +38,7 @@ typedef enum subfx_types
     subfx_types_map,
     subfx_types_ptrVector,
     subfx_types_vector,
-    subfx_types_yutils_fonthandle
+    subfx_types_fonthandle
 } subfx_types;
 
 typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);

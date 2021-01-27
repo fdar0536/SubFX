@@ -30,12 +30,12 @@
 #include "pango/pangocairo.h"
 #endif
 
-#include "internal/common.h"
-#include "internal/types.h"
-#include "utils/misc.h"
-#include "utils/ptrvector.h"
-#include "YutilsCpp/fonthandle.h"
-#include "YutilsCpp/math.h"
+#include "common.h"
+#include "types.h"
+#include "misc.h"
+#include "ptrvector.h"
+#include "fonthandle.h"
+#include "smath.h"
 
 #define FONT_PRECISION 64
 
@@ -73,33 +73,33 @@ typedef struct FontHandle
     double downscale;
 } FontHandle;
 
-subfx_yutils_fonthandle *subfx_yutils_fonthandle_init()
+subfx_fonthandle *subfx_fonthandle_init()
 {
-    subfx_yutils_fonthandle *ret(reinterpret_cast<subfx_yutils_fonthandle *>
-                                 (calloc(1, sizeof(subfx_yutils_fonthandle))));
+    subfx_fonthandle *ret(reinterpret_cast<subfx_fonthandle *>
+                          (calloc(1, sizeof(subfx_fonthandle))));
     if (!ret)
     {
         return NULL;
     }
 
-    ret->create = subfx_yutils_fonthandle_create;
-    ret->metrics = subfx_yutils_fonthandle_metrics;
-    ret->text_extents = subfx_yutils_fonthandle_text_extents;
-    ret->text_to_shape = subfx_yutils_fonthandle_text_to_shape;
+    ret->create = subfx_fonthandle_create;
+    ret->metrics = subfx_fonthandle_metrics;
+    ret->text_extents = subfx_fonthandle_text_extents;
+    ret->text_to_shape = subfx_fonthandle_text_to_shape;
 
     return ret;
 }
 
-subfx_handle subfx_yutils_fonthandle_create(const char *family,
-                                            bool bold,
-                                            bool italic,
-                                            bool underline,
-                                            bool strikeout,
-                                            int32_t size,
-                                            double xscale, // 1.
-                                            double yscale, // 1.
-                                            double hspace, // 0.
-                                            char *errMsg)
+subfx_handle subfx_fonthandle_create(const char *family,
+                                     bool bold,
+                                     bool italic,
+                                     bool underline,
+                                     bool strikeout,
+                                     int32_t size,
+                                     double xscale, // 1.
+                                     double yscale, // 1.
+                                     double hspace, // 0.
+                                     char *errMsg)
 {
     if (size <= 0)
     {
@@ -115,7 +115,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
         return NULL;
     }
 
-    ret->id = subfx_types_yutils_fonthandle;
+    ret->id = subfx_types_fonthandle;
     ret->xscale = xscale;
     ret->yscale = yscale;
 #ifdef _WIN32
@@ -129,7 +129,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
     if (wcslen(family_dst.c_str()) > 31)
     {
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         subfx_pError(errMsg,
                      "FontHandle->create: family name too long");
     }
@@ -137,7 +137,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     ret->dc = CreateCompatibleDC(NULL);
     if (!ret->dc)
     {
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -145,7 +145,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -153,7 +153,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -177,7 +177,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     if (!ret->font)
     {
         DeleteDC(ret->dc);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -193,7 +193,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     ret->surface = cairo_image_surface_create(CAIRO_FORMAT_A8, 1, 1);
     if (!ret->surface)
     {
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -201,7 +201,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     if (!ret->context)
     {
         cairo_surface_destroy(ret->surface);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -210,7 +210,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     {
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -221,7 +221,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -243,7 +243,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -269,7 +269,7 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_yutils_fonthandle_destroy(ret);
+        subfx_fonthandle_destroy(ret);
         return NULL;
     }
 
@@ -289,9 +289,9 @@ subfx_handle subfx_yutils_fonthandle_create(const char *family,
     return ret;
 }
 
-subfx_exitstate subfx_yutils_fonthandle_destroy(subfx_handle in)
+subfx_exitstate subfx_fonthandle_destroy(subfx_handle in)
 {
-    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    if (subfx_checkInput(in, subfx_types_fonthandle))
     {
         return subfx_failed;
     }
@@ -313,9 +313,9 @@ subfx_exitstate subfx_yutils_fonthandle_destroy(subfx_handle in)
     return subfx_success;
 }
 
-double *subfx_yutils_fonthandle_metrics(subfx_handle in)
+double *subfx_fonthandle_metrics(subfx_handle in)
 {
-    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    if (subfx_checkInput(in, subfx_types_fonthandle))
     {
         return NULL;
     }
@@ -343,27 +343,27 @@ double *subfx_yutils_fonthandle_metrics(subfx_handle in)
         return NULL;
     }
 
-    ret[subfx_yutils_fonthandle_metrics_height] =
+    ret[subfx_fonthandle_metrics_height] =
             fontMetrics->tmHeight *
             handle->downscale *
             handle->yscale;
 
-    ret[subfx_yutils_fonthandle_metrics_ascent] =
+    ret[subfx_fonthandle_metrics_ascent] =
             fontMetrics->tmAscent *
             handle->downscale *
             handle->yscale;
 
-    ret[subfx_yutils_fonthandle_metrics_descent] =
+    ret[subfx_fonthandle_metrics_descent] =
             fontMetrics->tmDescent *
             handle->downscale *
             handle->yscale;
 
-    ret[subfx_yutils_fonthandle_metrics_internal_leading] =
+    ret[subfx_fonthandle_metrics_internal_leading] =
             fontMetrics->tmInternalLeading *
             handle->downscale *
             handle->yscale;
 
-    ret[subfx_yutils_fonthandle_metrics_external_leading] =
+    ret[subfx_fonthandle_metrics_external_leading] =
             fontMetrics->tmExternalLeading *
             handle->downscale *
             handle->yscale;
@@ -393,24 +393,24 @@ double *subfx_yutils_fonthandle_metrics(subfx_handle in)
     descent = descent / PANGO_SCALE * handle->downscale;
     pango_font_metrics_unref(fontMetrics);
 
-    ret[subfx_yutils_fonthandle_metrics_height] =
+    ret[subfx_fonthandle_metrics_height] =
             (ascent + descent) *
             handle->yscale *
             handle->fonthack_scale;
 
-    ret[subfx_yutils_fonthandle_metrics_ascent] =
+    ret[subfx_fonthandle_metrics_ascent] =
             ascent *
             handle->yscale *
             handle->fonthack_scale;
 
-    ret[subfx_yutils_fonthandle_metrics_descent] =
+    ret[subfx_fonthandle_metrics_descent] =
             descent *
             handle->yscale *
             handle->fonthack_scale;
 
-    ret[subfx_yutils_fonthandle_metrics_internal_leading] = 0.;
+    ret[subfx_fonthandle_metrics_internal_leading] = 0.;
 
-    ret[subfx_yutils_fonthandle_metrics_external_leading] =
+    ret[subfx_fonthandle_metrics_external_leading] =
             pango_layout_get_spacing(handle->layout) /
             PANGO_SCALE *
             handle->downscale *
@@ -421,10 +421,10 @@ double *subfx_yutils_fonthandle_metrics(subfx_handle in)
     return ret;
 }
 
-double *subfx_yutils_fonthandle_text_extents(subfx_handle in,
+double *subfx_fonthandle_text_extents(subfx_handle in,
                                              const char *text)
 {
-    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    if (subfx_checkInput(in, subfx_types_fonthandle))
     {
         return NULL;
     }
@@ -456,12 +456,12 @@ double *subfx_yutils_fonthandle_text_extents(subfx_handle in,
         return NULL;
     }
 
-    ret[subfx_yutils_fonthandle_text_extents_width] =
+    ret[subfx_fonthandle_text_extents_width] =
             (size->cx * handle->downscale +
              handle->hspace * textLen) *
             handle->xscale;
 
-    ret[subfx_yutils_fonthandle_text_extents_height] =
+    ret[subfx_fonthandle_text_extents_height] =
             size->cy *
             handle->downscale *
             handle->yscale;
@@ -477,13 +477,13 @@ double *subfx_yutils_fonthandle_text_extents(subfx_handle in,
     }
 
     pango_layout_get_pixel_extents(handle->layout, NULL, rect);
-    ret[subfx_yutils_fonthandle_text_extents_width] =
+    ret[subfx_fonthandle_text_extents_width] =
             rect->width *
             handle->downscale *
             handle->xscale *
             handle->fonthack_scale;
 
-    ret[subfx_yutils_fonthandle_text_extents_height] =
+    ret[subfx_fonthandle_text_extents_height] =
             rect->height *
             handle->downscale *
             handle->yscale *
@@ -521,10 +521,10 @@ double *subfx_yutils_fonthandle_text_extents(subfx_handle in,
     }
 #endif
 
-char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
+char *subfx_fonthandle_text_to_shape(subfx_handle in,
                                             const char *text, char *errMsg)
 {
-    if (subfx_checkInput(in, subfx_types_yutils_fonthandle))
+    if (subfx_checkInput(in, subfx_types_fonthandle))
     {
         return NULL;
     }
@@ -707,12 +707,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpDouble =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                         cur_point.x *
                         handle->downscale *
                         handle->xscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -726,12 +726,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                         cur_point.y *
                         handle->downscale *
                         handle->yscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -769,12 +769,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 last_type = cur_type;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                         cur_point.x *
                         handle->downscale *
                         handle->xscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -788,12 +788,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                         cur_point.y *
                         handle->downscale *
                         handle->yscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -831,12 +831,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 last_type = cur_type;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                         cur_point.x *
                         handle->downscale *
                         handle->xscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -850,12 +850,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                         cur_point.y *
                         handle->downscale *
                         handle->yscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -869,12 +869,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                     points[i + 1].x *
                     handle->downscale *
                     handle->xscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -888,12 +888,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                     points[i + 1].y *
                     handle->downscale *
                     handle->yscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -907,12 +907,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                     points[i + 2].x *
                     handle->downscale *
                     handle->xscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -926,12 +926,12 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            tmpDouble = subfx_yutils_math_round(
+            tmpDouble = subfx_math_round(
                     points[i + 2].y *
                     handle->downscale *
                     handle->yscale, FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpDouble);
+            retStr = subfx_misc_doubleToString(tmpDouble);
             if (!retStr)
             {
                 cleanUp;
@@ -1050,11 +1050,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                         path->data[i + 1].point.x,
                         FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1069,11 +1069,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 1].point.y,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1108,11 +1108,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 1].point.x,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1127,11 +1127,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 1].point.y,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1166,11 +1166,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 1].point.x,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1185,11 +1185,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 1].point.y,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1204,11 +1204,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 2].point.x,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1223,11 +1223,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 2].point.y,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1242,11 +1242,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 3].point.x,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;
@@ -1261,11 +1261,11 @@ char *subfx_yutils_fonthandle_text_to_shape(subfx_handle in,
             }
 
             tmpValue =
-                    subfx_yutils_math_round(
+                    subfx_math_round(
                     path->data[i + 3].point.y,
                     FP_PRECISION);
 
-            retStr = subfx_utils_misc_doubleToString(tmpValue);
+            retStr = subfx_misc_doubleToString(tmpValue);
             if (!retStr)
             {
                 cleanUp;

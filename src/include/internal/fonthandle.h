@@ -22,23 +22,23 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include "../defines.h"
+#include "defines.h"
 
-#define subfx_yutils_fonthandle_metrics_height           0
-#define subfx_yutils_fonthandle_metrics_ascent           1
-#define subfx_yutils_fonthandle_metrics_descent          2
-#define subfx_yutils_fonthandle_metrics_internal_leading 3
-#define subfx_yutils_fonthandle_metrics_external_leading 4
+#define subfx_fonthandle_metrics_height           0
+#define subfx_fonthandle_metrics_ascent           1
+#define subfx_fonthandle_metrics_descent          2
+#define subfx_fonthandle_metrics_internal_leading 3
+#define subfx_fonthandle_metrics_external_leading 4
 
-#define subfx_yutils_fonthandle_text_extents_width  0
-#define subfx_yutils_fonthandle_text_extents_height 1
+#define subfx_fonthandle_text_extents_width  0
+#define subfx_fonthandle_text_extents_height 1
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct subfx_yutils_fonthandle
+typedef struct subfx_fonthandle
 {
     subfx_handle (*create)(const char *family,
                            bool bold,
@@ -58,7 +58,7 @@ typedef struct subfx_yutils_fonthandle
 
     char *(*text_to_shape)(subfx_handle fonthandle,
                            const char *text, char *errMsg);
-} subfx_yutils_fonthandle;
+} subfx_fonthandle;
 
 #ifdef __cplusplus
 }

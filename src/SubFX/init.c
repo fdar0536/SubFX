@@ -28,7 +28,8 @@
 #include "smath.h"
 #include "utf8.h"
 #include "vector.h"
-// #include "YutilsCpp/init.h"
+
+#include "fonthandle.h"
 
 SUBFX_API SubFX *SubFX_init()
 {
@@ -45,6 +46,8 @@ SUBFX_API SubFX *SubFX_init()
     ret->math = NULL;
     ret->utf8 = NULL;
     ret->vector = NULL;
+
+    ret->fonthandle = NULL;
 
     ret->logger = subfx_logger_init();
     if (!ret->logger)
@@ -95,6 +98,13 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
+    ret->fonthandle = subfx_fonthandle_init();
+    if (!ret->fonthandle)
+    {
+        SubFX_destroy(ret);
+        return NULL;
+    }
+
     ret->getHandleType = subfx_getHandleType;
     ret->closeHandle = subfx_closeHandle;
     ret->version = subfx_version;
@@ -115,5 +125,6 @@ SUBFX_API void SubFX_destroy(SubFX *in)
     if (in->math) free(in->math);
     if (in->utf8) free(in->utf8);
     if (in->vector) free(in->vector);
+    if (in->fonthandle) free(in->fonthandle);
     free(in);
 }
