@@ -69,57 +69,8 @@ endif (UNIX) # end if (UNIX)
 
 enable_testing()
 
-include(utils/CMakeLists.txt)
-include(YutilsCpp/CMakeLists.txt)
-
-set(subfx_main_header
-    ${CMAKE_SOURCE_DIR}/include/SubFX.h
-)
-
-set(subfx_priv_headers
-    internal/common.h
-    internal/subfx.h
-    internal/types.h
-    ${CMAKE_BINARY_DIR}/config.h
-)
-
-set(subfx_src
-    init.c
-    internal/subfx.c
-    internal/types.c
-)
-
-add_library(SubFX
-    SHARED
-
-    #utils
-    ${utils_main_headers}
-    ${utils_headers}
-    ${utils_priv_headers}
-    ${utils_src}
-
-    #YutilsCpp
-    ${YutilsCpp_main_headers}
-    ${YutilsCpp_headers}
-    ${YutilsCpp_priv_headers}
-    ${YutilsCpp_src}
-
-    #api entry
-    ${subfx_main_header}
-    ${subfx_priv_headers}
-    ${subfx_src}
-)
-
-target_include_directories(SubFX
-    SYSTEM BEFORE
-    PUBLIC
-    ${YutilsCpp_includes}
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-    $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
-)
-
-target_link_libraries(SubFX PUBLIC ${YutilsCpp_libs})
+include(SubFX/CMakeLists.txt)
+# include(YutilsCpp/CMakeLists.txt)
 
 option(BUILD_TESTING_CASES "Build testing cases" ON)
 
@@ -141,6 +92,6 @@ configure_file(config.h.in config.h @ONLY)
 # endif (ENABLE_PYTHON)
 
 if (BUILD_TESTING_CASES)
-    include(utils/test/CMakeLists.txt)
-    include(YutilsCpp/test/CMakeLists.txt)
+    include(SubFX/test/CMakeLists.txt)
+    # include(YutilsCpp/test/CMakeLists.txt)
 endif(BUILD_TESTING_CASES)

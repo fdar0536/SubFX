@@ -19,31 +19,36 @@
 
 #pragma once
 
+#include <stddef.h>
+
+#include "include/internal/vector.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum subfx_exitstate
-{
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
-} subfx_exitstate;
+subfx_vector *subfx_vector_init();
 
-typedef enum subfx_types
-{
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_yutils_fonthandle
-} subfx_types;
+subfx_handle subfx_vector_create(size_t sizeOfData);
 
-typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
-typedef void* subfx_handle;
+subfx_exitstate subfx_vector_destroy(subfx_handle vector);
+
+subfx_exitstate subfx_vector_at(subfx_handle vector, size_t index, void *dst);
+
+subfx_exitstate subfx_vector_setValue(subfx_handle vector, size_t, const void *);
+
+subfx_exitstate subfx_vector_clear(subfx_handle vector);
+
+subfx_exitstate subfx_vector_size(subfx_handle vector, size_t *);
+
+subfx_exitstate subfx_vector_capacity(subfx_handle vector, size_t *);
+
+subfx_exitstate subfx_vector_reserve(subfx_handle vector, size_t);
+
+subfx_exitstate subfx_vector_pushback(subfx_handle vector, const void *);
+
+subfx_exitstate subfx_vector_resize(subfx_handle vector, size_t, const void *);
 
 #ifdef __cplusplus
 }

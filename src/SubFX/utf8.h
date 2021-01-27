@@ -19,31 +19,21 @@
 
 #pragma once
 
+#include <inttypes.h>
+
+#include "include/internal/utf8.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum subfx_exitstate
-{
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
-} subfx_exitstate;
+subfx_utf8 *subfx_utf8_init();
 
-typedef enum subfx_types
-{
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_yutils_fonthandle
-} subfx_types;
+uint32_t subfx_utf8_stringLen(const char *);
 
-typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
-typedef void* subfx_handle;
+// https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
+subfx_handle subfx_utf8_stringSplit(const char *, char *);
 
 #ifdef __cplusplus
 }

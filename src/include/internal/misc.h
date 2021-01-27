@@ -19,31 +19,24 @@
 
 #pragma once
 
+#include <stdio.h>
+
+#include "defines.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum subfx_exitstate
+typedef struct subfx_misc
 {
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
-} subfx_exitstate;
+    char *(*doubleToString)(double input);
 
-typedef enum subfx_types
-{
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_yutils_fonthandle
-} subfx_types;
-
-typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
-typedef void* subfx_handle;
+    subfx_exitstate (*getLine)(char *buffer,
+                               size_t bufferSize,
+                               FILE *file,
+                               char *errMsg);
+} subfx_misc;
 
 #ifdef __cplusplus
 }

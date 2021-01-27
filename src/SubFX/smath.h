@@ -19,31 +19,25 @@
 
 #pragma once
 
+#include "include/internal/smath.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum subfx_exitstate
-{
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
-} subfx_exitstate;
+subfx_math *subfx_math_init();
 
-typedef enum subfx_types
-{
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_yutils_fonthandle
-} subfx_types;
+double *subfx_math_rotate2d(double, double, double);
 
-typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
-typedef void* subfx_handle;
+// math.rad
+double subfx_math_rad(double);
+
+// math.deg
+double subfx_math_deg(double);
+
+// math.random
+double subfx_math_random(double, double);
 
 #ifdef __cplusplus
 }

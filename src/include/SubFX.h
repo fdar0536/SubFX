@@ -20,8 +20,15 @@
 #pragma once
 
 #include "internal/defines.h"
-#include "internal/utils.h"
-#include "internal/yutils.h"
+#include "internal/logger.h"
+#include "internal/map.h"
+#include "internal/misc.h"
+#include "internal/ptrvector.h"
+#include "internal/smath.h"
+#include "internal/utf8.h"
+#include "internal/vector.h"
+
+// #include "internal/yutils.h"
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
@@ -40,15 +47,21 @@ extern "C"
 
 typedef struct SubFX
 {
+    subfx_logger *logger;
+
     subfx_map *map;
+
+    subfx_misc *misc;
 
     subfx_ptrVector *ptrVector;
 
-    subfx_utils *utils;
+    subfx_math *math;
+
+    subfx_utf8 *utf8;
 
     subfx_vector *vector;
 
-    subfx_yutils *yutils;
+    // subfx_yutils *yutils;
 
     subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
 

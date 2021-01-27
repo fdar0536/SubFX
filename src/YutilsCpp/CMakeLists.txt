@@ -31,7 +31,7 @@ set(YutilsCpp_main_headers
 
 set(YutilsCpp_headers
     ${CMAKE_SOURCE_DIR}/include/internal/yutilscpp/ass.h
-    # ${YUTILSCPP_INCLUDE_PREFIX}/asscommon.hpp
+    ${CMAKE_SOURCE_DIR}/include/internal/yutilscpp/asscommon.h
     # ${YUTILSCPP_INCLUDE_PREFIX}/assparser.hpp
     # assparser.cpp
     # ${YUTILSCPP_INCLUDE_PREFIX}/asswriter.hpp
@@ -50,6 +50,7 @@ set(YutilsCpp_headers
 
 set(YutilsCpp_priv_headers
     YutilsCpp/ass.h
+    YutilsCpp/asscommon.h
     YutilsCpp/fonthandle.h
     YutilsCpp/init.h
     YutilsCpp/math.h
@@ -57,6 +58,7 @@ set(YutilsCpp_priv_headers
 
 set(YutilsCpp_src
     YutilsCpp/ass.cpp
+    YutilsCpp/asscommon.c
     YutilsCpp/init.c
     YutilsCpp/math.c
     YutilsCpp/fonthandle.cpp

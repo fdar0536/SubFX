@@ -19,31 +19,39 @@
 
 #pragma once
 
+#include <stddef.h>
+
+#include "defines.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum subfx_exitstate
+typedef struct subfx_vector
 {
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
-} subfx_exitstate;
+    subfx_handle (*create)(size_t sizeOfData);
 
-typedef enum subfx_types
-{
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_yutils_fonthandle
-} subfx_types;
+    subfx_exitstate (*at)(subfx_handle vector, size_t index, void *dst);
 
-typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
-typedef void* subfx_handle;
+    subfx_exitstate (*setValue)(subfx_handle vector,
+                                size_t index,
+                                const void *src);
+
+    subfx_exitstate (*clear)(subfx_handle vector);
+
+    subfx_exitstate (*size)(subfx_handle vector, size_t *dst);
+
+    subfx_exitstate (*capacity)(subfx_handle vector, size_t *dst);
+
+    subfx_exitstate (*reserve)(subfx_handle vector, size_t newSize);
+
+    subfx_exitstate (*pushback)(subfx_handle vector, const void *src);
+
+    subfx_exitstate (*resize)(subfx_handle vector,
+                              size_t newSize,
+                              const void *src);
+} subfx_vector;
 
 #ifdef __cplusplus
 }

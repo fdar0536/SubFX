@@ -1,7 +1,0 @@
-add_subdirectory(utils/test/logger)
-add_subdirectory(utils/test/map)
-add_subdirectory(utils/test/math)
-add_subdirectory(utils/test/misc)
-add_subdirectory(utils/test/ptrvector)
-add_subdirectory(utils/test/utf8)
-add_subdirectory(utils/test/vector)
