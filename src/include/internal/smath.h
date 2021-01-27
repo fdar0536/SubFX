@@ -19,6 +19,11 @@
 
 #pragma once
 
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "defines.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -33,6 +38,50 @@ typedef struct subfx_math
     double (*deg)(double r);
 
     double (*random)(double min, double max);
+
+    subfx_handle (*arc_curve)(double x, double y,
+                              double cx, double cy,
+                              double angle,
+                              char *errMsg);
+
+    double *(*bezier)(double pct,
+                      double *pts,
+                      size_t ptsCount,
+                      bool is3D,
+                      char *errMsg);
+
+    double (*degree)(double x1, double y1, double z1,
+                     double x2, double y2, double z2);
+
+    double (*distance)(double x, double y, double z);
+
+    double *(*line_intersect)(double x0, double y0,
+                              double x1, double y1,
+                              double x2, double y2,
+                              double x3, double y3,
+                              int strict, char *errMsg);
+
+    double *(*ortho)(double x1,double y1,double z1,
+                     double x2,double y2,double z2);
+
+    double (*randomsteps)(double min, double max,
+                          double step, char *errMsg);
+
+    double (*round)(double x, double dec);
+
+    double *(*stretch)(double x, double y, double z, double length);
+
+    double (*trim)(double x, double min, double max, char *errMsg);
+
+    double *(*ellipse)(double x, double y,
+                       double w, double h,double a);
+
+    double (*randomway)();
+
+    double *(*rotate)(const double *p,
+                      const char *axis,
+                      double angle,
+                      char *errMsg);
 } subfx_math;
 
 #ifdef __cplusplus

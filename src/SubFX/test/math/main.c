@@ -29,46 +29,41 @@
 #include <inttypes.h>
 #endif
 
+#include "testingcase.h"
 #include "SubFX.h"
+
+#define TESTING(x) \
+    if (x) \
+    { \
+        testFin(); \
+        return 1; \
+    }
 
 int main()
 {
-    SubFX *api = SubFX_init();
-    if (!api)
-    {
-        fputs("Fail to create api entry.\n", stderr);
-        return 1;
-    }
-
-    subfx_math *math = api->math;
-
-    double *pRet = math->rotate2d(1., 0., 90.);
-    if (!pRet)
-    {
-        fputs("Fail due to \"rotate2d\"", stderr);
-        SubFX_destroy(api);
-        return 1;
-    }
-
-    printf("%lf, %lf\n", pRet[0], pRet[1]);
-    free(pRet);
-    pRet = NULL;
-
-    double ret = math->rad(180);
-    printf("%lf\n", ret);
-    printf("%lf\n", math->deg(ret));
 #ifdef _WIN32
     srand((uint32_t)time(NULL));
 #else
     srand(time(NULL));
 #endif
-    uint8_t i;
-    for (i = 0; i < 5; ++i)
-    {
-        printf("%lf\n", math->random(-1., 1.));
-    }
-
-    SubFX_destroy(api);
+    TESTING(testInit());
+    TESTING(testRotate2d());
+    TESTING(testRadAndDeg());
+    TESTING(testRandom());
+    TESTING(testArcCurve());
+    TESTING(testBezier());
+    TESTING(testDegree());
+    TESTING(testDistance());
+    TESTING(testLineIntersect());
+    TESTING(testOrtho());
+    TESTING(testRandomsteps());
+    TESTING(testRound());
+    TESTING(testStretch());
+    TESTING(testTrim());
+    TESTING(testEllipse());
+    TESTING(testRandomway());
+    TESTING(testRotate());
+    testFin();
 
     return 0;
 }

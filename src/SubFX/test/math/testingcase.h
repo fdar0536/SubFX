@@ -25,6 +25,12 @@
 
 int testInit();
 
+int testRotate2d();
+
+int testRadAndDeg();
+
+int testRandom();
+
 int testArcCurve();
 
 int testBezier();

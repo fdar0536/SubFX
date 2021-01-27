@@ -27,7 +27,7 @@
 #include "testingcase.h"
 
 SubFX *subfx;
-subfx_yutils_math *math;
+subfx_math *math;
 char errMsg[1000];
 
 int testInit()
@@ -39,7 +39,47 @@ int testInit()
         return 1;
     }
 
-    math = subfx->yutils->math;
+    math = subfx->math;
+    return 0;
+}
+
+int testRotate2d()
+{
+    puts("Testing rotate2d");
+    double *pRet = math->rotate2d(1., 0., 90.);
+    if (!pRet)
+    {
+        fputs("Fail due to \"rotate2d\"", stderr);
+        SubFX_destroy(subfx);
+        return 1;
+    }
+
+    printf("%lf, %lf\n", pRet[0], pRet[1]);
+    free(pRet);
+    puts("rotate2d is pass");
+    return 0;
+}
+
+int testRadAndDeg()
+{
+    puts("Testing rad and deg");
+    double ret = math->rad(180);
+    printf("%lf\n", ret);
+    printf("%lf\n", math->deg(ret));
+    puts("rad and deg are pass");
+    return 0;
+}
+
+int testRandom()
+{
+    puts("Testing random");
+    uint8_t i;
+    for (i = 0; i < 5; ++i)
+    {
+        printf("%lf\n", math->random(-1., 1.));
+    }
+
+    puts("random is pass");
     return 0;
 }
 

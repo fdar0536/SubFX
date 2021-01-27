@@ -1,5 +1,7 @@
 add_executable(testMath
     main.c
+    testingcase.h
+    testingcase.c
 )
 
 add_dependencies(testMath SubFX)
