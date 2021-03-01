@@ -23,26 +23,52 @@
 extern "C"
 {
 #endif
-
+/**
+ * @enum subfx_exitstate
+ * It defines the return state from SubFX APIs.
+ */
 typedef enum subfx_exitstate
 {
-    subfx_success,
-    subfx_successWithWarning,
-    subfx_eof,
-    subfx_failed
+    subfx_success, /**< success */
+    subfx_successWithWarning, /**< success but with warning */
+    subfx_eof, /**< end of file */
+    subfx_failed /**< failed */
 } subfx_exitstate;
 
+/**
+ * @enum subfx_types
+ * The type ID for subfx_handle
+ */
 typedef enum subfx_types
 {
-    subfx_types_logger,
-    subfx_types_map,
-    subfx_types_ptrVector,
-    subfx_types_vector,
-    subfx_types_fonthandle
+    subfx_types_logger, /**< logger */
+    subfx_types_map, /**< map */
+    subfx_types_ptrVector, /**< vector of pointer */
+    subfx_types_vector, /**< vector */
+    subfx_types_fonthandle /**< font handle */
 } subfx_types;
 
+/**
+ * @typedef subfx_cmpFunc
+ * A function for comparison
+ * @param lhs
+ * @param rhs
+ * @return if the return value is less than 0, indicate lhs is less than rhs;
+ *         if the return value is equal to 0, indicate lhs is equal to rhs;
+ *         else the return value is greater than 0.
+ */
 typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
-typedef void (*subfx_freeFunc)(void *toBeFree);
+
+/**
+ * @typedef subfx_freeFunc
+ * A function for free memory
+ * @param toBeFreed the pointer to be freed
+ */
+typedef void (*subfx_freeFunc)(void *toBeFreed);
+
+/**
+ * a pointer for the object return from SubFX API.
+ */
 typedef void* subfx_handle;
 
 #ifdef __cplusplus

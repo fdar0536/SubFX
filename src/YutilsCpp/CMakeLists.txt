@@ -25,7 +25,7 @@ set(YutilsCpp_headers
 
 set(YutilsCpp_priv_headers
     YutilsCpp/ass.h
-    YutilsCpp/asscommon.h
+    # YutilsCpp/asscommon.h
     YutilsCpp/fonthandle.h
     YutilsCpp/init.h
     YutilsCpp/math.h
@@ -33,7 +33,7 @@ set(YutilsCpp_priv_headers
 
 set(YutilsCpp_src
     YutilsCpp/ass.cpp
-    YutilsCpp/asscommon.c
+    # YutilsCpp/asscommon.c
     YutilsCpp/init.c
     YutilsCpp/math.c
     YutilsCpp/fonthandle.cpp

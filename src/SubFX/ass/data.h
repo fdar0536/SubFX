@@ -19,20 +19,20 @@
 
 #pragma once
 
-#include "include/internal/yutilscpp/asscommon.h"
+#include "include/internal/ass/data.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-subfx_yutils_AssMeta *subfx_yutils_AssMeta_create();
+subfx_ass_meta *subfx_ass_meta_create();
 
-void subfx_yutils_AssMeta_destroy(subfx_yutils_AssMeta *);
+void subfx_ass_meta_destroy(subfx_ass_meta *);
 
-subfx_yutils_AssStyle *subfx_yutils_AssStyle_create();
+subfx_ass_style *subfx_ass_style_create();
 
-void subfx_yutils_AssStyle_destroy(subfx_yutils_AssStyle *);
+void subfx_ass_style_destroy(subfx_ass_style *);
 
 #ifdef __cplusplus
 }

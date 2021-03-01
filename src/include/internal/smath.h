@@ -29,14 +29,28 @@ extern "C"
 {
 #endif
 
+/**
+ * @struct subfx_math
+ *
+ * namespace "math"
+ */
 typedef struct subfx_math
 {
     double *(*rotate2d)(double x, double y, double angle);
 
+    /**
+     * Convert given degree to radian
+     */
     double (*rad)(double angle);
 
+    /**
+     * Convert given radian to degree
+     */
     double (*deg)(double r);
 
+    /**
+     *
+     */
     double (*random)(double min, double max);
 
     subfx_handle (*arc_curve)(double x, double y,

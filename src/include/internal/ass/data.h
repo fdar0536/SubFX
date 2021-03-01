@@ -31,16 +31,16 @@ extern "C"
 {
 #endif
 
-typedef struct subfx_yutils_AssMeta
+typedef struct subfx_ass_meta
 {
     uint8_t wrap_style;
     bool scaled_border_and_shadow;
     uint16_t play_res_x;
     uint16_t play_res_y;
     char *colorMatrix;
-} subfx_yutils_AssMeta;
+} subfx_ass_meta;
 
-typedef struct subfx_yutils_AssStyle
+typedef struct subfx_ass_style
 {
     char *fontname;
     int fontsize;
@@ -68,7 +68,29 @@ typedef struct subfx_yutils_AssStyle
     char *alpha3;
     char *color4;
     char *alpha4;
-} subfx_yutils_AssStyle;
+} subfx_ass_style;
+
+#define subfx_ass_symbol \
+    uint64_t start_time; \
+    uint64_t end_time; \
+    char *text; \
+    uint32_t i; \
+    uint64_t duration; \
+    uint64_t mid_time; \
+    double width; \
+    double height; \
+    double ascent; \
+    double descent; \
+    double internal_leading; \
+    double external_leading; \
+    double left; \
+    double center; \
+    double right; \
+    double x; \
+    double top; \
+    double middle; \
+    double bottom; \
+    double y;
 
 #ifdef __cplusplus
 }
@@ -80,41 +102,6 @@ namespace PROJ_NAMESPACE
 
 namespace Yutils
 {
-
-class AssStyle
-{
-public:
-    AssStyle() :
-    fontname("Arial"),
-    fontsize(20),
-    bold(ASS_FALSE),
-    italic(ASS_FALSE),
-    underline(ASS_FALSE),
-    strikeout(ASS_FALSE),
-    scale_x(100.),
-    scale_y(100.),
-    spaceing(0.),
-    angle(0.),
-    bolder_style(1),
-    outline(0.),
-    shadow(0.),
-    alignment(2),
-    margin_l(0.),
-    margin_r(0.),
-    margin_v(20.),
-    encoding(0),
-    color1("&HFFFFFF&"),
-    alpha1("&H00&"),
-    color2("&H000000&"),
-    alpha2("&H00&"),
-    color3("&HFFFFFF&"),
-    alpha3("&H00&"),
-    color4("&HFFFFFF&"),
-    alpha4("&H00&")
-    {}
-
-
-};
 
 class AssSymbol
 {
@@ -141,27 +128,6 @@ public:
     bottom(0.),
     y(0.)
     {}
-
-    uint64_t start_time;
-    uint64_t end_time;
-    std::string text;
-    uint32_t i;
-    uint64_t duration;
-    uint64_t mid_time;
-    double width;
-    double height;
-    double ascent;
-    double descent;
-    double internal_leading;
-    double external_leading;
-    double left;
-    double center;
-    double right;
-    double x;
-    double top;
-    double middle;
-    double bottom;
-    double y;
 };
 
 class AssTextChunked

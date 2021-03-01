@@ -46,6 +46,11 @@ extern "C"
 {
 #endif
 
+/**
+ * @struct SubFX
+ * This is main object for SubFX.
+ * All APIs are included in it.
+ */
 typedef struct SubFX
 {
     subfx_logger *logger;
@@ -66,15 +71,35 @@ typedef struct SubFX
 
     subfx_fonthandle *fonthandle;
 
+    /**
+     * Get object's type id.
+     * @param handle the object pointer return from SubFX APIs
+     * @param dst the pointer for store result
+     * @return please refer to subfx_exitstate
+     */
     subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
 
+    /**
+     * free the subfx_handle
+     * @param handle the object pointer return from SubFX APIs
+     * @return please refer to subfx_exitstate
+     */
     subfx_exitstate (*closeHandle)(subfx_handle handle);
 
+    /**
+     * @return it returns SubFX API's version.
+     */
     const char *(*version)();
 } SubFX;
 
+/**
+ * Initialize SubFX APIs. If fail, it will return NULL.
+ */
 SUBFX_API SubFX *SubFX_init();
 
+/**
+ * Destroy SubFX APIs' entries.
+ */
 SUBFX_API void SubFX_destroy(SubFX *);
 
 #ifdef __cplusplus

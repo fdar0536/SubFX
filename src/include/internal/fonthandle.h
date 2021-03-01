@@ -40,6 +40,21 @@ extern "C"
 
 typedef struct subfx_fonthandle
 {
+    /**
+     * @brief Create FontHandle object.
+     *
+     * @param family the font family.
+     * @param bold If true, font has bold weight.
+     * @param italic If true, font has italic style.
+     * @param underline If true, font has underline decoration.
+     * @param strikeout If true, font has strikeout decoration.
+     * @param size the font size.
+     * @param xscale can define horizontal scale.
+     * @param yscale can define vertical scale.
+     * @param hspace can define intercharacter space.
+     * @param errMsg you can pass buffer if you want to get the error message.
+     * @return If failed, it will return NULL.
+     */
     subfx_handle (*create)(const char *family,
                            bool bold,
                            bool italic,
@@ -51,11 +66,39 @@ typedef struct subfx_fonthandle
                            double hspace, // 0.
                            char *errMsg);
 
+    /**
+     * Returns font metrics as array with followings fields:
+     * subfx_fonthandle_metrics_height: font maximal height
+     * subfx_fonthandle_metrics_ascent: font ascent
+     * subfx_fonthandle_metrics_descent: font descent
+     * subfx_fonthandle_metrics_internal_leading: font internal leading
+     * subfx_fonthandle_metrics_external_leading: font external leading
+     *
+     * @param fonthandle the fonthandle return from create()
+     * @return If fail, it will return NULL.
+     */
     double *(*metrics)(subfx_handle fonthandle);
 
+    /**
+     * Returns extents of text with given font as array with followings fields:
+     * subfx_fonthandle_text_extents_width: text width
+     * subfx_fonthandle_text_extents_height: text height
+     *
+     * @param fonthandle the fonthandle return from create()
+     * @param text input text
+     * @return If fail, it will return NULL.
+     */
     double *(*text_extents)(subfx_handle fonthandle,
                             const char *text);
 
+    /**
+     * Converts text with given font to an ASS shape.
+     *
+     * @param fonthandle the fonthandle return from create()
+     * @param text input text
+     * @param errMsg you can pass buffer if you want to get the error message.
+     * @return If fail, it will return NULL.
+     */
     char *(*text_to_shape)(subfx_handle fonthandle,
                            const char *text, char *errMsg);
 } subfx_fonthandle;
