@@ -14,3 +14,7 @@ steps:
     branch:
       - master
       - c_api_approach
+trigger:
+event:
+- push
+- pull_request
