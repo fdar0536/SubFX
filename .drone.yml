@@ -15,6 +15,6 @@ steps:
       - master
       - c_api_approach
 trigger:
-event:
-- push
-- pull_request
+  event:
+  - push
+  - pull_request
