@@ -32,13 +32,6 @@
 #include "testingcase.h"
 #include "SubFX.h"
 
-#define TESTING(x) \
-    if (x) \
-    { \
-        testFin(); \
-        return 1; \
-    }
-
 int main()
 {
 #ifdef _WIN32
@@ -46,23 +39,17 @@ int main()
 #else
     srand(time(NULL));
 #endif
-    TESTING(testInit());
-    TESTING(testRotate2d());
-    TESTING(testRadAndDeg());
-    TESTING(testRandom());
-    TESTING(testArcCurve());
-    TESTING(testBezier());
-    TESTING(testDegree());
-    TESTING(testDistance());
-    TESTING(testLineIntersect());
-    TESTING(testOrtho());
-    TESTING(testRandomsteps());
-    TESTING(testRound());
-    TESTING(testStretch());
-    TESTING(testTrim());
-    TESTING(testEllipse());
-    TESTING(testRandomway());
-    TESTING(testRotate());
+
+    int i;
+    for (i = 1; i <= TESTING_CASES; ++i)
+    {
+        if (testFunc[i]())
+        {
+            testFin();
+            return 1;
+        }
+    }
+
     testFin();
 
     return 0;

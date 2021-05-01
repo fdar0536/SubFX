@@ -42,9 +42,6 @@ typedef enum subfx_exitstate
 typedef enum subfx_types
 {
     subfx_types_logger, /**< logger */
-    subfx_types_map, /**< map */
-    subfx_types_ptrVector, /**< vector of pointer */
-    subfx_types_vector, /**< vector */
     subfx_types_fonthandle /**< font handle */
 } subfx_types;
 

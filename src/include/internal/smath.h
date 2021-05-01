@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "fdsa/fdsa.h"
+
 #include "defines.h"
 
 #ifdef __cplusplus
@@ -53,10 +55,10 @@ typedef struct subfx_math
      */
     double (*random)(double min, double max);
 
-    subfx_handle (*arc_curve)(double x, double y,
-                              double cx, double cy,
-                              double angle,
-                              char *errMsg);
+    fdsa_handle (*arc_curve)(double x, double y,
+                             double cx, double cy,
+                             double angle,
+                             char *errMsg);
 
     double *(*bezier)(double pct,
                       double *pts,

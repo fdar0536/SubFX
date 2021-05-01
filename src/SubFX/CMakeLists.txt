@@ -32,12 +32,9 @@ set(subfx_main_header
 set(subfx_headers
     include/internal/defines.h
     include/internal/logger.h
-    include/internal/map.h
     include/internal/misc.h
-    include/internal/ptrvector.h
     include/internal/smath.h
     include/internal/utf8.h
-    include/internal/vector.h
 
     include/internal/ass.h
     # include/internal/ass/data.h
@@ -46,15 +43,13 @@ set(subfx_headers
 
 set(subfx_priv_headers
     SubFX/common.h
+    SubFX/global.h
     SubFX/subfx.h
     SubFX/types.h
     SubFX/logger.h
-    SubFX/map.h
     SubFX/misc.h
-    SubFX/ptrvector.h
     SubFX/smath.h
     SubFX/utf8.h
-    SubFX/vector.h
 
     SubFX/ass.h
     # SubFX/ass/data.h
@@ -64,17 +59,15 @@ set(subfx_priv_headers
 )
 
 set(subfx_src
+    SubFX/global.c
     SubFX/init.c
     SubFX/subfx.c
     SubFX/types.c
     SubFX/logger.c
     SubFX/init.c
-    SubFX/map.c
     SubFX/misc.c
-    SubFX/ptrvector.c
     SubFX/smath.c
     SubFX/utf8.c
-    SubFX/vector.c
 
     SubFX/ass.cpp
     # SubFX/ass/data.c
@@ -99,6 +92,9 @@ LIST(APPEND SubFX_libs ${Boost_REGEX_LIBRARY})
 if (WIN32)
     LIST(APPEND SubFX_libs ${Boost_LOCALE_LIBRARY})
 endif (WIN32)
+
+#fDSA
+LIST(APPEND SubFX_libs fDSA::fDSA)
 
 # eigen
 find_package(Eigen3 3.3.7 REQUIRED)

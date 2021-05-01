@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2020 fdar0536.
+*    Copyright(C) 2019-2021 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -19,25 +19,20 @@
 
 #pragma once
 
-#include "defines.h"
+#include <stdbool.h>
+
+#include "fdsa/fdsa.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct subfx_map
-{
-    subfx_handle (*create)(subfx_cmpFunc keyCmpFunc,
-                           subfx_freeFunc keyFreeFunc,
-                           subfx_freeFunc valueFreeFunc);
+bool globalInit();
 
-    void *(*at)(subfx_handle map, void *key);
+void globalFin();
 
-    subfx_exitstate (*insertNode)(subfx_handle map, void *key, void *value);
-
-    subfx_exitstate (*deleteNode)(subfx_handle map, void *key);
-} subfx_map;
+fDSA *getFDSA();
 
 #ifdef __cplusplus
 }

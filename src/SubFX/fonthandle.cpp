@@ -31,10 +31,10 @@
 #endif
 
 #include "common.h"
-#include "types.h"
-#include "misc.h"
-#include "ptrvector.h"
 #include "fonthandle.h"
+#include "global.h"
+#include "misc.h"
+#include "types.h"
 #include "smath.h"
 
 #define FONT_PRECISION 64
@@ -505,7 +505,7 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
         delete[] charWidths; \
     } \
      \
-    if (subfx_ptrVector_destroy(shape) == subfx_failed) \
+    if (fdsa->closeHandle(shape) == fdsa_failed) \
     { \
         subfx_pError(errMsg, "text_to_shape: you should" \
                              " never see this message."); \
@@ -514,7 +514,7 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
 #define cleanUp \
     cairo_new_path(handle->context); \
     cairo_path_destroy(path); \
-    if (subfx_ptrVector_destroy(shape) == subfx_failed) \
+    if (fdsa->closeHandle(shape) == fdsa_failed) \
     { \
         subfx_pError(errMsg, "text_to_shape: you should" \
                              " never see this message."); \
@@ -524,6 +524,12 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
 char *subfx_fonthandle_text_to_shape(subfx_handle in,
                                             const char *text, char *errMsg)
 {
+    fDSA *fdsa(getFDSA());
+    if (!fdsa)
+    {
+        return NULL;
+    }
+
     if (subfx_checkInput(in, subfx_types_fonthandle))
     {
         return NULL;
@@ -646,7 +652,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     GetPath(handle->dc, points, types, points_n);
 
-    subfx_handle shape(subfx_ptrVector_create(free));
+    fdsa_handle shape(fdsa->ptrVector->create(free));
     if (!shape)
     {
         if (!charWidths)
@@ -661,7 +667,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     }
 
     // may be larger or smaller?
-    if (subfx_ptrVector_reserve(shape, 2048) == subfx_failed)
+    if (fdsa->ptrVector->reserve(shape, 2048) == fdsa_failed)
     {
         if (!charWidths)
         {
@@ -696,7 +702,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "m", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -719,7 +725,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -738,7 +744,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -759,7 +765,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "l", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -781,7 +787,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -800,7 +806,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -821,7 +827,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "b", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -843,7 +849,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -862,7 +868,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -881,7 +887,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -900,7 +906,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -919,7 +925,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -938,7 +944,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -962,7 +968,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
             }
 
             memcpy(retStr, "c", 2);
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1007,7 +1013,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         return NULL;
     }
 
-    subfx_handle shape(subfx_ptrVector_create(free));
+    fdsa_handle shape(fdsa->ptrVector->create(free));
     if (!shape)
     {
         cairo_new_path(handle->context);
@@ -1016,7 +1022,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     }
 
     // may be larger or smaller?
-    if (subfx_ptrVector_reserve(shape, 2048) == subfx_failed)
+    if (fdsa->ptrVector->reserve(shape, 2048) == fdsa_failed)
     {
         cairo_new_path(handle->context);
         cairo_path_destroy(path);
@@ -1041,7 +1047,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "m", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1061,7 +1067,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1080,7 +1086,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1099,7 +1105,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "l", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1119,7 +1125,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1138,7 +1144,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1157,7 +1163,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "b", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1177,7 +1183,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1196,7 +1202,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1215,7 +1221,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1234,7 +1240,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1253,7 +1259,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1272,7 +1278,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1291,7 +1297,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "c", 2);
-                if (subfx_ptrVector_pushback(shape, retStr) == subfx_failed)
+                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1313,23 +1319,23 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 #endif
 
     // calculate how many buffer we need
-    if (subfx_ptrVector_size(shape, &retSize) == subfx_failed)
+    if (fdsa->ptrVector->size(shape, &retSize) == fdsa_failed)
     {
         subfx_pError(errMsg, "text_to_shape: you should"
                              " never see this message.");
-        static_cast<void>(subfx_ptrVector_destroy(shape));
+        static_cast<void>(fdsa->closeHandle(shape));
         return NULL;
     }
 
     size_t length(0);
     for (size_t index = 0; index < retSize; ++index)
     {
-        retStr = reinterpret_cast<char *>(subfx_ptrVector_at(shape, index));
+        retStr = reinterpret_cast<char *>(fdsa->ptrVector->at(shape, index));
         if (!retStr)
         {
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
-            static_cast<void>(subfx_ptrVector_destroy(shape));
+            static_cast<void>(fdsa->closeHandle(shape));
             return NULL;
         }
 
@@ -1341,7 +1347,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     retStr = reinterpret_cast<char *>(calloc(length, sizeof(char)));
     if (!retStr)
     {
-        if (subfx_ptrVector_destroy(shape) == subfx_failed)
+        if (fdsa->closeHandle(shape) == fdsa_failed)
         {
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
@@ -1354,13 +1360,13 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     char *tmpStr(NULL);
     for (size_t index = 0; index < retSize; ++index)
     {
-        tmpStr = reinterpret_cast<char *>(subfx_ptrVector_at(shape, index));
+        tmpStr = reinterpret_cast<char *>(fdsa->ptrVector->at(shape, index));
         if (!tmpStr)
         {
             free(retStr);
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
-            static_cast<void>(subfx_ptrVector_destroy(shape));
+            static_cast<void>(fdsa->closeHandle(shape));
             return NULL;
         }
 
@@ -1374,7 +1380,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     pStr[0] = '\0';
 
-    if (subfx_ptrVector_destroy(shape) == subfx_failed)
+    if (fdsa->closeHandle(shape) == fdsa_failed)
     {
         subfx_pError(errMsg, "text_to_shape: you should"
                              " never see this message.");

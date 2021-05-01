@@ -21,6 +21,8 @@
 
 #include <inttypes.h>
 
+#include "fdsa/fdsa.h"
+
 #include "defines.h"
 
 #ifdef __cplusplus
@@ -32,7 +34,7 @@ typedef struct subfx_utf8
 {
     uint32_t (*stringLen)(const char *str);
 
-    subfx_handle (*stringSplit)(const char *str, char *msg);
+    fdsa_handle (*stringSplit)(const char *str, char *msg);
 } subfx_utf8;
 
 #ifdef __cplusplus

@@ -45,8 +45,9 @@ int main()
 
     subfx_utf8 *utf8 = api->utf8;
     subfx_misc *misc = api->misc;
-    subfx_ptrVector *vec = api->ptrVector;
+    fdsa_ptrVector *vec = api->fdsa->ptrVector;
     subfx_exitstate state;
+    fdsa_exitstate fstate;
     uint8_t flag = 1;
 
     char buf[1000];
@@ -55,7 +56,7 @@ int main()
     char errMsg[1000];
     errMsg[0] = '\0';
 
-    subfx_handle handle = NULL;
+    fdsa_handle handle = NULL;
     size_t i, size;
     char *string = NULL;
 
@@ -78,11 +79,11 @@ int main()
                 return 1;
             }
 
-            state = vec->size(handle, &size);
-            if (state == subfx_failed)
+            fstate = vec->size(handle, &size);
+            if (fstate == fdsa_failed)
             {
                 fputs("Fail to get size", stderr);
-                if (api->closeHandle(handle) == subfx_failed)
+                if (api->fdsa->closeHandle(handle) == fdsa_failed)
                 {
                     fputs("Fail to close handle", stderr);
                 }
@@ -98,7 +99,7 @@ int main()
                 if (!string)
                 {
                     fputs("Fail due to access vector", stderr);
-                    if (api->closeHandle(handle) == subfx_failed)
+                    if (api->fdsa->closeHandle(handle) == fdsa_failed)
                     {
                         fputs("Fail to close handle", stderr);
                     }
@@ -111,7 +112,7 @@ int main()
                 puts(string);
             }
 
-            if (api->closeHandle(handle) == subfx_failed)
+            if (api->fdsa->closeHandle(handle) == fdsa_failed)
             {
                 fputs("Fail to close handle", stderr);
                 fclose(text);

@@ -21,9 +21,6 @@
 #include "subfx.h"
 #include "types.h"
 #include "logger.h"
-#include "map.h"
-#include "vector.h"
-#include "ptrvector.h"
 #include "fonthandle.h"
 
 subfx_exitstate subfx_getHandleType(subfx_handle in, subfx_types *dst)
@@ -52,18 +49,6 @@ subfx_exitstate subfx_closeHandle(subfx_handle in)
     case subfx_types_logger:
     {
         return subfx_logger_destroy(in);
-    }
-    case subfx_types_vector:
-    {
-        return subfx_vector_destroy(in);
-    }
-    case subfx_types_ptrVector:
-    {
-        return subfx_ptrVector_destroy(in);
-    }
-    case subfx_types_map:
-    {
-        return subfx_map_destroy(in);
     }
     case subfx_types_fonthandle:
     {

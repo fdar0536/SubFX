@@ -30,6 +30,28 @@ SubFX *subfx;
 subfx_math *math;
 char errMsg[1000];
 
+TestFunc testFunc[TESTING_CASES + 1] =
+{
+    NULL,
+    testInit,
+    testRotate2d,
+    testRadAndDeg,
+    testRandom,
+    testArcCurve,
+    testBezier,
+    testDegree,
+    testDistance,
+    testLineIntersect,
+    testOrtho,
+    testRandomsteps,
+    testRound,
+    testStretch,
+    testTrim,
+    testEllipse,
+    testRandomway,
+    testRotate
+};
+
 int testInit()
 {
     subfx = SubFX_init();
@@ -88,8 +110,8 @@ int testArcCurve()
     puts("Testing arc_curve");
 
     double testData[] = { 0., 720., 60. };
-    subfx_handle ret;
-    subfx_vector *vec = subfx->vector;
+    fdsa_handle ret;
+    fdsa_vector *vec = subfx->fdsa->vector;
     int i;
     size_t j, size;
     double first, second;
@@ -105,7 +127,7 @@ int testArcCurve()
             if (ret)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->closeHandle(ret) == subfx_failed)
+                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
@@ -128,10 +150,10 @@ int testArcCurve()
                 return 1;
             }
 
-            if (vec->size(ret, &size) == subfx_failed)
+            if (vec->size(ret, &size) == fdsa_failed)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->closeHandle(ret) == subfx_failed)
+                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
@@ -143,7 +165,7 @@ int testArcCurve()
             if (!size)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->closeHandle(ret) == subfx_failed)
+                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
@@ -154,10 +176,10 @@ int testArcCurve()
 
             for (j = 0; j < size; j += 2)
             {
-                if (vec->at(ret, j, &first) == subfx_failed)
+                if (vec->at(ret, j, &first) == fdsa_failed)
                 {
                     printf("Failed in arc_curve's case %d.\n", i);
-                    if (subfx->closeHandle(ret) == subfx_failed)
+                    if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
                     {
                         puts("Fail to close handle.");
                     }
@@ -166,10 +188,10 @@ int testArcCurve()
                     return 1;
                 }
 
-                if (vec->at(ret, j + 1, &second) == subfx_failed)
+                if (vec->at(ret, j + 1, &second) == fdsa_failed)
                 {
                     printf("Failed in arc_curve's case %d.\n", i);
-                    if (subfx->closeHandle(ret) == subfx_failed)
+                    if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
                     {
                         puts("Fail to close handle.");
                     }
@@ -181,7 +203,7 @@ int testArcCurve()
                 printf("%lf, %lf\n", first, second);
             } // end for (j = 0; j < size; j += 2)
 
-            if (subfx->closeHandle(ret) == subfx_failed)
+            if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
             {
                 puts("Fail to close handle.");
                 SubFX_destroy(subfx);

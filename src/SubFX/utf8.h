@@ -33,7 +33,7 @@ subfx_utf8 *subfx_utf8_init();
 uint32_t subfx_utf8_stringLen(const char *);
 
 // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
-subfx_handle subfx_utf8_stringSplit(const char *, char *);
+fdsa_handle subfx_utf8_stringSplit(const char *, char *);
 
 #ifdef __cplusplus
 }

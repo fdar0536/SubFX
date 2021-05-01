@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "ptrvector.h"
+#include "global.h"
 #include "utf8.h"
 
 subfx_utf8 *subfx_utf8_init()
@@ -52,18 +52,24 @@ uint32_t subfx_utf8_stringLen(const char *utf8str)
     return len;
 } // end subfx_utf8_stringLen
 
-subfx_handle subfx_utf8_stringSplit(const char *utf8str,
-                                    char *msg)
+fdsa_handle subfx_utf8_stringSplit(const char *utf8str,
+                                   char *msg)
 {
-    subfx_handle ret = subfx_ptrVector_create(free);
+    fDSA *fdsa = getFDSA();
+    if (!fdsa)
+    {
+        return NULL;
+    }
+
+    fdsa_handle ret = fdsa->ptrVector->create(free);
     if (!ret)
     {
         return NULL;
     }
 
-    if (subfx_ptrVector_reserve(ret, 20) == subfx_failed)
+    if (fdsa->ptrVector->reserve(ret, 20) == fdsa_failed)
     {
-        if (subfx_ptrVector_destroy(ret) == subfx_failed)
+        if (fdsa->closeHandle(ret) == fdsa_failed)
         {
             subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle");
         }
@@ -90,7 +96,7 @@ subfx_handle subfx_utf8_stringSplit(const char *utf8str,
         str = calloc(len + 1, sizeof(char));
         if (!str)
         {
-            if (subfx_ptrVector_destroy(ret) == subfx_failed)
+            if (fdsa->closeHandle(ret) == fdsa_failed)
             {
                 subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle");
             }
@@ -101,9 +107,9 @@ subfx_handle subfx_utf8_stringSplit(const char *utf8str,
         strncpy(str, utf8str + i, len);
         str[len] = '\0';
 
-        if (subfx_ptrVector_pushback(ret, str) == subfx_failed)
+        if (fdsa->ptrVector->pushback(ret, str) == fdsa_failed)
         {
-            if (subfx_ptrVector_destroy(ret) == subfx_failed)
+            if (fdsa->closeHandle(ret) == fdsa_failed)
             {
                 subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle")
             }

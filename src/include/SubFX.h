@@ -21,12 +21,9 @@
 
 #include "internal/defines.h"
 #include "internal/logger.h"
-#include "internal/map.h"
 #include "internal/misc.h"
-#include "internal/ptrvector.h"
 #include "internal/smath.h"
 #include "internal/utf8.h"
-#include "internal/vector.h"
 
 #include "internal/ass.h"
 #include "internal/fonthandle.h"
@@ -53,19 +50,16 @@ extern "C"
  */
 typedef struct SubFX
 {
+
+    fDSA *fdsa;
+
     subfx_logger *logger;
 
-    subfx_map *map;
-
     subfx_misc *misc;
-
-    subfx_ptrVector *ptrVector;
 
     subfx_math *math;
 
     subfx_utf8 *utf8;
-
-    subfx_vector *vector;
 
     subfx_ass *ass;
 

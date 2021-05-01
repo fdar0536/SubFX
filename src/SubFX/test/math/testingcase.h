@@ -1,6 +1,6 @@
 /*
  * This file is part of SubFX,
- * Copyright (c) 2020 fdar0536
+ * Copyright (c) 2020-2021 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,11 @@
  */
 
 #pragma once
+
+#define TESTING_CASES 17
+typedef int (*TestFunc)();
+
+extern TestFunc testFunc[TESTING_CASES + 1];
 
 int testInit();
 

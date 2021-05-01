@@ -20,14 +20,13 @@
 #include <stdlib.h>
 
 #include "include/SubFX.h"
-#include "subfx.h"
+
+#include "global.h"
 #include "logger.h"
-#include "map.h"
 #include "misc.h"
-#include "ptrvector.h"
 #include "smath.h"
+#include "subfx.h"
 #include "utf8.h"
-#include "vector.h"
 
 #include "ass.h"
 #include "fonthandle.h"
@@ -41,12 +40,9 @@ SUBFX_API SubFX *SubFX_init()
     }
 
     ret->logger = NULL;
-    ret->map = NULL;
     ret->misc = NULL;
-    ret->ptrVector = NULL;
     ret->math = NULL;
     ret->utf8 = NULL;
-    ret->vector = NULL;
 
     ret->ass = NULL;
     ret->fonthandle = NULL;
@@ -58,22 +54,8 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
-    ret->map = subfx_map_init();
-    if (!ret->map)
-    {
-        SubFX_destroy(ret);
-        return NULL;
-    }
-
     ret->misc = subfx_misc_init();
     if (!ret->misc)
-    {
-        SubFX_destroy(ret);
-        return NULL;
-    }
-
-    ret->ptrVector = subfx_ptrVector_init();
-    if (!ret->ptrVector)
     {
         SubFX_destroy(ret);
         return NULL;
@@ -93,19 +75,13 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
-    ret->vector = subfx_vector_init();
-    if (!ret->vector)
-    {
-        SubFX_destroy(ret);
-        return NULL;
-    }
-
     ret->ass = subfx_ass_init();
     if (!ret->ass)
     {
         SubFX_destroy(ret);
         return NULL;
     }
+
     ret->fonthandle = subfx_fonthandle_init();
     if (!ret->fonthandle)
     {
@@ -113,6 +89,13 @@ SUBFX_API SubFX *SubFX_init()
         return NULL;
     }
 
+    if (!globalInit())
+    {
+        SubFX_destroy(ret);
+        return NULL;
+    }
+
+    ret->fdsa = getFDSA();
     ret->getHandleType = subfx_getHandleType;
     ret->closeHandle = subfx_closeHandle;
     ret->version = subfx_version;
@@ -127,14 +110,12 @@ SUBFX_API void SubFX_destroy(SubFX *in)
     }
 
     if (in->logger) free(in->logger);
-    if (in->map) free(in->map);
     if (in->misc) free(in->misc);
-    if (in->ptrVector) free(in->ptrVector);
     if (in->math) free(in->math);
     if (in->utf8) free(in->utf8);
-    if (in->vector) free(in->vector);
 
     if (in->ass) free(in->ass);
     if (in->fonthandle) free(in->fonthandle);
+    globalFin();
     free(in);
 }

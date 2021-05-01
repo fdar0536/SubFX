@@ -18,6 +18,8 @@ else () # windows
     find_package(ICU 64.2 REQUIRED COMPONENTS uc in)
 endif (UNIX)
 
+find_package(fDSA 0.0.1 REQUIRED)
+
 option(SUBFX_ENABLE_SIMD "Enable X86 SIMD, include SSE" ON)
 if(SUBFX_ENABLE_SIMD)
     option(SUBFX_ENABLE_AVX "Enable AVX" ON)

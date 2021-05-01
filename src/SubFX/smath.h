@@ -39,7 +39,7 @@ double subfx_math_deg(double);
 // math.random
 double subfx_math_random(double, double);
 
-subfx_handle
+fdsa_handle
 subfx_math_arc_curve(double x, double y,
                      double cx, double cy,
                      double angle,
