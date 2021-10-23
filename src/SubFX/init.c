@@ -31,91 +31,49 @@
 #include "ass.h"
 #include "fonthandle.h"
 
-SUBFX_API SubFX *SubFX_init()
+SUBFX_API subfx_exitstate SubFX_init(SubFX *ret)
 {
-    SubFX *ret = calloc(1, sizeof(SubFX));
     if (!ret)
     {
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->logger = NULL;
-    ret->misc = NULL;
-    ret->math = NULL;
-    ret->utf8 = NULL;
-
-    ret->ass = NULL;
-    ret->fonthandle = NULL;
-
-    ret->logger = subfx_logger_init();
-    if (!ret->logger)
+    if (subfx_logger_init(&ret->logger) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->misc = subfx_misc_init();
-    if (!ret->misc)
+    if (subfx_misc_init(&ret->misc) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->math = subfx_math_init();
-    if (!ret->math)
+    if (subfx_math_init(&ret->math) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->utf8 = subfx_utf8_init();
-    if (!ret->utf8)
+    if (subfx_utf8_init(&ret->utf8) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->ass = subfx_ass_init();
-    if (!ret->ass)
+    if (subfx_ass_init(&ret->ass) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->fonthandle = subfx_fonthandle_init();
-    if (!ret->fonthandle)
+    if (subfx_fontHandle_init(&ret->fontHandle) == subfx_failed)
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
     if (!globalInit())
     {
-        SubFX_destroy(ret);
-        return NULL;
+        return subfx_failed;
     }
 
     ret->fdsa = getFDSA();
-    ret->getHandleType = subfx_getHandleType;
-    ret->closeHandle = subfx_closeHandle;
     ret->version = subfx_version;
-    return ret;
-}
-
-SUBFX_API void SubFX_destroy(SubFX *in)
-{
-    if (!in)
-    {
-        return;
-    }
-
-    if (in->logger) free(in->logger);
-    if (in->misc) free(in->misc);
-    if (in->math) free(in->math);
-    if (in->utf8) free(in->utf8);
-
-    if (in->ass) free(in->ass);
-    if (in->fonthandle) free(in->fonthandle);
-    globalFin();
-    free(in);
+    return subfx_success;
 }

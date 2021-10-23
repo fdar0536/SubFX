@@ -25,18 +25,17 @@
 #include "global.h"
 #include "utf8.h"
 
-subfx_utf8 *subfx_utf8_init()
+subfx_exitstate subfx_utf8_init(subfx_utf8_api *utf8)
 {
-    subfx_utf8 *utf8 = calloc(1, sizeof(subfx_utf8));
     if (!utf8)
     {
-        return NULL;
+        return subfx_failed;
     }
 
     utf8->stringLen = subfx_utf8_stringLen;
     utf8->stringSplit = subfx_utf8_stringSplit;
 
-    return utf8;
+    return subfx_success;
 }
 
 uint32_t subfx_utf8_stringLen(const char *utf8str)
@@ -52,8 +51,8 @@ uint32_t subfx_utf8_stringLen(const char *utf8str)
     return len;
 } // end subfx_utf8_stringLen
 
-fdsa_handle subfx_utf8_stringSplit(const char *utf8str,
-                                   char *msg)
+fdsa_ptrVector *subfx_utf8_stringSplit(const char *utf8str,
+                                       char *msg)
 {
     fDSA *fdsa = getFDSA();
     if (!fdsa)
@@ -61,15 +60,15 @@ fdsa_handle subfx_utf8_stringSplit(const char *utf8str,
         return NULL;
     }
 
-    fdsa_handle ret = fdsa->ptrVector->create(free);
+    fdsa_ptrVector *ret = fdsa->ptrVector.create(free);
     if (!ret)
     {
         return NULL;
     }
 
-    if (fdsa->ptrVector->reserve(ret, 20) == fdsa_failed)
+    if (fdsa->ptrVector.reserve(ret, 20) == fdsa_failed)
     {
-        if (fdsa->closeHandle(ret) == fdsa_failed)
+        if (fdsa->ptrVector.destory(ret) == fdsa_failed)
         {
             subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle");
         }
@@ -96,7 +95,7 @@ fdsa_handle subfx_utf8_stringSplit(const char *utf8str,
         str = calloc(len + 1, sizeof(char));
         if (!str)
         {
-            if (fdsa->closeHandle(ret) == fdsa_failed)
+            if (fdsa->ptrVector.destory(ret) == fdsa_failed)
             {
                 subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle");
             }
@@ -107,9 +106,9 @@ fdsa_handle subfx_utf8_stringSplit(const char *utf8str,
         strncpy(str, utf8str + i, len);
         str[len] = '\0';
 
-        if (fdsa->ptrVector->pushback(ret, str) == fdsa_failed)
+        if (fdsa->ptrVector.pushBack(ret, str) == fdsa_failed)
         {
-            if (fdsa->closeHandle(ret) == fdsa_failed)
+            if (fdsa->ptrVector.destory(ret) == fdsa_failed)
             {
                 subfx_pError(msg, "utf8->stringSplit: Fail to destroy handle")
             }

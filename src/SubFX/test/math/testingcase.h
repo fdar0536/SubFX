@@ -61,5 +61,3 @@ int testEllipse();
 int testRandomway();
 
 int testRotate();
-
-void testFin();

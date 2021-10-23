@@ -21,29 +21,27 @@
 #include <string.h>
 
 #include "logger.h"
-#include "types.h"
 
-subfx_logger
-*subfx_logger_init()
+subfx_exitstate subfx_logger_init(subfx_logger_api *logger)
 {
-    subfx_logger *logger = calloc(1, sizeof(subfx_logger));
     if (!logger)
     {
-        return NULL;
+        return subfx_failed;
     }
 
     logger->create = subfx_logger_create;
     logger->create2 = subfx_logger_create2;
+    logger->destory = subfx_logger_destroy;
     logger->writeOut = subfx_logger_writeOut;
     logger->writeErr = subfx_logger_writeErr;
 
-    return logger;
+    return subfx_success;
 }
 
-subfx_handle
-subfx_logger_create(FILE *out,
-                    FILE *err,
-                    bool autoCloseFiles)
+subfx_logger
+*subfx_logger_create(FILE *out,
+                     FILE *err,
+                     bool autoCloseFiles)
 {
     if (!out || !err)
     {
@@ -56,9 +54,9 @@ subfx_logger_create(FILE *out,
                                        false);
 }
 
-subfx_handle
-subfx_logger_create2(const char *outFile,
-                     const char *errFile)
+subfx_logger
+*subfx_logger_create2(const char *outFile,
+                      const char *errFile)
 {
     FILE *out = NULL;
     FILE *err = NULL;
@@ -86,14 +84,13 @@ subfx_logger_create2(const char *outFile,
     return subfx_logger_createInternal(out, err, true, true);
 }
 
-subfx_exitstate subfx_logger_destroy(subfx_handle in)
+subfx_exitstate subfx_logger_destroy(subfx_logger *logger)
 {
-    if (subfx_checkInput(in, subfx_types_logger))
+    if (!logger)
     {
         return subfx_failed;
     }
 
-    Logger *logger = (Logger *)in;
     if (logger->haveToCloseFiles == true)
     {
         subfx_logger_closeFiles(logger->out, logger->err);
@@ -104,40 +101,38 @@ subfx_exitstate subfx_logger_destroy(subfx_handle in)
     return subfx_success;
 }
 
-subfx_exitstate subfx_logger_writeOut(subfx_handle in,
+subfx_exitstate subfx_logger_writeOut(subfx_logger *logger,
                                       const char *msg)
 {
-    if (subfx_checkInput(in, subfx_types_logger))
+    if (!logger)
     {
         return subfx_failed;
     }
 
-    Logger *logger = (Logger *)in;
     fprintf(logger->out, "%s", msg);
 
     return subfx_success;
 }
 
-subfx_exitstate subfx_logger_writeErr(subfx_handle in,
+subfx_exitstate subfx_logger_writeErr(subfx_logger *logger,
                                       const char *msg)
 {
-    if (subfx_checkInput(in, subfx_types_logger))
+    if (!logger)
     {
         return subfx_failed;
     }
 
-    Logger *logger = (Logger *)in;
     fprintf(logger->err, "%s", msg);
 
     return subfx_success;
 }
 
-subfx_handle subfx_logger_createInternal(FILE *out,
-                                         FILE *err,
-                                         bool autoCloseFiles,
-                                         bool haveToCloseFiles)
+subfx_logger *subfx_logger_createInternal(FILE *out,
+                                          FILE *err,
+                                          bool autoCloseFiles,
+                                          bool haveToCloseFiles)
 {
-    Logger *ret = calloc(1, sizeof(Logger));
+    subfx_logger *ret = calloc(1, sizeof(subfx_logger));
     if (!ret)
     {
         if (haveToCloseFiles == true)

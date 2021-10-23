@@ -26,27 +26,27 @@ extern "C"
 {
 #endif
 
-subfx_fonthandle *subfx_fonthandle_init();
+subfx_exitstate subfx_fontHandle_init(subfx_fontHandle_api *);
 
-subfx_handle subfx_fonthandle_create(const char *family,
-                                     bool bold,
-                                     bool italic,
-                                     bool underline,
-                                     bool strikeout,
-                                     int32_t size,
-                                     double xscale, // 1.
-                                     double yscale, // 1.
-                                     double hspace, // 0.
-                                     char *errMsg);
+subfx_fontHandle *subfx_fontHandle_create(const char *family,
+                                          bool bold,
+                                          bool italic,
+                                          bool underline,
+                                          bool strikeout,
+                                          int32_t size,
+                                          double xscale, // 1.
+                                          double yscale, // 1.
+                                          double hspace, // 0.
+                                          char *errMsg);
 
-subfx_exitstate subfx_fonthandle_destroy(subfx_handle);
+subfx_exitstate subfx_fontHandle_destroy(subfx_fontHandle *);
 
-double *subfx_fonthandle_metrics(subfx_handle);
+double *subfx_fontHandle_metrics(subfx_fontHandle *);
 
-double *subfx_fonthandle_text_extents(subfx_handle fonthandle,
+double *subfx_fontHandle_text_extents(subfx_fontHandle *fontHandle,
                                       const char *text);
 
-char *subfx_fonthandle_text_to_shape(subfx_handle fonthandle,
+char *subfx_fontHandle_text_to_shape(subfx_fontHandle *fontHandle,
                                      const char *text, char *errMsg);
 
 #ifdef __cplusplus

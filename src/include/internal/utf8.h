@@ -30,12 +30,12 @@ extern "C"
 {
 #endif
 
-typedef struct subfx_utf8
+typedef struct subfx_utf8_api
 {
     uint32_t (*stringLen)(const char *str);
 
-    fdsa_handle (*stringSplit)(const char *str, char *msg);
-} subfx_utf8;
+    fdsa_ptrVector *(*stringSplit)(const char *str, char *msg);
+} subfx_utf8_api;
 
 #ifdef __cplusplus
 }

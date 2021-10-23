@@ -30,8 +30,6 @@ extern "C"
 
 bool globalInit();
 
-void globalFin();
-
 fDSA *getFDSA();
 
 #ifdef __cplusplus

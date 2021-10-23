@@ -36,7 +36,7 @@ extern "C"
  *
  * namespace "math"
  */
-typedef struct subfx_math
+typedef struct subfx_math_api
 {
     double *(*rotate2d)(double x, double y, double angle);
 
@@ -55,10 +55,10 @@ typedef struct subfx_math
      */
     double (*random)(double min, double max);
 
-    fdsa_handle (*arc_curve)(double x, double y,
-                             double cx, double cy,
-                             double angle,
-                             char *errMsg);
+    fdsa_vector *(*arc_curve)(double x, double y,
+                              double cx, double cy,
+                              double angle,
+                              char *errMsg);
 
     double *(*bezier)(double pct,
                       double *pts,
@@ -98,7 +98,7 @@ typedef struct subfx_math
                       const char *axis,
                       double angle,
                       char *errMsg);
-} subfx_math;
+} subfx_math_api;
 
 #ifdef __cplusplus
 }

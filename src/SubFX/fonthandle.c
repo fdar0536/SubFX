@@ -17,15 +17,10 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include <new>
-
-#include <cstring>
+#include <string.h>
 
 #ifdef _WIN32
-#include <string>
-
 #include "windows.h"
-#include "boost/locale.hpp"
 #else
 #include "pango/pangocairo.h"
 #endif
@@ -34,18 +29,12 @@
 #include "fonthandle.h"
 #include "global.h"
 #include "misc.h"
-#include "types.h"
 #include "smath.h"
 
 #define FONT_PRECISION 64
 
-extern "C"
+typedef struct subfx_fontHandle
 {
-
-typedef struct FontHandle
-{
-    subfx_types id;
-
 #ifdef _WIN32
     HDC dc;
 
@@ -71,35 +60,34 @@ typedef struct FontHandle
     double yscale;
 
     double downscale;
-} FontHandle;
+} subfx_fontHandle;
 
-subfx_fonthandle *subfx_fonthandle_init()
+subfx_exitstate subfx_fontHandle_init(subfx_fontHandle_api *ret)
 {
-    subfx_fonthandle *ret(reinterpret_cast<subfx_fonthandle *>
-                          (calloc(1, sizeof(subfx_fonthandle))));
     if (!ret)
     {
-        return NULL;
+        return subfx_failed;
     }
 
-    ret->create = subfx_fonthandle_create;
-    ret->metrics = subfx_fonthandle_metrics;
-    ret->text_extents = subfx_fonthandle_text_extents;
-    ret->text_to_shape = subfx_fonthandle_text_to_shape;
+    ret->create = subfx_fontHandle_create;
+    ret->destory = subfx_fontHandle_destroy;
+    ret->metrics = subfx_fontHandle_metrics;
+    ret->text_extents = subfx_fontHandle_text_extents;
+    ret->text_to_shape = subfx_fontHandle_text_to_shape;
 
-    return ret;
+    return subfx_success;
 }
 
-subfx_handle subfx_fonthandle_create(const char *family,
-                                     bool bold,
-                                     bool italic,
-                                     bool underline,
-                                     bool strikeout,
-                                     int32_t size,
-                                     double xscale, // 1.
-                                     double yscale, // 1.
-                                     double hspace, // 0.
-                                     char *errMsg)
+subfx_fontHandle *subfx_fontHandle_create(const char *family,
+                                          bool bold,
+                                          bool italic,
+                                          bool underline,
+                                          bool strikeout,
+                                          int32_t size,
+                                          double xscale, // 1.
+                                          double yscale, // 1.
+                                          double hspace, // 0.
+                                          char *errMsg)
 {
     if (size <= 0)
     {
@@ -108,28 +96,25 @@ subfx_handle subfx_fonthandle_create(const char *family,
         return NULL;
     }
 
-    FontHandle *ret(reinterpret_cast<FontHandle *>
-                    (calloc(1, sizeof(FontHandle))));
+    subfx_fontHandle *ret = calloc(1, sizeof(subfx_fontHandle));
     if (!ret)
     {
         return NULL;
     }
 
-    ret->id = subfx_types_fonthandle;
     ret->xscale = xscale;
     ret->yscale = yscale;
 #ifdef _WIN32
     ret->hspace = hspace;
     ret->upscale = FONT_PRECISION;
-    ret->downscale = (1.f / static_cast<double>(ret->upscale));
+    ret->downscale = (1.f / (double)ret->upscale);
     ret->dc = NULL;
     ret->font = NULL;
     ret->old_font = NULL;
 
-    std::wstring family_dst(boost::locale::conv::utf_to_utf<wchar_t>(family));
-    if (wcslen(family_dst.c_str()) > 31)
+    if (strlen(family) > 31)
     {
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         subfx_pError(errMsg,
                      "FontHandle->create: family name too long");
     }
@@ -137,7 +122,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
     ret->dc = CreateCompatibleDC(NULL);
     if (!ret->dc)
     {
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -145,7 +130,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -153,11 +138,11 @@ subfx_handle subfx_fonthandle_create(const char *family,
     if (res == 0)
     {
         DeleteDC(ret->dc);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
-    ret->font = CreateFontW(
+    ret->font = CreateFontA(
         size * ret->upscale, // nHeight
         0,    // nWidth
         0,    // nEscapement
@@ -171,20 +156,20 @@ subfx_handle subfx_fonthandle_create(const char *family,
         CLIP_DEFAULT_PRECIS,    // fdwClipPrecision
         ANTIALIASED_QUALITY,    // fdwQuality
         DEFAULT_PITCH + FF_DONTCARE,    // fdwPitchAndFamily
-        family_dst.c_str()
+        family
     );
 
     if (!ret->font)
     {
         DeleteDC(ret->dc);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
     ret->old_font = SelectObject(ret->dc, ret->font);
 #else
     int upscale(FONT_PRECISION);
-    ret->downscale = (1. / static_cast<double>(upscale));
+    ret->downscale = (1. / (double)upscale);
     ret->surface = NULL;
     ret->context = NULL;
     ret->layout = NULL;
@@ -193,7 +178,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
     ret->surface = cairo_image_surface_create(CAIRO_FORMAT_A8, 1, 1);
     if (!ret->surface)
     {
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -201,7 +186,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
     if (!ret->context)
     {
         cairo_surface_destroy(ret->surface);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -210,7 +195,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
     {
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -221,7 +206,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -243,7 +228,7 @@ subfx_handle subfx_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
@@ -269,16 +254,16 @@ subfx_handle subfx_fonthandle_create(const char *family,
         g_object_unref(ret->layout);
         cairo_destroy(ret->context);
         cairo_surface_destroy(ret->surface);
-        subfx_fonthandle_destroy(ret);
+        subfx_fontHandle_destroy(ret);
         return NULL;
     }
 
-    double ascent(static_cast<double>(pango_font_metrics_get_ascent(metrics)));
-    double descent(static_cast<double>(pango_font_metrics_get_descent(metrics)));
+    double ascent((double)pango_font_metrics_get_ascent(metrics));
+    double descent((double)pango_font_metrics_get_descent(metrics));
 
     ret->fonthack_scale = size /
                          ((ascent + descent) /
-                           static_cast<double>(PANGO_SCALE) *
+                           (double)PANGO_SCALE *
                            ret->downscale);
 
     pango_font_metrics_unref(metrics);
@@ -289,14 +274,9 @@ subfx_handle subfx_fonthandle_create(const char *family,
     return ret;
 }
 
-subfx_exitstate subfx_fonthandle_destroy(subfx_handle in)
+subfx_exitstate subfx_fontHandle_destroy(subfx_fontHandle *handle)
 {
-    if (subfx_checkInput(in, subfx_types_fonthandle))
-    {
-        return subfx_failed;
-    }
-
-    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
+    if (!handle) return subfx_failed;
 
 #ifdef _WIN32
     SelectObject(handle->dc, handle->old_font);
@@ -308,28 +288,25 @@ subfx_exitstate subfx_fonthandle_destroy(subfx_handle in)
     cairo_surface_destroy(handle->surface);
 #endif
 
-    free(in);
-
+    free(handle);
     return subfx_success;
 }
 
-double *subfx_fonthandle_metrics(subfx_handle in)
+double *subfx_fontHandle_metrics(subfx_fontHandle *handle)
 {
-    if (subfx_checkInput(in, subfx_types_fonthandle))
+    if (!handle)
     {
         return NULL;
     }
 
-    double *ret(reinterpret_cast<double *>(calloc(5, sizeof(double))));
+    double *ret = calloc(5, sizeof(double));
     if (!ret)
     {
         return NULL;
     }
 
-    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
-
 #ifdef _WIN32
-    TEXTMETRICW  *fontMetrics(new (std::nothrow) TEXTMETRICW);
+    TEXTMETRICW  *fontMetrics = calloc(1, sizeof(TEXTMETRICW));
     if (!fontMetrics)
     {
         free(ret);
@@ -338,7 +315,7 @@ double *subfx_fonthandle_metrics(subfx_handle in)
 
     if (GetTextMetricsW(handle->dc, fontMetrics) == 0)
     {
-        delete fontMetrics;
+        free(fontMetrics);
         free(ret);
         return NULL;
     }
@@ -368,7 +345,7 @@ double *subfx_fonthandle_metrics(subfx_handle in)
             handle->downscale *
             handle->yscale;
 
-    delete fontMetrics;
+    free(fontMetrics);
 #else
     PangoFontMetrics *fontMetrics(pango_context_get_metrics(
         pango_layout_get_context(handle->layout),
@@ -382,14 +359,10 @@ double *subfx_fonthandle_metrics(subfx_handle in)
         return NULL;
     }
 
-    double ascent(
-                static_cast<double>
-                (pango_font_metrics_get_ascent(fontMetrics)));
+    double ascent = (double)pango_font_metrics_get_ascent(fontMetrics);
     ascent = ascent / PANGO_SCALE * handle->downscale;
 
-    double descent =
-            static_cast<double>
-            (pango_font_metrics_get_descent(fontMetrics));
+    double descent = (double)pango_font_metrics_get_descent(fontMetrics);
     descent = descent / PANGO_SCALE * handle->downscale;
     pango_font_metrics_unref(fontMetrics);
 
@@ -421,37 +394,34 @@ double *subfx_fonthandle_metrics(subfx_handle in)
     return ret;
 }
 
-double *subfx_fonthandle_text_extents(subfx_handle in,
-                                             const char *text)
+double *subfx_fontHandle_text_extents(subfx_fontHandle *handle,
+                                      const char *text)
 {
-    if (subfx_checkInput(in, subfx_types_fonthandle))
+    if (!handle)
     {
         return NULL;
     }
 
-    double *ret(reinterpret_cast<double *>(calloc(2, sizeof(double))));
+    double *ret = calloc(2, sizeof(double));
     if (!ret)
     {
         return NULL;
     }
 
-    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
-
 #ifdef _WIN32
-    std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
-    size_t textLen = wcslen(textDst.c_str());
+    size_t textLen = strlen(text);
 
-    SIZE *size(new (std::nothrow) SIZE);
+    SIZE *size = calloc(1, sizeof(SIZE));
     if (!size)
     {
         free(ret);
         return NULL;
     }
 
-    if (GetTextExtentPoint32W(handle->dc, textDst.c_str(),
-                              static_cast<int>(textLen), size) == 0)
+    if (GetTextExtentPoint32A(handle->dc, text,
+                              (int)textLen, size) == 0)
     {
-        delete size;
+        free(size);
         free(ret);
         return NULL;
     }
@@ -459,17 +429,17 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
     ret[subfx_fonthandle_text_extents_width] =
             (size->cx * handle->downscale +
              handle->hspace * textLen) *
-            handle->xscale;
+             handle->xscale;
 
     ret[subfx_fonthandle_text_extents_height] =
             size->cy *
             handle->downscale *
             handle->yscale;
 
-    delete size;
+    free(size);
 #else
     pango_layout_set_text(handle->layout, text, -1);
-    PangoRectangle *rect(new (std::nothrow) PangoRectangle);
+    PangoRectangle *rect = calloc(1, sizeof(PangoRectangle));
     if (!rect)
     {
         free(ret);
@@ -489,7 +459,7 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
             handle->yscale *
             handle->fonthack_scale;
 
-    delete rect;
+    free(rect);
 #endif
 
     return ret;
@@ -498,14 +468,14 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
 #ifdef _WIN32
 #define cleanUp \
     AbortPath(handle->dc); \
-    delete[] points; \
-    delete[] types; \
+    free(points); \
+    free(types); \
     if (!charWidths) \
     { \
-        delete[] charWidths; \
+        free(charWidths); \
     } \
      \
-    if (fdsa->closeHandle(shape) == fdsa_failed) \
+    if (fdsa->ptrVector.destory(shape) == fdsa_failed) \
     { \
         subfx_pError(errMsg, "text_to_shape: you should" \
                              " never see this message."); \
@@ -514,88 +484,81 @@ double *subfx_fonthandle_text_extents(subfx_handle in,
 #define cleanUp \
     cairo_new_path(handle->context); \
     cairo_path_destroy(path); \
-    if (fdsa->closeHandle(shape) == fdsa_failed) \
+    if (fdsa->ptrVector.destory(shape) == fdsa_failed) \
     { \
         subfx_pError(errMsg, "text_to_shape: you should" \
                              " never see this message."); \
     }
 #endif
 
-char *subfx_fonthandle_text_to_shape(subfx_handle in,
-                                            const char *text, char *errMsg)
+char *subfx_fontHandle_text_to_shape(subfx_fontHandle *handle,
+                                     const char *text, char *errMsg)
 {
-    fDSA *fdsa(getFDSA());
+    fDSA *fdsa = getFDSA();
     if (!fdsa)
     {
         return NULL;
     }
 
-    if (subfx_checkInput(in, subfx_types_fonthandle))
-    {
-        return NULL;
-    }
-
-    FontHandle *handle(reinterpret_cast<FontHandle *>(in));
     char *retStr;
     size_t retSize;
 #ifdef _WIN32
-    std::wstring textDst(boost::locale::conv::utf_to_utf<wchar_t>(text));
-    size_t textLen(wcslen(textDst.c_str()));
+    size_t textLen = strlen(text);
     if (textLen > 8192)
     {
         subfx_pError(errMsg, "text_to_shape: text is too long");
         return NULL;
     }
 
-    INT *charWidths(NULL);
+    INT *charWidths = NULL;
     if (handle->hspace != 0)
     {
-        charWidths = new (std::nothrow) INT[textLen];
+        charWidths = calloc(textLen, sizeof(INT));
         if (!charWidths)
         {
             return NULL;
         }
 
-        SIZE *size(new (std::nothrow) SIZE);
+        SIZE *size = calloc(1, sizeof(SIZE));
         if (!size)
         {
-            delete[] charWidths;
+            free(charWidths);
             return NULL;
         }
 
-        int space(static_cast<int>(handle->hspace * handle->upscale));
+        int space = (int)handle->hspace * handle->upscale;
         for (size_t i = 0; i <= (textLen - 1); ++i)
         {
-            if (GetTextExtentPoint32W(handle->dc, textDst.c_str() + i, 1, size) == 0)
+            if (GetTextExtentPoint32A(handle->dc, text + i, 1, size) == 0)
             {
-                delete[] charWidths;
-                delete size;
+                free(charWidths);
+                free(size);
                 return NULL;
             }
 
             charWidths[i] = size->cx + space;
         }
 
-        delete size;
+        free(size);
     } // end if (hspace != 0)
 
     if (BeginPath(handle->dc) == 0)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
         AbortPath(handle->dc);
         return NULL;
     }
 
-    if (ExtTextOutW(handle->dc, 0, 0, 0x0, NULL, textDst.c_str(),
-                    static_cast<UINT>(textLen), charWidths) == 0)
+    if (ExtTextOutA(handle->dc, 0, 0, 0x0, NULL, text,
+                    (UINT)textLen, charWidths) == 0)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
         AbortPath(handle->dc);
@@ -606,84 +569,84 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
         AbortPath(handle->dc);
         return NULL;
     }
 
-    int points_n(GetPath(handle->dc, NULL, NULL, 0));
+    int points_n = GetPath(handle->dc, NULL, NULL, 0);
     if (points_n <= 0)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
         AbortPath(handle->dc);
         return NULL;
     }
 
-    POINT *points(new (std::nothrow) POINT[points_n]);
+    POINT *points = calloc(points_n, sizeof(POINT));
     if (!points)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
         AbortPath(handle->dc);
         return NULL;
     }
 
-    BYTE *types(new (std::nothrow) BYTE[points_n]);
+    BYTE *types = calloc(points_n, sizeof(BYTE));
     if (!types)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
-        delete[] points;
+        free(points);
         AbortPath(handle->dc);
         return NULL;
     }
 
     GetPath(handle->dc, points, types, points_n);
 
-    fdsa_handle shape(fdsa->ptrVector->create(free));
+    fdsa_ptrVector *shape = fdsa->ptrVector.create(free);
     if (!shape)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
-        delete[] points;
-        delete[] types;
+        free(points);
+        free(types);
         AbortPath(handle->dc);
         return NULL;
     }
 
     // may be larger or smaller?
-    if (fdsa->ptrVector->reserve(shape, 2048) == fdsa_failed)
+    if (fdsa->ptrVector.reserve(shape, 2048) == fdsa_failed)
     {
         if (!charWidths)
         {
-            delete[] charWidths;
+            free(charWidths);
         }
 
-        delete[] points;
-        delete[] types;
+        free(points);
+        free(types);
         AbortPath(handle->dc);
         return NULL;
     }
 
-    int i(0);
-    BYTE last_type(0xff), cur_type(0xff);
+    int i = 0;
+    BYTE last_type = 0xff, cur_type = 0xff;
     POINT cur_point;
-    double tmpDouble(0.f);
+    double tmpDouble = 0.f;
     while (i < points_n)
     {
         cur_type = types[i];
@@ -694,7 +657,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case PT_MOVETO:
             if (last_type != PT_MOVETO)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -702,7 +665,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "m", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -725,7 +688,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -744,7 +707,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -757,7 +720,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case (PT_LINETO + PT_CLOSEFIGURE):
             if (last_type != PT_LINETO)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -765,7 +728,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "l", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -787,7 +750,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -806,7 +769,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -819,7 +782,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case (PT_BEZIERTO + PT_CLOSEFIGURE):
             if (last_type != PT_BEZIERTO)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -827,7 +790,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "b", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -849,7 +812,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -868,7 +831,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -887,7 +850,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -906,7 +869,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -925,7 +888,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -944,7 +907,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -960,7 +923,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
         if ((cur_type & 0x1) == 1) // odd = PT_CLOSEFIGURE
         {
-            retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+            retStr = calloc(2, sizeof(char));
             if (!retStr)
             {
                 cleanUp;
@@ -968,7 +931,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
             }
 
             memcpy(retStr, "c", 2);
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -979,11 +942,11 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     // clean up
     AbortPath(handle->dc);
-    delete[] points;
-    delete[] types;
+    free(points);
+    free(types);
     if (!charWidths)
     {
-        delete[] charWidths;
+        free(charWidths);
     }
 #else
     // Set text path to layout
@@ -1013,7 +976,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         return NULL;
     }
 
-    fdsa_handle shape(fdsa->ptrVector->create(free));
+    fdsa_ptrVector *shape = fdsa->ptrVector->create(free);
     if (!shape)
     {
         cairo_new_path(handle->context);
@@ -1022,15 +985,15 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
     }
 
     // may be larger or smaller?
-    if (fdsa->ptrVector->reserve(shape, 2048) == fdsa_failed)
+    if (fdsa->ptrVector.reserve(shape, 2048) == fdsa_failed)
     {
         cairo_new_path(handle->context);
         cairo_path_destroy(path);
         return NULL;
     }
 
-    int i(0), cur_type(0), last_type(99999); // first loop has no last_type
-    double tmpValue(0.);
+    int i = 0, cur_type = 0, last_type = 99999; // first loop has no last_type
+    double tmpValue = 0.;
     while (i < path->num_data)
     {
         cur_type = path->data[i].header.type;
@@ -1039,7 +1002,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case CAIRO_PATH_MOVE_TO:
             if (cur_type != last_type)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -1047,7 +1010,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "m", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1067,7 +1030,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1086,7 +1049,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1097,7 +1060,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case CAIRO_PATH_LINE_TO:
             if (cur_type != last_type)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -1105,7 +1068,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "l", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1125,7 +1088,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1144,7 +1107,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1155,7 +1118,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case CAIRO_PATH_CURVE_TO:
             if (cur_type != last_type)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -1163,7 +1126,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "b", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1183,7 +1146,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1202,7 +1165,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1221,7 +1184,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1240,7 +1203,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1259,7 +1222,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1278,7 +1241,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 return NULL;
             }
 
-            if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+            if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
             {
                 cleanUp;
                 free(retStr);
@@ -1289,7 +1252,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         case CAIRO_PATH_CLOSE_PATH:
             if (cur_type != last_type)
             {
-                retStr = reinterpret_cast<char *>(calloc(2, sizeof(char)));
+                retStr = calloc(2, sizeof(char));
                 if (!retStr)
                 {
                     cleanUp;
@@ -1297,7 +1260,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
                 }
 
                 memcpy(retStr, "c", 2);
-                if (fdsa->ptrVector->pushback(shape, retStr) == fdsa_failed)
+                if (fdsa->ptrVector.pushBack(shape, retStr) == fdsa_failed)
                 {
                     cleanUp;
                     free(retStr);
@@ -1319,23 +1282,23 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 #endif
 
     // calculate how many buffer we need
-    if (fdsa->ptrVector->size(shape, &retSize) == fdsa_failed)
+    if (fdsa->ptrVector.size(shape, &retSize) == fdsa_failed)
     {
         subfx_pError(errMsg, "text_to_shape: you should"
                              " never see this message.");
-        static_cast<void>(fdsa->closeHandle(shape));
+        fdsa->ptrVector.destory(shape);
         return NULL;
     }
 
-    size_t length(0);
+    size_t length = 0;
     for (size_t index = 0; index < retSize; ++index)
     {
-        retStr = reinterpret_cast<char *>(fdsa->ptrVector->at(shape, index));
+        retStr = fdsa->ptrVector.at(shape, index);
         if (!retStr)
         {
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
-            static_cast<void>(fdsa->closeHandle(shape));
+            fdsa->ptrVector.destory(shape);
             return NULL;
         }
 
@@ -1344,10 +1307,10 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     length += (retSize + 1); // for ' ' and '\0'
 
-    retStr = reinterpret_cast<char *>(calloc(length, sizeof(char)));
+    retStr = calloc(length, sizeof(char));
     if (!retStr)
     {
-        if (fdsa->closeHandle(shape) == fdsa_failed)
+        if (fdsa->ptrVector.destory(shape) == fdsa_failed)
         {
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
@@ -1356,17 +1319,17 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
         return NULL;
     }
 
-    char *pStr(retStr);
-    char *tmpStr(NULL);
+    char *pStr = retStr;
+    char *tmpStr = NULL;
     for (size_t index = 0; index < retSize; ++index)
     {
-        tmpStr = reinterpret_cast<char *>(fdsa->ptrVector->at(shape, index));
+        tmpStr = fdsa->ptrVector.at(shape, index);
         if (!tmpStr)
         {
             free(retStr);
             subfx_pError(errMsg, "text_to_shape: you should"
                                  " never see this message.");
-            static_cast<void>(fdsa->closeHandle(shape));
+            fdsa->ptrVector.destory(shape);
             return NULL;
         }
 
@@ -1380,7 +1343,7 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     pStr[0] = '\0';
 
-    if (fdsa->closeHandle(shape) == fdsa_failed)
+    if (fdsa->ptrVector.destory(shape) == fdsa_failed)
     {
         subfx_pError(errMsg, "text_to_shape: you should"
                              " never see this message.");
@@ -1390,5 +1353,3 @@ char *subfx_fonthandle_text_to_shape(subfx_handle in,
 
     return retStr;
 }
-
-} // end extern "C"

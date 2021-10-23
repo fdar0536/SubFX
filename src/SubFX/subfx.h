@@ -26,10 +26,6 @@ extern "C"
 {
 #endif
 
-subfx_exitstate subfx_getHandleType(subfx_handle, subfx_types *dst);
-
-subfx_exitstate subfx_closeHandle(subfx_handle);
-
 const char *subfx_version();
 
 #ifdef __cplusplus

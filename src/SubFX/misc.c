@@ -23,18 +23,17 @@
 #include "misc.h"
 #include "common.h"
 
-subfx_misc *subfx_misc_init()
+subfx_exitstate subfx_misc_init(subfx_misc_api *misc)
 {
-    subfx_misc *misc = calloc(1, sizeof(subfx_misc));
     if (!misc)
     {
-        return NULL;
+        return subfx_failed;
     }
 
     misc->doubleToString = subfx_misc_doubleToString;
     misc->getLine = subfx_misc_getLine;
 
-    return misc;
+    return subfx_success;
 }
 
 char *subfx_misc_doubleToString(double input)

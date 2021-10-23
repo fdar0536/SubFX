@@ -28,8 +28,8 @@
 
 int main()
 {
-    SubFX *api = SubFX_init();
-    if (!api)
+    SubFX api;
+    if (SubFX_init(&api))
     {
         fputs("Fail to create api entry.\n", stderr);
         return 1;
@@ -39,13 +39,12 @@ int main()
     if (!text)
     {
         fputs("Fail to open file", stderr);
-        SubFX_destroy(api);
         return 1;
     }
 
-    subfx_utf8 *utf8 = api->utf8;
-    subfx_misc *misc = api->misc;
-    fdsa_ptrVector *vec = api->fdsa->ptrVector;
+    subfx_utf8_api *utf8 = &api.utf8;
+    subfx_misc_api *misc = &api.misc;
+    fdsa_ptrVector_api *vec = &api.fdsa->ptrVector;
     subfx_exitstate state;
     fdsa_exitstate fstate;
     uint8_t flag = 1;
@@ -56,7 +55,7 @@ int main()
     char errMsg[1000];
     errMsg[0] = '\0';
 
-    fdsa_handle handle = NULL;
+    fdsa_ptrVector *handle = NULL;
     size_t i, size;
     char *string = NULL;
 
@@ -75,7 +74,6 @@ int main()
             {
                 fputs(errMsg, stderr);
                 fclose(text);
-                SubFX_destroy(api);
                 return 1;
             }
 
@@ -83,13 +81,12 @@ int main()
             if (fstate == fdsa_failed)
             {
                 fputs("Fail to get size", stderr);
-                if (api->fdsa->closeHandle(handle) == fdsa_failed)
+                if (vec->destory(handle) == fdsa_failed)
                 {
                     fputs("Fail to close handle", stderr);
                 }
 
                 fclose(text);
-                SubFX_destroy(api);
                 return 1;
             }
 
@@ -99,24 +96,22 @@ int main()
                 if (!string)
                 {
                     fputs("Fail due to access vector", stderr);
-                    if (api->fdsa->closeHandle(handle) == fdsa_failed)
+                    if (vec->destory(handle) == fdsa_failed)
                     {
                         fputs("Fail to close handle", stderr);
                     }
 
                     fclose(text);
-                    SubFX_destroy(api);
                     return 1;
                 }
 
                 puts(string);
             }
 
-            if (api->fdsa->closeHandle(handle) == fdsa_failed)
+            if (vec->destory(handle) == fdsa_failed)
             {
                 fputs("Fail to close handle", stderr);
                 fclose(text);
-                SubFX_destroy(api);
                 return 1;
             }
 
@@ -132,14 +127,12 @@ int main()
         {
             fputs(errMsg, stderr);
             fclose(text);
-            SubFX_destroy(api);
             return 1;
         }
         default:
         {
             fputs("You should NEVER see this line", stderr);
             fclose(text);
-            SubFX_destroy(api);
             return 1;
         }
         }
@@ -148,7 +141,6 @@ int main()
     }
 
     fclose(text);
-    SubFX_destroy(api);
 
     return 0;
 }

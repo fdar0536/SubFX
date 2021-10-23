@@ -30,38 +30,36 @@ extern "C"
 {
 #endif
 
-typedef struct Logger
+typedef struct subfx_logger
 {
-    subfx_types id;
-
     FILE *out;
 
     FILE *err;
 
     bool haveToCloseFiles;
-} Logger;
+} subfx_logger;
 
-subfx_logger *subfx_logger_init();
+subfx_exitstate subfx_logger_init(subfx_logger_api *);
 
-subfx_handle
-subfx_logger_create(FILE *,
-                    FILE *,
-                    bool);
+subfx_logger
+*subfx_logger_create(FILE *,
+                     FILE *,
+                     bool);
 
-subfx_handle
-subfx_logger_create2(const char *,
-                     const char *);
+subfx_logger
+*subfx_logger_create2(const char *,
+                      const char *);
 
-subfx_exitstate subfx_logger_destroy(subfx_handle);
+subfx_exitstate subfx_logger_destroy(subfx_logger *);
 
-subfx_exitstate subfx_logger_writeOut(subfx_handle, const char *);
+subfx_exitstate subfx_logger_writeOut(subfx_logger *, const char *);
 
-subfx_exitstate subfx_logger_writeErr(subfx_handle, const char *);
+subfx_exitstate subfx_logger_writeErr(subfx_logger *, const char *);
 
-subfx_handle subfx_logger_createInternal(FILE *,
-                                         FILE *,
-                                         bool,
-                                         bool);
+subfx_logger *subfx_logger_createInternal(FILE *,
+                                          FILE *,
+                                          bool,
+                                          bool);
 
 void subfx_logger_closeFiles(FILE *, FILE *);
 

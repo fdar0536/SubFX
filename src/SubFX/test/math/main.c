@@ -45,12 +45,9 @@ int main()
     {
         if (testFunc[i]())
         {
-            testFin();
             return 1;
         }
     }
-
-    testFin();
 
     return 0;
 }

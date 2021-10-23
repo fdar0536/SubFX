@@ -29,7 +29,7 @@ extern "C"
 {
 #endif
 
-subfx_misc *subfx_misc_init();
+subfx_exitstate subfx_misc_init(subfx_misc_api *);
 
 char *subfx_misc_doubleToString(double input);
 

@@ -45,7 +45,6 @@ set(subfx_priv_headers
     SubFX/common.h
     SubFX/global.h
     SubFX/subfx.h
-    SubFX/types.h
     SubFX/logger.h
     SubFX/misc.h
     SubFX/smath.h
@@ -62,7 +61,6 @@ set(subfx_src
     SubFX/global.c
     SubFX/init.c
     SubFX/subfx.c
-    SubFX/types.c
     SubFX/logger.c
     SubFX/init.c
     SubFX/misc.c
@@ -71,7 +69,7 @@ set(subfx_src
 
     SubFX/ass.cpp
     # SubFX/ass/data.c
-    SubFX/fonthandle.cpp
+    SubFX/fonthandle.c
 )
 
 add_library(SubFX
@@ -94,6 +92,8 @@ if (WIN32)
 endif (WIN32)
 
 #fDSA
+LIST(APPEND SubFX_includes
+    ${fDSA_INCLUDE_DIR})
 LIST(APPEND SubFX_libs fDSA::fDSA)
 
 # eigen

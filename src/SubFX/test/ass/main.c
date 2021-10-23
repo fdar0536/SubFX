@@ -30,7 +30,6 @@
     if (!x) \
     { \
         puts("Failed in testing stringToColorAlpha"); \
-        SubFX_destroy(api); \
         return 1; \
     } \
     printf("r: %d, g: %d, b: %d, a: %d\n", \
@@ -42,7 +41,6 @@
     if (!x) \
     { \
         puts("Failed in testing colorAlphaToString"); \
-        SubFX_destroy(api); \
         return 1; \
     } \
     puts(x); \
@@ -51,14 +49,14 @@
 int main()
 {
     puts("Testing ass.h ...");
-    SubFX *api = SubFX_init();
-    if (!api)
+    SubFX api;
+    if (SubFX_init(&api) == subfx_failed)
     {
         puts("Failed in SubFX_init()");
         return 1;
     }
 
-    subfx_ass *ass = api->ass;
+    subfx_ass_api *ass = &api.ass;
 
     char errMsg[1024];
     char tmpString[1024];
@@ -70,7 +68,6 @@ int main()
     if (ass->stringToMs(tmpString, &ms, errMsg) == subfx_failed)
     {
         puts("Failed in testing stringToMs");
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -86,7 +83,6 @@ int main()
     if (!resString)
     {
         puts("Failed in testing msToString");
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -105,7 +101,6 @@ int main()
     if (!res)
     {
         puts("Fail to allocate memory");
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -125,6 +120,5 @@ int main()
 
     puts("All done!");
     free(res);
-    SubFX_destroy(api);
     return 0;
 }

@@ -43,12 +43,11 @@
 #define subfx_max(x, y) x > y ? x : y
 #define subfx_min(x, y) x < y ? x : y
 
-subfx_math *subfx_math_init()
+subfx_exitstate subfx_math_init(subfx_math_api *math)
 {
-    subfx_math *math = calloc(1, sizeof(subfx_math));
     if (!math)
     {
-        return NULL;
+        return subfx_failed;
     }
 
     math->rotate2d = subfx_math_rotate2d;
@@ -69,7 +68,7 @@ subfx_math *subfx_math_init()
     math->randomway = subfx_math_randomway;
     math->rotate = subfx_math_rotate;
 
-    return math;
+    return subfx_success;
 }
 
 double *subfx_math_rotate2d(double x, double y, double angle)
@@ -107,29 +106,29 @@ double subfx_math_random(double min, double max)
 #define checkError \
     if (!ptr) \
     { \
-        fdsa->closeHandle(curves); \
+        fdsa->vector.destory(curves); \
         subfx_pError(errMsg, "arc_curve: Fail to allocate memory.") \
         return NULL; \
     }
 
 #define pushback(x) \
-    if (fdsa->vector->pushback(curves, x) == fdsa_failed) \
+    if (fdsa->vector.pushBack(curves, x) == fdsa_failed) \
     { \
-        fdsa->closeHandle(curves); \
+        fdsa->vector.destory(curves); \
         subfx_pError(errMsg, "arc_curve: Fail to allocate memory.") \
         return NULL; \
     }
 
-fdsa_handle
-subfx_math_arc_curve(double x, double y,
-                     double cx, double cy,
-                     double angle,
-                     char *errMsg)
+fdsa_vector
+*subfx_math_arc_curve(double x, double y,
+                      double cx, double cy,
+                      double angle,
+                      char *errMsg)
 {
     fDSA *fdsa = getFDSA();
     if (!fdsa)
     {
-        subfx_pError(errMsg, "arc_curve: please initialize this library first")
+        subfx_pError(errMsg, "arc_curve: You should never see this line.")
         return NULL;
     }
 
@@ -146,7 +145,7 @@ subfx_math_arc_curve(double x, double y,
         return NULL;
     }
 
-    fdsa_handle *curves = fdsa->vector->create(sizeof(double));
+    fdsa_vector *curves = fdsa->vector.create(sizeof(double));
     if (!curves)
     {
         subfx_pError(errMsg, "arc_curve: Fail to create vector.")
@@ -166,9 +165,9 @@ subfx_math_arc_curve(double x, double y,
     size_t curves_n = 4;
 
     // 4 * 2 = 8
-    if (fdsa->vector->reserve(curves, 8) == fdsa_failed)
+    if (fdsa->vector.reserve(curves, 8) == fdsa_failed)
     {
-        fdsa->closeHandle(curves);
+        fdsa->vector.destory(curves);
         subfx_pError(errMsg, "arc_curve: Fail to allocate memory.")
         return NULL;
     }
@@ -253,10 +252,10 @@ subfx_math_arc_curve(double x, double y,
 
         curves_n += 4;
 
-        if (fdsa->vector->reserve(curves, curves_n << 1)
+        if (fdsa->vector.reserve(curves, curves_n << 1)
                 == fdsa_failed)
         {
-            fdsa->closeHandle(curves);
+            fdsa->vector.destory(curves);
             subfx_pError(errMsg, "arc_curve: Fail to allocate memory.")
             return NULL;
         }

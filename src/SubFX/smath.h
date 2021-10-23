@@ -26,7 +26,7 @@ extern "C"
 {
 #endif
 
-subfx_math *subfx_math_init();
+subfx_exitstate subfx_math_init(subfx_math_api *);
 
 double *subfx_math_rotate2d(double, double, double);
 
@@ -39,11 +39,11 @@ double subfx_math_deg(double);
 // math.random
 double subfx_math_random(double, double);
 
-fdsa_handle
-subfx_math_arc_curve(double x, double y,
-                     double cx, double cy,
-                     double angle,
-                     char *errMsg);
+fdsa_vector
+*subfx_math_arc_curve(double x, double y,
+                      double cx, double cy,
+                      double angle,
+                      char *errMsg);
 
 double
 *subfx_math_bezier(double pct,

@@ -28,12 +28,12 @@ extern "C"
 {
 #endif
 
-subfx_utf8 *subfx_utf8_init();
+subfx_exitstate subfx_utf8_init(subfx_utf8_api *);
 
 uint32_t subfx_utf8_stringLen(const char *);
 
 // https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
-fdsa_handle subfx_utf8_stringSplit(const char *, char *);
+fdsa_ptrVector *subfx_utf8_stringSplit(const char *, char *);
 
 #ifdef __cplusplus
 }

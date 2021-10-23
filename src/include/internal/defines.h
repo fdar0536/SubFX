@@ -36,16 +36,6 @@ typedef enum subfx_exitstate
 } subfx_exitstate;
 
 /**
- * @enum subfx_types
- * The type ID for subfx_handle
- */
-typedef enum subfx_types
-{
-    subfx_types_logger, /**< logger */
-    subfx_types_fonthandle /**< font handle */
-} subfx_types;
-
-/**
  * @typedef subfx_cmpFunc
  * A function for comparison
  * @param lhs
@@ -62,11 +52,6 @@ typedef int (*subfx_cmpFunc)(const void *lhs, const void *rhs);
  * @param toBeFreed the pointer to be freed
  */
 typedef void (*subfx_freeFunc)(void *toBeFreed);
-
-/**
- * a pointer for the object return from SubFX API.
- */
-typedef void* subfx_handle;
 
 #ifdef __cplusplus
 }

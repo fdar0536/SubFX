@@ -38,7 +38,9 @@ extern "C"
 {
 #endif
 
-typedef struct subfx_fonthandle
+typedef struct subfx_fontHandle subfx_fontHandle;
+
+typedef struct subfx_fontHandle_api
 {
     /**
      * @brief Create FontHandle object.
@@ -55,16 +57,18 @@ typedef struct subfx_fonthandle
      * @param errMsg you can pass buffer if you want to get the error message.
      * @return If failed, it will return NULL.
      */
-    subfx_handle (*create)(const char *family,
-                           bool bold,
-                           bool italic,
-                           bool underline,
-                           bool strikeout,
-                           int32_t size,
-                           double xscale, // 1.
-                           double yscale, // 1.
-                           double hspace, // 0.
-                           char *errMsg);
+    subfx_fontHandle *(*create)(const char *family,
+                                bool bold,
+                                bool italic,
+                                bool underline,
+                                bool strikeout,
+                                int32_t size,
+                                double xscale, // 1.
+                                double yscale, // 1.
+                                double hspace, // 0.
+                                char *errMsg);
+
+    subfx_exitstate (*destory)(subfx_fontHandle *fontHandle);
 
     /**
      * Returns font metrics as array with followings fields:
@@ -77,7 +81,7 @@ typedef struct subfx_fonthandle
      * @param fonthandle the fonthandle return from create()
      * @return If fail, it will return NULL.
      */
-    double *(*metrics)(subfx_handle fonthandle);
+    double *(*metrics)(subfx_fontHandle *fontHandle);
 
     /**
      * Returns extents of text with given font as array with followings fields:
@@ -88,7 +92,7 @@ typedef struct subfx_fonthandle
      * @param text input text
      * @return If fail, it will return NULL.
      */
-    double *(*text_extents)(subfx_handle fonthandle,
+    double *(*text_extents)(subfx_fontHandle *fontHandle,
                             const char *text);
 
     /**
@@ -99,9 +103,9 @@ typedef struct subfx_fonthandle
      * @param errMsg you can pass buffer if you want to get the error message.
      * @return If fail, it will return NULL.
      */
-    char *(*text_to_shape)(subfx_handle fonthandle,
+    char *(*text_to_shape)(subfx_fontHandle *fontHandle,
                            const char *text, char *errMsg);
-} subfx_fonthandle;
+} subfx_fontHandle_api;
 
 #ifdef __cplusplus
 }

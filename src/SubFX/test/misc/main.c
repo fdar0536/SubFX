@@ -31,19 +31,18 @@
 
 int main()
 {
-    SubFX *api = SubFX_init();
-    if (!api)
+    SubFX api;
+    if (SubFX_init(&api) == subfx_failed)
     {
         fputs("Fail to create api entry.\n", stderr);
         return 1;
     }
 
-    subfx_misc *misc = api->misc;
+    subfx_misc_api *misc = &api.misc;
     char *string = misc->doubleToString(sqrt(2.));
     if (!string)
     {
         fputs("Fail due to \"doubleToString\"", stderr);
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -57,7 +56,6 @@ int main()
     {
         fputs("Fail to open file", stderr);
         free(string);
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -85,7 +83,6 @@ int main()
             fputs(errMsg, stderr);
             fclose(ass);
             free(string);
-            SubFX_destroy(api);
             return 1;
         }
         default:
@@ -93,7 +90,6 @@ int main()
             fputs("You should NEVER see this line", stderr);
             fclose(ass);
             free(string);
-            SubFX_destroy(api);
             return 1;
         }
         }
@@ -104,7 +100,6 @@ int main()
     // clean up
     fclose(ass);
     free(string);
-    SubFX_destroy(api);
 
     return 0;
 }

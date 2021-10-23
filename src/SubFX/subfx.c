@@ -19,47 +19,8 @@
 
 #include "config.h"
 #include "subfx.h"
-#include "types.h"
 #include "logger.h"
 #include "fonthandle.h"
-
-subfx_exitstate subfx_getHandleType(subfx_handle in, subfx_types *dst)
-{
-    if (!in)
-    {
-        return subfx_failed;
-    }
-
-    ID *id = (ID *)in;
-    *dst = id->id;
-
-    return subfx_success;
-}
-
-subfx_exitstate subfx_closeHandle(subfx_handle in)
-{
-    if (!in)
-    {
-        return subfx_failed;
-    }
-
-    ID *id = (ID *)in;
-    switch(id->id)
-    {
-    case subfx_types_logger:
-    {
-        return subfx_logger_destroy(in);
-    }
-    case subfx_types_fonthandle:
-    {
-        return subfx_fonthandle_destroy(in);
-    }
-    default:
-    {
-        return subfx_failed;
-    }
-    }
-}
 
 const char *subfx_version()
 {

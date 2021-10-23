@@ -10,11 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GNUInstallDirs)
 
+find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
 if (UNIX)
-    find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
     find_package(ICU 64.2 REQUIRED COMPONENTS uc i18n)
 else () # windows
-    find_package(Boost 1.69.0 REQUIRED COMPONENTS regex locale)
     find_package(ICU 64.2 REQUIRED COMPONENTS uc in)
 endif (UNIX)
 

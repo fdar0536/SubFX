@@ -27,7 +27,7 @@
 
 #include "SubFX.h"
 
-int testingLogger(subfx_logger *api, subfx_handle logger)
+int testingLogger(subfx_logger_api *api, subfx_logger *logger)
 {
     if (api->writeOut(logger, "Message to stdout.\n") == subfx_failed)
     {
@@ -37,7 +37,7 @@ int testingLogger(subfx_logger *api, subfx_handle logger)
 
     if (api->writeErr(logger, "Message to stderr.\n") == subfx_failed)
     {
-        fputs("Fail to write message to stderr.", stdout);
+        fputs("Fail to write message to stderr.", stderr);
         return 1;
     }
 
@@ -46,16 +46,16 @@ int testingLogger(subfx_logger *api, subfx_handle logger)
 
 int main()
 {
-    SubFX *api = SubFX_init();
-    if (!api)
+    SubFX api;
+    if (SubFX_init(&api) == subfx_failed)
     {
         fputs("Fail to create api entry.\n", stderr);
         return 1;
     }
 
-    subfx_logger *loggerApi = api->logger;
+    subfx_logger_api *loggerApi = &api.logger;
 
-    subfx_handle logger = loggerApi->create(stdout, stderr, false);
+    subfx_logger *logger = loggerApi->create(stdout, stderr, false);
     if (!logger)
     {
         fputs("Fail to create logger via create.", stderr);
@@ -67,10 +67,9 @@ int main()
         return 1;
     }
 
-    if (api->closeHandle(logger) == subfx_failed)
+    if (loggerApi->destory(logger) == subfx_failed)
     {
         fputs("Fail to close handle.", stderr);
-        SubFX_destroy(api);
         return 1;
     }
 
@@ -95,14 +94,11 @@ int main()
         return 1;
     }
 
-    if (api->closeHandle(logger) == subfx_failed)
+    if (loggerApi->destory(logger) == subfx_failed)
     {
         fputs("Fail to close handle.", stderr);
-        SubFX_destroy(api);
         return 1;
     }
-
-    SubFX_destroy(api);
 
     return 0;
 }

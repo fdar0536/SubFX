@@ -26,8 +26,8 @@
 #include "SubFX.h"
 #include "testingcase.h"
 
-SubFX *subfx;
-subfx_math *math;
+SubFX subfx;
+subfx_math_api *math;
 char errMsg[1000];
 
 TestFunc testFunc[TESTING_CASES + 1] =
@@ -54,14 +54,13 @@ TestFunc testFunc[TESTING_CASES + 1] =
 
 int testInit()
 {
-    subfx = SubFX_init();
-    if (!subfx)
+    if (SubFX_init(&subfx) == subfx_failed)
     {
         puts("Fail to initialize");
         return 1;
     }
 
-    math = subfx->math;
+    math = &subfx.math;
     return 0;
 }
 
@@ -72,7 +71,6 @@ int testRotate2d()
     if (!pRet)
     {
         fputs("Fail due to \"rotate2d\"", stderr);
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -110,8 +108,8 @@ int testArcCurve()
     puts("Testing arc_curve");
 
     double testData[] = { 0., 720., 60. };
-    fdsa_handle ret;
-    fdsa_vector *vec = subfx->fdsa->vector;
+    fdsa_vector *ret;
+    fdsa_vector_api *vec = &subfx.fdsa->vector;
     int i;
     size_t j, size;
     double first, second;
@@ -127,12 +125,11 @@ int testArcCurve()
             if (ret)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+                if (vec->destory(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
 
-                SubFX_destroy(subfx);
                 return 1;
             }
         }
@@ -146,31 +143,28 @@ int testArcCurve()
             if (!ret)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                SubFX_destroy(subfx);
                 return 1;
             }
 
             if (vec->size(ret, &size) == fdsa_failed)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+                if (vec->destory(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
 
-                SubFX_destroy(subfx);
                 return 1;
             }
 
             if (!size)
             {
                 printf("Failed in arc_curve's case %d.\n", i);
-                if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+                if (vec->destory(ret) == fdsa_failed)
                 {
                     puts("Fail to close handle.");
                 }
 
-                SubFX_destroy(subfx);
                 return 1;
             }
 
@@ -179,34 +173,31 @@ int testArcCurve()
                 if (vec->at(ret, j, &first) == fdsa_failed)
                 {
                     printf("Failed in arc_curve's case %d.\n", i);
-                    if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+                    if (vec->destory(ret) == fdsa_failed)
                     {
                         puts("Fail to close handle.");
                     }
 
-                    SubFX_destroy(subfx);
                     return 1;
                 }
 
                 if (vec->at(ret, j + 1, &second) == fdsa_failed)
                 {
                     printf("Failed in arc_curve's case %d.\n", i);
-                    if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+                    if (vec->destory(ret) == fdsa_failed)
                     {
                         puts("Fail to close handle.");
                     }
 
-                    SubFX_destroy(subfx);
                     return 1;
                 }
 
                 printf("%lf, %lf\n", first, second);
             } // end for (j = 0; j < size; j += 2)
 
-            if (subfx->fdsa->closeHandle(ret) == fdsa_failed)
+            if (vec->destory(ret) == fdsa_failed)
             {
                 puts("Fail to close handle.");
-                SubFX_destroy(subfx);
                 return 1;
             }
         } // end if (i != 2)
@@ -221,7 +212,6 @@ int testArcCurve()
     if (!ret) \
     { \
         puts("Failed in bezier"); \
-        SubFX_destroy(subfx); \
         return 1; \
     } \
     free(ret);
@@ -246,7 +236,6 @@ int testBezier()
     {
         puts("Failed in bezier");
         free(ret);
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -259,7 +248,6 @@ int testBezier()
     {
         puts("Failed in bezier");
         free(ret);
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -309,7 +297,6 @@ int testLineIntersect()
     {
         puts("Failed in line_intersect");
         free(ret);
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -323,7 +310,6 @@ int testLineIntersect()
     if (!ret)
     {
         puts("Failed in line_intersect");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -340,7 +326,6 @@ int testOrtho()
     if (!ret)
     {
         puts("Failed in ortho");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -361,7 +346,6 @@ int testRandomsteps()
     if (errMsg[0] == '\0')
     {
         puts("Failed in randomsteps");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -397,7 +381,6 @@ int testStretch()
     if (!ret)
     {
         puts("Failed in stretch");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -417,7 +400,6 @@ int testTrim()
     if (errMsg[0] == '\0')
     {
         puts("Failed in trim");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -439,7 +421,6 @@ int testEllipse()
     if (!ret)
     {
         puts("Failed in ellipse");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -475,7 +456,6 @@ int testRotate()
     {
         puts("Failed in rotate");
         free(ret);
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -491,7 +471,6 @@ int testRotate()
         if (!ret)
         {
             puts("Failed in rotate");
-            SubFX_destroy(subfx);
             return 1;
         }
 
@@ -501,8 +480,3 @@ int testRotate()
     puts("rotate is pass");
     return 0;
 } // end testRotate
-
-void testFin()
-{
-    SubFX_destroy(subfx);
-}

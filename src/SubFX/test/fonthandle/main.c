@@ -28,20 +28,20 @@
 
 int main()
 {
-    SubFX *subfx = SubFX_init();
-    if (!subfx)
+    SubFX subfx;
+    if (SubFX_init(&subfx) == subfx_failed)
     {
         puts("Fail in initializing.");
         return 1;
     }
 
-    subfx_fonthandle *fontHandle = subfx->fonthandle;
+    subfx_fontHandle_api *fontHandle = &subfx.fontHandle;
 
     char tmpString[100];
     sprintf(tmpString, "Source Code Pro");
     char errMsg[1000];
     errMsg[0] = '\0';
-    subfx_handle *handle = fontHandle->create(
+    subfx_fontHandle *handle = fontHandle->create(
             tmpString, // family
             0, // bold
             0, // italic
@@ -56,7 +56,6 @@ int main()
     if (!handle)
     {
         puts("Fail in initializing.");
-        SubFX_destroy(subfx);
         return 1;
     }
 
@@ -116,12 +115,11 @@ int main()
     free(retChar);
 
 error:
-    if (subfx->closeHandle(handle) == subfx_failed)
+    if (fontHandle->destory(handle) == subfx_failed)
     {
         puts("Fail to close handle");
         ret = 1;
     }
 
-    SubFX_destroy(subfx);
     return ret;
 }

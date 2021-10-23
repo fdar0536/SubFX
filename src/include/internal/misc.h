@@ -28,7 +28,7 @@ extern "C"
 {
 #endif
 
-typedef struct subfx_misc
+typedef struct subfx_misc_api
 {
     char *(*doubleToString)(double input);
 
@@ -36,7 +36,7 @@ typedef struct subfx_misc
                                size_t bufferSize,
                                FILE *file,
                                char *errMsg);
-} subfx_misc;
+} subfx_misc_api;
 
 #ifdef __cplusplus
 }

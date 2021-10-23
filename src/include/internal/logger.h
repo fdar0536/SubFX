@@ -29,20 +29,25 @@ extern "C"
 {
 #endif
 
-typedef struct subfx_logger
+typedef struct subfx_logger subfx_logger;
+
+typedef struct subfx_logger_api
 {
-    subfx_handle (*create)(FILE *out,
-                           FILE *err,
-                           bool autoCloseFiles);
+    subfx_logger *(*create)(FILE *out,
+                            FILE *err,
+                            bool autoCloseFiles);
 
-    subfx_handle (*create2)(const char *outFile,
-                            const char *errFile);
+    subfx_logger *(*create2)(const char *outFile,
+                             const char *errFile);
 
-    subfx_exitstate (*writeOut)(subfx_handle logger, const char *msg);
+    subfx_exitstate (*destory)(subfx_logger *logger);
 
-    subfx_exitstate (*writeErr)(subfx_handle logger, const char *msg);
+    subfx_exitstate (*writeOut)(subfx_logger *logger, const char *msg);
 
-} subfx_logger;
+    subfx_exitstate (*writeErr)(subfx_logger *logger, const char *msg);
+
+} subfx_logger_api;
+
 #ifdef __cplusplus
 }
 #endif

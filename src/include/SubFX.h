@@ -53,32 +53,17 @@ typedef struct SubFX
 
     fDSA *fdsa;
 
-    subfx_logger *logger;
+    subfx_logger_api logger;
 
-    subfx_misc *misc;
+    subfx_misc_api misc;
 
-    subfx_math *math;
+    subfx_math_api math;
 
-    subfx_utf8 *utf8;
+    subfx_utf8_api utf8;
 
-    subfx_ass *ass;
+    subfx_ass_api ass;
 
-    subfx_fonthandle *fonthandle;
-
-    /**
-     * Get object's type id.
-     * @param handle the object pointer return from SubFX APIs
-     * @param dst the pointer for store result
-     * @return please refer to subfx_exitstate
-     */
-    subfx_exitstate (*getHandleType)(subfx_handle handle, subfx_types *dst);
-
-    /**
-     * free the subfx_handle
-     * @param handle the object pointer return from SubFX APIs
-     * @return please refer to subfx_exitstate
-     */
-    subfx_exitstate (*closeHandle)(subfx_handle handle);
+    subfx_fontHandle_api fontHandle;
 
     /**
      * @return it returns SubFX API's version.
@@ -87,14 +72,9 @@ typedef struct SubFX
 } SubFX;
 
 /**
- * Initialize SubFX APIs. If fail, it will return NULL.
+ * Initialize SubFX APIs.
  */
-SUBFX_API SubFX *SubFX_init();
-
-/**
- * Destroy SubFX APIs' entries.
- */
-SUBFX_API void SubFX_destroy(SubFX *);
+SUBFX_API subfx_exitstate SubFX_init(SubFX *);
 
 #ifdef __cplusplus
 }

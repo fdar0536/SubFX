@@ -33,7 +33,7 @@ extern "C"
  * @struct subfx_ass
  * namespace "ass"
  */
-typedef struct subfx_ass
+typedef struct subfx_ass_api
 {
     /**
      * Converts time to numeric.
@@ -73,7 +73,7 @@ typedef struct subfx_ass
      */
     char *(*colorAlphaToString)(uint8_t *input,
                                 size_t inputSize, char *errMsg);
-} subfx_ass;
+} subfx_ass_api;
 
 #ifdef __cplusplus
 }

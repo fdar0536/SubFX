@@ -32,13 +32,11 @@
 extern "C"
 {
 
-subfx_ass *subfx_ass_init()
+subfx_exitstate subfx_ass_init(subfx_ass_api *ret)
 {
-    subfx_ass *ret(reinterpret_cast<subfx_ass *>
-                          (calloc(1, sizeof(subfx_ass))));
     if (!ret)
     {
-        return NULL;
+        return subfx_failed;
     }
 
     ret->stringToMs = subfx_ass_stringToMs;
@@ -46,7 +44,7 @@ subfx_ass *subfx_ass_init()
     ret->stringToColorAlpha = subfx_ass_stringToColorAlpha;
     ret->colorAlphaToString = subfx_ass_colorAlphaToString;
 
-    return ret;
+    return subfx_success;
 }
 
 subfx_exitstate subfx_ass_stringToMs(const char *in,

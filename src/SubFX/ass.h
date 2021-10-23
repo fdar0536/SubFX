@@ -26,7 +26,7 @@ extern "C"
 {
 #endif
 
-subfx_ass *subfx_ass_init();
+subfx_exitstate subfx_ass_init(subfx_ass_api *);
 
 subfx_exitstate subfx_ass_stringToMs(const char *ass_ms,
                                      uint64_t *dst,
