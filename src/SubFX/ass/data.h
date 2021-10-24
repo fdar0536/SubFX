@@ -26,13 +26,9 @@ extern "C"
 {
 #endif
 
-subfx_ass_meta *subfx_ass_meta_create();
+subfx_exitstate subfx_ass_meta_init(subfx_ass_meta *);
 
-void subfx_ass_meta_destroy(subfx_ass_meta *);
-
-subfx_ass_style *subfx_ass_style_create();
-
-void subfx_ass_style_destroy(subfx_ass_style *);
+subfx_exitstate subfx_ass_style_init(subfx_ass_style *);
 
 #ifdef __cplusplus
 }

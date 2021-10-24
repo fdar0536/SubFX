@@ -22,6 +22,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "fdsa/fdsa.h"
+
 #include "../defines.h"
 
 // reference: https://github.com/weizhenye/ASS/wiki/ASS-%E5%AD%97%E5%B9%95%E6%A0%BC%E5%BC%8F%E8%A7%84%E8%8C%83
@@ -31,18 +33,22 @@ extern "C"
 {
 #endif
 
+#define SUBFX_FONT_NAME_LEN 32
+#define SUBFX_COLOR_ALPHA_LEN 16
+#define SUBFX_ASS_TEXT_LEN (1 << 16) // maybe too large? maybe too small? or dynamic allocate?
+
 typedef struct subfx_ass_meta
 {
     uint8_t wrap_style;
     bool scaled_border_and_shadow;
     uint16_t play_res_x;
     uint16_t play_res_y;
-    char *colorMatrix;
+    char colorMatrix[32];
 } subfx_ass_meta;
 
 typedef struct subfx_ass_style
 {
-    char *fontname;
+    char fontname[SUBFX_FONT_NAME_LEN];
     int fontsize;
     int8_t bold;
     int8_t italic;
@@ -60,20 +66,20 @@ typedef struct subfx_ass_style
     double margin_r;
     double margin_v;
     int encoding;
-    char *color1;
-    char *alpha1;
-    char *color2;
-    char *alpha2;
-    char *color3;
-    char *alpha3;
-    char *color4;
-    char *alpha4;
+    char color1[SUBFX_COLOR_ALPHA_LEN];
+    char alpha1[SUBFX_COLOR_ALPHA_LEN];
+    char color2[SUBFX_COLOR_ALPHA_LEN];
+    char alpha2[SUBFX_COLOR_ALPHA_LEN];
+    char color3[SUBFX_COLOR_ALPHA_LEN];
+    char alpha3[SUBFX_COLOR_ALPHA_LEN];
+    char color4[SUBFX_COLOR_ALPHA_LEN];
+    char alpha4[SUBFX_COLOR_ALPHA_LEN];
 } subfx_ass_style;
 
 #define subfx_ass_symbol \
     uint64_t start_time; \
     uint64_t end_time; \
-    char *text; \
+    char text[SUBFX_ASS_TEXT_LEN]; \
     uint32_t i; \
     uint64_t duration; \
     uint64_t mid_time; \
@@ -92,138 +98,58 @@ typedef struct subfx_ass_style
     double bottom; \
     double y;
 
-#ifdef __cplusplus
-}
-#endif
+// maybe too large? maybe too small? or dynamic allocate?
+#define SUBFX_ASS_CHUNKED_TEXT_SIZE (1 << 8)
 
-/*
-namespace PROJ_NAMESPACE
+typedef struct subfx_ass_chunked
 {
+    char tags[SUBFX_ASS_CHUNKED_TEXT_SIZE];
+    char text[SUBFX_ASS_CHUNKED_TEXT_SIZE];
+} subfx_ass_chunked;
 
-namespace Yutils
+typedef struct subfx_ass_syl
 {
-
-class AssSymbol
-{
-public:
-    AssSymbol() :
-    start_time(0),
-    end_time(0),
-    text(""),
-    i(0),
-    duration(0),
-    mid_time(0),
-    width(0.),
-    height(0.),
-    ascent(0.),
-    descent(0.),
-    internal_leading(0.),
-    external_leading(0.),
-    left(0.),
-    center(0.),
-    right(0.),
-    x(0.),
-    top(0.),
-    middle(0.),
-    bottom(0.),
-    y(0.)
-    {}
-};
-
-class AssTextChunked
-{
-public:
-    AssTextChunked() :
-    tags(""),
-    text("")
-    {}
-
-    std::string tags;
-    std::string text;
-};
-
-class AssSyl : public AssSymbol
-{
-public:
-    AssSyl() :
-    AssSymbol(),
-    tags(""),
-    prespace(0),
-    postspace(0)
-    {}
-
-    std::string tags;
+    subfx_ass_symbol;
+    char tags[SUBFX_ASS_CHUNKED_TEXT_SIZE];
     uint32_t prespace;
     uint32_t postspace;
-};
+} subfx_ass_syl;
 
-class AssWord : public AssSymbol
+typedef struct subfx_ass_word
 {
-public:
-    AssWord() :
-    AssSymbol(),
-    prespace(0),
-    postspace(0)
-    {}
-
+    subfx_ass_symbol;
     uint32_t prespace;
     uint32_t postspace;
-};
+} subfx_ass_word;
 
-class AssChar : public AssSymbol
+typedef struct subfx_ass_char
 {
-public:
-    AssChar() :
-    AssSymbol(),
-    syl_i(0),
-    word_i(0)
-    {}
-
+    subfx_ass_symbol;
     int syl_i;
     int word_i;
-};
+} subfx_ass_char;
 
-class AssDialog : public AssSymbol
+typedef struct subfx_ass_dialog
 {
-public:
-    AssDialog() :
-    AssSymbol(),
-    styleref(std::make_shared<AssStyle>()),
-    text_stripped(""),
-    comment(false),
-    layer(0),
-    style(""),
-    actor(""),
-    margin_l(0.),
-    margin_r(0.),
-    margin_v(0.),
-    effect(""),
-    leadin(0.),
-    leadout(0.),
-    textChunked(std::vector<std::shared_ptr<AssTextChunked>>()),
-    syls(std::vector<std::shared_ptr<AssSyl>>()),
-    words(std::vector<std::shared_ptr<AssWord>>()),
-    chars(std::vector<std::shared_ptr<AssChar>>())
-    {}
-
-    std::shared_ptr<AssStyle> styleref;
-    std::string text_stripped;
+    subfx_ass_symbol;
+    subfx_ass_style styleref;
+    char text_stripped[SUBFX_ASS_CHUNKED_TEXT_SIZE];
     bool comment;
     uint32_t layer;
-    std::string style;
-    std::string actor;
+    char style[32];
+    char actor[32];
     double margin_l;
     double margin_r;
     double margin_v;
-    std::string effect;
+    char effect[32];
     double leadin;
     double leadout;
-    std::vector<std::shared_ptr<AssTextChunked>> textChunked;
-    std::vector<std::shared_ptr<AssSyl>> syls;
-    std::vector<std::shared_ptr<AssWord>> words;
-    std::vector<std::shared_ptr<AssChar>> chars;
-};
-} // end namespace Yutils
+    fdsa_ptrVector *textChunked;
+    fdsa_ptrVector *syls;
+    fdsa_ptrVector *words;
+    fdsa_ptrVector *chars;
+} subfx_ass_dialog;
 
-} // end PROJ_NAMESPACE
-*/
+#ifdef __cplusplus
+}
+#endif
