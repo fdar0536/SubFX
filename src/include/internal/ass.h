@@ -44,14 +44,15 @@ typedef struct subfx_ass_api
      * @return please refer to subfx_exitstate
      */
     subfx_exitstate (*stringToMs)(const char *ass_ms,
-                                  uint64_t *dst,
+                                  uint64_t *output,
                                   char *errMsg);
 
     /**
      * It's the reverse function of stringToMs.
+     * @param dst Output buffer
      * @return If fail, it will return NULL.
      */
-    char *(*msToString)(uint64_t ms_ass);
+    subfx_exitstate (*msToString)(uint64_t ms_ass, char *output);
 
     /**
      * [r, g, b, a] = stringToColorAlpha(input, errMsg);
@@ -62,7 +63,10 @@ typedef struct subfx_ass_api
      * @param errMsg you can pass buffer if you want to get the error message.
      * @return If fail, it will return NULL.
      */
-    uint8_t *(*stringToColorAlpha)(const char *input, char *errMsg);
+    subfx_exitstate (*stringToColorAlpha)(const char *input,
+                                          uint8_t *output,
+                                          uint8_t *outLen,
+                                          char *errMsg);
 
     /**
      * Converts color or alpha to ASS presentation.
@@ -71,8 +75,10 @@ typedef struct subfx_ass_api
      * @param errMsg you can pass buffer if you want to get the error message.
      * @return If fail, it will return NULL.
      */
-    char *(*colorAlphaToString)(uint8_t *input,
-                                size_t inputSize, char *errMsg);
+    subfx_exitstate (*colorAlphaToString)(uint8_t *input,
+                                          size_t inputSize,
+                                          char *output,
+                                          char *errMsg);
 } subfx_ass_api;
 
 #ifdef __cplusplus

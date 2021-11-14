@@ -10,9 +10,7 @@ Now is under development.
 
 - C++14
 - [fDSA](https://github.com/fdar0536/fdsa)
-- [Boost C++ Libraries](https://www.boost.org)
-  - Regex with [ICU](http://site.icu-project.org)
-  - Lexical Cast
+- [PCRE2](https://www.pcre.org/)
 - [Pango](https://pango.gnome.org) (Non-Windows only)
 - [pybind11](https://github.com/pybind/pybind11) (Optional)
 - [Python3](https://www.python.org) or later (Optional)

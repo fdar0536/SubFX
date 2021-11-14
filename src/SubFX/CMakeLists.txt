@@ -38,12 +38,14 @@ set(subfx_headers
 
     include/internal/ass.h
     include/internal/ass/data.h
+    # include/internal/assparser.h
     include/internal/fonthandle.h
 )
 
 set(subfx_priv_headers
     SubFX/common.h
     SubFX/global.h
+    SubFX/regex.h
     SubFX/subfx.h
     SubFX/logger.h
     SubFX/misc.h
@@ -52,6 +54,7 @@ set(subfx_priv_headers
 
     SubFX/ass.h
     SubFX/ass/data.h
+    # SubFX/assparser.h
     SubFX/fonthandle.h
 
     ${CMAKE_BINARY_DIR}/config.h
@@ -64,11 +67,13 @@ set(subfx_src
     SubFX/logger.c
     SubFX/init.c
     SubFX/misc.c
+    SubFX/regex.c
     SubFX/smath.c
     SubFX/utf8.c
 
-    SubFX/ass.cpp
+    SubFX/ass.c
     SubFX/ass/data.c
+    # SubFX/assparser.cpp
     SubFX/fonthandle.c
 )
 
@@ -81,19 +86,12 @@ add_library(SubFX
     ${subfx_src}
 )
 
-#ICU
-LIST(APPEND SubFX_includes ${ICU_INCLUDE_DIRS})
-LIST(APPEND SubFX_libs ${ICU_LIBRARIES})
-
-# boost
-LIST(APPEND SubFX_libs ${Boost_REGEX_LIBRARY})
-if (WIN32)
-    LIST(APPEND SubFX_libs ${Boost_LOCALE_LIBRARY})
-endif (WIN32)
+#PCRE2
+LIST(APPEND SubFX_includes ${PCRE2_INCLUDE_DIRS})
+LIST(APPEND SubFX_libs ${PCRE2_LIBRARIES})
 
 #fDSA
-LIST(APPEND SubFX_includes
-    ${fDSA_INCLUDE_DIR})
+LIST(APPEND SubFX_includes ${fDSA_INCLUDE_DIR})
 LIST(APPEND SubFX_libs fDSA::fDSA)
 
 # eigen

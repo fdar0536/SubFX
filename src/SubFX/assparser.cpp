@@ -17,229 +17,341 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include <fstream>
-#include <stdexcept>
-#include <iostream>
-#include <algorithm>
-#include <stdexcept>
-
 #include <cstdio>
-#include <cinttypes>
-
-#ifndef SCNd8
-#define SCNd8 "hhd"
-#endif
-#ifndef SCNu8
-#define SCNu8 "hhu"
-#endif
+#include <cstdlib>
+#include <cstring>
 
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 #include "boost/regex/icu.hpp"
 
-#include "YutilsCpp"
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
-using namespace PROJ_NAMESPACE::Yutils;
+#include "ass/data.h"
+#include "ass.h"
+#include "assparser.h"
+#include "common.h"
+#include "global.h"
+#include "misc.h"
 
-std::shared_ptr<AssParser>
-AssParser::create(const std::string &fileName,
-                  const std::string &warningOut) THROW
+extern "C"
 {
-    std::fstream assFile;
-    assFile.open(fileName, std::fstream::in);
-    if (assFile.fail())
+
+static void destoryDialogs(void *in)
+{
+    if (!in) return;
+
+    fDSA *fdsa = getFDSA();
+    subfx_ass_dialog *dialog = reinterpret_cast<subfx_ass_dialog *>(in);
+
+    if (dialog->textChunked) fdsa->ptrVector.destory(dialog->textChunked);
+    if (dialog->syls) fdsa->ptrVector.destory(dialog->syls);
+    if (dialog->words) fdsa->ptrVector.destory(dialog->words);
+    if (dialog->chars) fdsa->ptrVector.destory(dialog->chars);
+    free(in);
+}
+
+static void myFree(void *in)
+{
+    if (!in) return;
+    free(in);
+}
+
+static int myStrcmp(const void *lhs, const void *rhs)
+{
+    if (!lhs && !rhs) return 0;
+    else if (lhs && !rhs) return 1;
+    else if (!lhs && rhs) return -1;
+
+    return strcmp(reinterpret_cast<const char *>(lhs),
+                  reinterpret_cast<const char *>(rhs));
+}
+
+subfx_assParser *subfx_assParser_create(const char *fileName,
+                                        const char *warningOut,
+                                        char *errMsg)
+{
+    FILE *assFile;
+    assFile = fopen(fileName, "r");
+    if (!assFile)
     {
-        throw std::invalid_argument("AssParser::create: CANNOT open file.");
+        subfx_pError(errMsg, "assParser_create: CANNOT open file.");
+        return NULL;
     }
 
-    AssParser *ret(new (std::nothrow) AssParser());
+    AssParser *ret(reinterpret_cast<AssParser*>(calloc(1, sizeof(AssParser))));
     if (!ret)
     {
-        return nullptr;
+        fclose(assFile);
+        return NULL;
     }
 
-    if (warningOut.empty())
+    if (!warningOut)
     {
-        ret->m_logger = PROJ_NAMESPACE::Utils::Logger::create();
+        ret->logger = subfx_logger_create(stdout, stderr, false);
     }
     else
     {
-        ret->m_logger = ret->m_logger =
-                PROJ_NAMESPACE::Utils::Logger::create(warningOut,
-                                                      warningOut);
+        ret->logger = subfx_logger_create2(warningOut, warningOut);
     }
 
-    if (ret->m_logger == nullptr)
+    if (!ret->logger)
     {
-        delete ret;
-        return nullptr;
+        fclose(assFile);
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
     }
 
-    ret->dialogData.reserve(1000);
-    std::string tmpString;
+    fDSA *fdsa = getFDSA();
+    ret->dialogs = fdsa->ptrVector.create(destoryDialogs);
+    if (!ret->dialogs)
+    {
+        fclose(assFile);
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
+    }
+
+    if (fdsa->ptrVector.reserve(ret->dialogs, 1000) == fdsa_failed)
+    {
+        fclose(assFile);
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
+    }
+
+    ret->styles = fdsa->ptrMap.create(myStrcmp, myFree, myFree);
+    if (!ret->styles)
+    {
+        fclose(assFile);
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
+    }
+
+    subfx_ass_meta_init(&ret->meta);
+    char tmpString[65536];
     uint8_t flag(1);
     uint8_t flags[] = {0, 0, 0, 0};
-    while(!PROJ_NAMESPACE::Utils::Misc::safeGetline(assFile, tmpString).eof())
+    subfx_exitstate exitstate;
+    while(1)
     {
+        exitstate = subfx_misc_getLine(tmpString, 65536, assFile, NULL);
+        if (exitstate == subfx_eof) break;
+        else if (exitstate == subfx_failed)
+        {
+            fclose(assFile);
+            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            return NULL;
+        }
+
         if (flag)
         {
             // for safety
-            if (tmpString.size() == 0)
+            size_t len = strlen(tmpString);
+            if (!len) // len == 0
             {
-                delete ret;
-                throw std::invalid_argument("AssParser::create: Is input "
-                                            "an empty file?");
+                subfx_pError(errMsg, "assParser_create: Is input "
+                                     "an empty file?");
+                fclose(assFile);
+                subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+                return NULL;
             }
 
             flag = 0;
-            tmpString = ret->checkBom(tmpString);
+            subfx_assParser_checkBom(ret,
+                                     reinterpret_cast<uint8_t *>(tmpString),
+                                     &len);
         }
 
-        // here may be throw exception
-        ret->parseLine(tmpString, flags);
+        if (subfx_assParser_parseLine(ret, tmpString, flags, errMsg))
+        {
+            fclose(assFile);
+            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            return NULL;
+        }
     }
 
-    assFile.close();
+    fclose(assFile);
 
+    size_t size;
     // check ass file is valid or not
-    if (ret->dialogData.size() == 0)
+    if (fdsa->ptrVector.size(ret->dialogs, &size) == fdsa_failed)
     {
-        delete ret;
-        throw std::invalid_argument("AssParser::create: This ass file has no "
+        subfx_pError(errMsg, "AssParser::create: You should never see this line.");
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
+    }
+
+    if (!size) // size == 0
+    {
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_pError(errMsg, "AssParser::create: This ass file has no "
                                     "dialog data.");
+        return NULL;
     }
 
-    if (ret->metaData->play_res_x == 0 ||
-        ret->metaData->play_res_y == 0)
+    if (ret->meta.play_res_x == 0 ||
+        ret->meta.play_res_y == 0)
     {
-        ret->m_logger->writeErr("Warning: PlayRes is fallback to default.\n");
-        ret->metaData->play_res_x = 640;
-        ret->metaData->play_res_y = 360;
+        subfx_logger_writeErr(ret->logger,
+                              "Warning: PlayRes is fallback to default.\n");
+        ret->meta.play_res_x = 640;
+        ret->meta.play_res_y = 360;
     }
 
-    if (ret->styleData.size() == 0)
+    uint8_t res;
+    if (fdsa->ptrMap.isEmpty(ret->styles, &res) == fdsa_failed)
+    {
+        subfx_pError(errMsg, "AssParser::create: You should never see this line.");
+        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        return NULL;
+    }
+
+    if (!res) // res == 0
     {
         // set default style
-        ret->m_logger->writeErr("Warning: CANNOT find any style data "
-                                "in ass file.\n");
-        ret->m_logger->writeErr("Warning: Create default style.\n");
+        subfx_logger_writeErr(ret->logger,
+                              "Warning: CANNOT find any style data "
+                               "in ass file.\n");
+        subfx_logger_writeErr(ret->logger,
+                              "Warning: Create default style.\n");
 
-        std::shared_ptr<AssStyle> style(std::make_shared<AssStyle>());
-        ret->styleData["Default"] = style;
+        subfx_ass_style *style = reinterpret_cast<subfx_ass_style *>
+                (calloc(1, sizeof(subfx_ass_style)));
+        if (!style)
+        {
+            subfx_pError(errMsg, "AssParser::create: Fail to create default style.");
+            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            return NULL;
+        }
+
+        char *key = reinterpret_cast<char *>
+                (calloc(8, sizeof(char)));
+
+        if (!key)
+        {
+            free(style);
+            subfx_pError(errMsg, "AssParser::create: Fail to create default style.");
+            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            return NULL;
+        }
+
+        subfx_ass_style_init(style);
+        memcpy(key, "Default", 8);
+
+        if (fdsa->ptrMap.insertNode(ret->styles, key, style) == fdsa_failed)
+        {
+            subfx_pError(errMsg, "AssParser::create: You should never see this line.");
+            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            return NULL;
+        }
     }
 
     ret->section = Idle;
-    return std::shared_ptr<AssParser>(ret);
+    return reinterpret_cast<subfx_assParser *>(ret);
 }
 
-std::shared_ptr<AssMeta> AssParser::meta() const NOTHROW
+subfx_exitstate subfx_assParser_destory(subfx_assParser *in)
 {
-    return metaData;
+    if (!in) return subfx_failed;
+
+    fDSA *fdsa = getFDSA();
+    AssParser *parser = reinterpret_cast<AssParser *>(in);
+
+    if (parser->dialogs) fdsa->ptrVector.destory(parser->dialogs);
+    if (parser->logger) subfx_logger_destroy(parser->logger);
+    if (parser->styles) fdsa->ptrMap.destory(parser->styles);
+
+    free(parser);
+    return subfx_success;
 }
 
-std::map<std::string, std::shared_ptr<AssStyle>> AssParser::styles() const NOTHROW
+subfx_exitstate subfx_assParser_extendDialogs(subfx_assParser *in, char *errMsg)
 {
-    return styleData;
+    if (!in) return subfx_failed;
+    AssParser *parser = reinterpret_cast<AssParser *>(in);
+    if (parser->dialogParsed) return subfx_success;
+
+    return subfx_assParser_parseDialogs(parser, errMsg);
 }
 
-std::vector<std::shared_ptr<AssDialog>> AssParser::dialogs() const NOTHROW
+subfx_exitstate subfx_assParser_dialogIsExtended(subfx_assParser *in,
+                                                 bool *res)
 {
-    return dialogData;
+    if (!in || !res) return subfx_failed;
+    AssParser *parser = reinterpret_cast<AssParser *>(in);
+    *res = parser->dialogParsed;
+    return subfx_success;
 }
 
-void AssParser::extendDialogs() THROW
+void subfx_assParser_checkBom(AssParser *parser, uint8_t *in, size_t *inLen)
 {
-    if (dialogParsed)
+    if (*inLen < 3) return;
+
+    // utf-8 bom
+    if (in[0] != 0xef ||
+        in[1] != 0xbb ||
+        in[2] != 0xbf)
     {
         return;
     }
 
-    parseDialogs();
+    subfx_logger_writeErr(parser->logger, "Warning: Remove utf-8 bom.\n");
+    memmove(in, in + 3, *inLen - 2); // one more for '\0'
+    *inLen -= 3;
 }
 
-bool AssParser::dialogIsExtended() const NOTHROW
+uint8_t subfx_assParser_parseLine(AssParser *parser,
+                                  const char *line,
+                                  uint8_t *flags,
+                                  char *errMsg)
 {
-    return dialogParsed;
-}
-
-bool AssParser::isSylAvailable() const NOTHROW
-{
-    return sylReady;
-}
-
-bool AssParser::isWordAvailable() const NOTHROW
-{
-    return wordReady;
-}
-
-bool AssParser::isCharAvailable() const NOTHROW
-{
-    return charReady;
-}
-
-// private member functions
-std::string AssParser::checkBom(std::string &in) NOTHROW
-{
-    // utf-8 bom
-    if (static_cast<uint8_t>(in.at(0)) != 0xef ||
-        static_cast<uint8_t>(in.at(1)) != 0xbb ||
-        static_cast<uint8_t>(in.at(2)) != 0xbf)
-    {
-        return in;
-    }
-
-    m_logger->writeErr("Warning: Remove utf-8 bom.\n");
-    return in.substr(3);
-}
-
-void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
-{
+    fDSA *fdsa = getFDSA();
     if (regex_match(line, boost::regex("^\\[.*\\]$")))
     {
         // ass section mark
         // [XXX]
-        std::string res(line.substr(1, line.length() - 2));
-        if (res == "Script Info")
+        // if (res == "Script Info")
+        if (!strcmp(line, "[Script Info]"))
         {
             if (flags[Script_Info])
             {
-                throw std::invalid_argument("parseLine: Input is not a "
-                                            "valid ass file.");
+                subfx_pError(errMsg, "parseLine: Input is not a valid ass file.");
+                return 1;
             }
 
-            section = Script_Info;
+            parser->section = Script_Info;
             ++flags[Script_Info];
         }
-        else if (res == "V4+ Styles")
+        else if (!strcmp(line, "[V4+ Styles]"))
         {
             if (flags[V4_Styles])
             {
-                throw std::invalid_argument("parseLine: Input is not a "
-                                            "valid ass file.");
+                subfx_pError(errMsg,
+                             "parseLine: Input is not a valid ass file.");
+                return 1;
             }
 
-            section = V4_Styles;
+            parser->section = V4_Styles;
             ++flags[V4_Styles];
         }
-        else if (res == "Events")
+        else if (!strcmp(line, "[Events]"))
         {
             if (flags[Events])
             {
-                throw std::invalid_argument("parseLine: Input is not a "
-                                            "valid ass file.");
+                subfx_pError(errMsg,
+                             "parseLine: Input is not a valid ass file.");
+                return 1;
             }
 
-            section = Events;
+            parser->section = Events;
             ++flags[Events];
         }
 
-        return;
+        return 0;
     }
 
-    switch (section)
+    size_t lineLen = strlen(line);
+    switch (parser->section)
     {
     case Script_Info:
     {
@@ -247,48 +359,55 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         {
             try
             {
-                metaData->wrap_style = lexical_cast<uint8_t>(line.substr(11));
+                parser->meta.wrap_style = lexical_cast<uint8_t>(line + 11);
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("parseLine: Syntax error in\n"
-                       "\"Script info\" -> \"WrapStyle\"");
+                subfx_pError(errMsg,
+                             "parseLine: Syntax error in\n "
+                             "\"Script info\" -> \"WrapStyle\"");
+                return 1;
             }
         }
         else if (regex_match(line, boost::regex("^ScaledBorderAndShadow:"
                                                 " ([Yy]es|[Nn]o)$")))
         {
-            std::string res(line.substr(23));
-            metaData->scaled_border_and_shadow = (res == "Yes" || res == "yes");
+            std::string res(line+ 23);
+            parser->meta.scaled_border_and_shadow = (res == "Yes" ||
+                                                     res == "yes");
         }
         else if (regex_match(line, boost::regex("^PlayResX: \\d+$")))
         {
             try
             {
-                metaData->play_res_x = lexical_cast<uint16_t>(line.substr(10));
+                parser->meta.play_res_x = lexical_cast<uint16_t>(line + 10);
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("parseLine: Syntax error in\n"
-                       "\"Script info\" -> \"PlayResX\"");
+                subfx_pError(errMsg,
+                             "parseLine: Syntax error in\n"
+                             "\"Script info\" -> \"PlayResX\"");
+                return 1;
             }
         }
         else if (regex_match(line, boost::regex("^PlayResY: \\d+$")))
         {
             try
             {
-                metaData->play_res_y = lexical_cast<uint16_t>(line.substr(10));
+                parser->meta.play_res_y = lexical_cast<uint16_t>(line + 10);
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("parseLine: Syntax error in\n"
-                       "\"Script info\" -> \"PlayResY\"");
+                subfx_pError(errMsg,
+                             "parseLine: Syntax error in\n"
+                             "\"Script info\" -> \"PlayResY\"");
+                return 1;
             }
         }
         else if (regex_match(line, boost::regex("^YCbCr Matrix: (.*)")))
         {
-            std::string res(line.substr(14));
-            metaData->colorMatrix = res;
+            memcpy(parser->meta.colorMatrix, line + 14, lineLen - 14);
+            parser->meta.colorMatrix[lineLen - 14] = '\0';
         }
         break;
     }
@@ -303,7 +422,15 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         boost::smatch match;
         if(boost::u32regex_search(line, match, reg))
         {
-            std::shared_ptr<AssStyle> style(std::make_shared<AssStyle>());
+            subfx_ass_style *style = reinterpret_cast
+                    <subfx_ass_style *>
+                    (calloc(1, sizeof(subfx_ass_style)));
+            if (!style)
+            {
+                return 1;
+            }
+
+            subfx_ass_style_init(style);
             try
             {
                 style->encoding =
@@ -311,15 +438,20 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
             }
             catch (...)
             {
-                throw std::invalid_argument("parseLine: Error in parsing "
+                subfx_pError(errMsg, "parseLine: Error in parsing "
                                             "style's encoding.");
+                free(style);
+                return 1;
             }
 
             if (style->encoding <= 255)
             {
                 try
                 {
-                    style->fontname = match[2];
+                    memcpy(style->fontname,
+                           match[2].str().c_str(),
+                           match[2].str().length());
+
                     style->fontsize = lexical_cast<int>(match[3]);
 
                     // match[4~7] are not here
@@ -370,74 +502,181 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
                 }
                 catch (...)
                 {
-                    throw std::invalid_argument("parseLine: Error when parsing"
+                    subfx_pError(errMsg, "parseLine: Error when parsing"
                                                 " style.");
+                    free(style);
+                    return 1;
                 }
             }
 
-            std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> tmpTuple;
-            std::vector<uint8_t> tmpVector;
             std::string tmpString;
+            char buf1[64], buf2[64];
+            uint8_t buf1Size;
 
             // stringToColorAlpha may throw exception
             // but ignore here
             // color1 and alpha1
             tmpString = match[4];
-            tmpTuple = Ass::stringToColorAlpha(tmpString);
+            if (subfx_ass_stringToColorAlpha(tmpString.c_str(),
+                                             buf1,
+                                             &buf1Size,
+                                             errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
 
-            tmpVector.reserve(3);
-            tmpVector.push_back(std::get<0>(tmpTuple));
-            tmpVector.push_back(std::get<1>(tmpTuple));
-            tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color1 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
-            tmpVector.reserve(1);
-            tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha1 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        3,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->color1, buf2, strlen(buf2) + 1); // one more for '\0'
+
+            buf1[0] = buf1[3];
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        1,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->alpha1, buf2, strlen(buf2) + 1); // one more for '\0'
 
             // color2 and alpha2
             tmpString = match[5];
-            tmpTuple = Ass::stringToColorAlpha(tmpString);
-            tmpVector.reserve(3);
-            tmpVector.push_back(std::get<0>(tmpTuple));
-            tmpVector.push_back(std::get<1>(tmpTuple));
-            tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color2 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
-            tmpVector.reserve(1);
-            tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha2 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
+            if (subfx_ass_stringToColorAlpha(tmpString.c_str(),
+                                             buf1,
+                                             &buf1Size,
+                                             errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        3,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->color2, buf2, strlen(buf2) + 1); // one more for '\0'
+
+            buf1[0] = buf1[3];
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        1,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->alpha2, buf2, strlen(buf2) + 1); // one more for '\0'
 
             // color3 and alpha3
             tmpString = match[6];
-            tmpTuple = Ass::stringToColorAlpha(tmpString);
-            tmpVector.reserve(3);
-            tmpVector.push_back(std::get<0>(tmpTuple));
-            tmpVector.push_back(std::get<1>(tmpTuple));
-            tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color3 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
-            tmpVector.reserve(1);
-            tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha3 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
+            if (subfx_ass_stringToColorAlpha(tmpString.c_str(),
+                                             buf1,
+                                             &buf1Size,
+                                             errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        3,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->color3, buf2, strlen(buf2) + 1); // one more for '\0'
+
+            buf1[0] = buf1[3];
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        1,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->alpha3, buf2, strlen(buf2) + 1); // one more for '\0'
 
             // color4 and alpha4
             tmpString = match[7];
-            tmpTuple = Ass::stringToColorAlpha(tmpString);
-            tmpVector.reserve(3);
-            tmpVector.push_back(std::get<0>(tmpTuple));
-            tmpVector.push_back(std::get<1>(tmpTuple));
-            tmpVector.push_back(std::get<2>(tmpTuple));
-            style->color4 = Ass::colorAlphaToString(tmpVector);
-            tmpVector.clear();
-            tmpVector.reserve(1);
-            tmpVector.push_back(std::get<3>(tmpTuple));
-            style->alpha4 = Ass::colorAlphaToString(tmpVector);
+            if (subfx_ass_stringToColorAlpha(tmpString.c_str(),
+                                             buf1,
+                                             &buf1Size,
+                                             errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
 
-            styleData[match[1]] = style;
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        3,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->color4, buf2, strlen(buf2) + 1); // one more for '\0'
+
+            buf1[0] = buf1[3];
+            if (subfx_ass_colorAlphaToString(
+                        reinterpret_cast<uint8_t *>(buf1),
+                        1,
+                        buf2,
+                        errMsg) == subfx_failed)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(style->alpha4, buf2, strlen(buf2) + 1); // one more for '\0'
+
+            tmpString = match[1];
+            char *key = reinterpret_cast<char *>
+                    (calloc(tmpString.length() + 1, sizeof(char)));
+            if (!key)
+            {
+                free(style);
+                return 1;
+            }
+
+            memcpy(key, tmpString.c_str(), tmpString.length());
+            key[tmpString.length()] = '\0';
+
+            if (fdsa->ptrMap.insertNode(parser->styles, key, style) == fdsa_failed)
+            {
+                free(key);
+                free(style);
+                return 1;
+            }
         }
         break;
     }
@@ -452,10 +691,13 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         boost::smatch match;
         if(boost::u32regex_search(line, match, reg))
         {
-            std::shared_ptr<AssDialog> dialog(std::make_shared<AssDialog>());
+            subfx_ass_dialog *dialog = reinterpret_cast<subfx_ass_dialog *>
+                    (calloc(1, sizeof(subfx_ass_dialog)));
+            if (!dialog)
+            {
+                return 1;
+            }
 
-            // stringToMs may throw exception
-            // but ignore here
             try
             {
                 std::string tmpString = match[1];
@@ -465,13 +707,30 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
                 dialog->layer = lexical_cast<uint32_t>(tmpString);
 
                 tmpString = match[3];
-                dialog->start_time = Ass::stringToMs(tmpString);
+                if (subfx_ass_stringToMs(tmpString.c_str(),
+                                         &dialog->start_time,
+                                         errMsg) == subfx_failed)
+                {
+                    free(dialog);
+                    return 1;
+                }
 
                 tmpString = match[4];
-                dialog->end_time = Ass::stringToMs(tmpString);
+                if (subfx_ass_stringToMs(tmpString.c_str(),
+                                         &dialog->end_time,
+                                         errMsg) == subfx_failed)
+                {
+                    free(dialog);
+                    return 1;
+                }
 
-                dialog->style = match[5];
-                dialog->actor = match[6];
+                tmpString = match[5];
+                memcpy(dialog->style, tmpString.c_str(), tmpString.length());
+                dialog->style[tmpString.length()] = '\0';
+
+                tmpString = match[6];
+                memcpy(dialog->actor, tmpString.c_str(), tmpString.length());
+                dialog->actor[tmpString.length()] = '\0';
 
                 tmpString = match[7];
                 sscanf(tmpString.c_str(), "%lf", &(dialog->margin_l));
@@ -482,14 +741,25 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
                 tmpString = match[9];
                 sscanf(tmpString.c_str(), "%lf", &(dialog->margin_v));
 
-                dialog->effect = match[10];
-                dialog->text = match[11];
+                tmpString = match[10];
+                memcpy(dialog->effect, tmpString.c_str(), tmpString.length());
+                dialog->effect[tmpString.length()] = '\0';
 
-                dialogData.push_back(dialog);
+                tmpString = match[11];
+                memcpy(dialog->text, tmpString.c_str(), tmpString.length());
+                dialog->text[tmpString.length()] = '\0';
+
+                if (fdsa->ptrVector.pushBack(parser->dialogs, dialog) == fdsa_failed)
+                {
+                    free(dialog);
+                    return 1;
+                }
             }
             catch (const bad_lexical_cast &)
             {
-                throw std::invalid_argument("parseLine: Error when parsing dialog");
+                subfx_pError(errMsg, "parseLine: Error when parsing dialog");
+                free(dialog);
+                return 1;
             }
         }
         break;
@@ -499,28 +769,61 @@ void AssParser::parseLine(std::string &line, uint8_t *flags) THROW
         break;
     }
     }
+
+    return 0;
 }
 
-void AssParser::parseDialogs() THROW
+subfx_exitstate subfx_assParser_parseDialogs(AssParser *parser,
+                                             char *errMsg)
 {
     double space_width(0.);
-    for (size_t i = 0; i < dialogData.size(); ++i)
+    size_t dialogsSize;
+    fDSA *fdsa = getFDSA();
+    if (fdsa->ptrVector.size(parser->dialogs, &dialogsSize) == fdsa_failed)
     {
-        std::shared_ptr<AssDialog> dialog(dialogData.at(i));
+       subfx_pError(errMsg,
+                    "AssParser::parseDialogs: You should never see this line.");
+       return subfx_failed;
+    }
+
+    for (size_t i = 0; i < dialogsSize; ++i)
+    {
+        subfx_ass_dialog *dialog(
+                    reinterpret_cast<subfx_ass_dialog *>
+                    (fdsa->ptrVector.at(parser->dialogs, i)));
+
+        if (!dialog)
+        {
+            subfx_pError(errMsg,
+                         "AssParser::parseDialogs: You should never see this line.");
+            return subfx_failed;
+        }
+
         dialog->i = static_cast<uint32_t>(i);
         dialog->duration = dialog->end_time - dialog->start_time;
         dialog->mid_time = dialog->start_time + (dialog->duration >> 1);
-        dialog->styleref = styleData[dialog->style];
-        if (dialog->styleref == nullptr)
+        dialog->styleref = reinterpret_cast
+                <subfx_ass_style *>
+                (fdsa->ptrMap.at(parser->styles, dialog->style));
+        if (!dialog->styleref)
         {
             std::string out("Waring: dialog " + std::to_string(dialog->i));
             out += " fallback to default style.\n";
-            m_logger->writeErr(out);
-            dialog->styleref = std::make_shared<AssStyle>();
+            subfx_logger_writeErr(parser->logger, out.c_str());
+            dialog->styleref = reinterpret_cast<subfx_ass_style *>
+                    (calloc(1, sizeof(subfx_ass_style)));
+
+            if (!dialog->styleref)
+            {
+                subfx_pError(errMsg,
+                             "AssParser::parseDialogs: "
+                             "Fail to add default style.");
+                return subfx_failed;
+            }
         }
 
         dialog->text_stripped = regex_replace(
-            dialog->text,
+            &dialog->text,
             boost::regex("\\{[^\\{\\}]+\\}"),
             ""
         );
@@ -1161,6 +1464,45 @@ word_reference_found:
     }
 
     dialogParsed = true;
+    return subfx_success;
+}
+
+}; // end extern "C"
+
+/*
+
+#include <stdexcept>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+
+#include <cstdio>
+#include <cinttypes>
+
+#ifndef SCNd8
+#define SCNd8 "hhd"
+#endif
+#ifndef SCNu8
+#define SCNu8 "hhu"
+#endif
+
+using namespace PROJ_NAMESPACE::Yutils;
+
+void AssParser::extendDialogs() THROW
+{
+    if (dialogParsed)
+    {
+        return;
+    }
+
+    parseDialogs();
+}
+
+// private member functions
+
+void AssParser::parseDialogs() THROW
+{
+
 }
 
 std::shared_ptr<AssParser::TEXT_SIZE>
@@ -1209,3 +1551,4 @@ AssParser::textSize(std::string &text,
     ret->external_leading = tmpMap["external_leading"];
     return std::shared_ptr<AssParser::TEXT_SIZE>(ret);
 }
+*/

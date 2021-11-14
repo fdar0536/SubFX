@@ -39,6 +39,7 @@ int main()
     if (!text)
     {
         fputs("Fail to open file", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
@@ -74,6 +75,7 @@ int main()
             {
                 fputs(errMsg, stderr);
                 fclose(text);
+                SubFX_fin(&api);
                 return 1;
             }
 
@@ -87,6 +89,7 @@ int main()
                 }
 
                 fclose(text);
+                SubFX_fin(&api);
                 return 1;
             }
 
@@ -102,6 +105,7 @@ int main()
                     }
 
                     fclose(text);
+                    SubFX_fin(&api);
                     return 1;
                 }
 
@@ -112,6 +116,7 @@ int main()
             {
                 fputs("Fail to close handle", stderr);
                 fclose(text);
+                SubFX_fin(&api);
                 return 1;
             }
 
@@ -127,12 +132,14 @@ int main()
         {
             fputs(errMsg, stderr);
             fclose(text);
+            SubFX_fin(&api);
             return 1;
         }
         default:
         {
             fputs("You should NEVER see this line", stderr);
             fclose(text);
+            SubFX_fin(&api);
             return 1;
         }
         }
@@ -141,6 +148,7 @@ int main()
     }
 
     fclose(text);
+    SubFX_fin(&api);
 
     return 0;
 }

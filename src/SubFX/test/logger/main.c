@@ -59,17 +59,20 @@ int main()
     if (!logger)
     {
         fputs("Fail to create logger via create.", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
     if (testingLogger(loggerApi, logger))
     {
+        SubFX_fin(&api);
         return 1;
     }
 
     if (loggerApi->destory(logger) == subfx_failed)
     {
         fputs("Fail to close handle.", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
@@ -86,19 +89,23 @@ int main()
     if (!logger)
     {
         fputs("Fail to create logger via create2.", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
     if (testingLogger(loggerApi, logger))
     {
+        SubFX_fin(&api);
         return 1;
     }
 
     if (loggerApi->destory(logger) == subfx_failed)
     {
         fputs("Fail to close handle.", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
+    SubFX_fin(&api);
     return 0;
 }

@@ -19,6 +19,7 @@
 
 #pragma once
 
+// #include "internal/assparser.h"
 #include "internal/defines.h"
 #include "internal/logger.h"
 #include "internal/misc.h"
@@ -50,7 +51,6 @@ extern "C"
  */
 typedef struct SubFX
 {
-
     fDSA *fdsa;
 
     subfx_logger_api logger;
@@ -75,6 +75,8 @@ typedef struct SubFX
  * Initialize SubFX APIs.
  */
 SUBFX_API subfx_exitstate SubFX_init(SubFX *);
+
+SUBFX_API void SubFX_fin(SubFX *in);
 
 #ifdef __cplusplus
 }

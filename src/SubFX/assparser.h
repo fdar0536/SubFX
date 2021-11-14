@@ -19,6 +19,77 @@
 
 #pragma once
 
+#include "include/internal/assparser.h"
+#include "logger.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+typedef struct TEXT_SIZE
+{
+    double width;
+    double height;
+    double ascent;
+    double descent;
+    double internal_leading;
+    double external_leading;
+} TEXT_SIZE;
+
+typedef enum PARSER_SECTION
+{
+    Idle,
+    Script_Info,
+    V4_Styles,
+    Events
+} PARSER_SECTION;
+
+typedef struct AssParser
+{
+    subfx_ass_meta meta;
+
+    fdsa_ptrMap *styles;
+
+    fdsa_ptrVector *dialogs;
+
+    subfx_logger *logger;
+
+    PARSER_SECTION section;
+
+    bool dialogParsed;
+
+} AssParser;
+
+subfx_exitstate subfx_assParser_init(subfx_assParser *);
+
+subfx_assParser *subfx_assParser_create(const char *fileName,
+                                        const char *warningOut,
+                                        char *errMsg);
+
+subfx_exitstate subfx_assParser_destory(subfx_assParser *parser);
+
+subfx_exitstate subfx_assParser_extendDialogs(subfx_assParser *parser,
+                                              char *errMsg);
+
+subfx_exitstate subfx_assParser_dialogIsExtended(subfx_assParser *parser,
+                                                 bool *out);
+
+void subfx_assParser_checkBom(AssParser *, uint8_t *, size_t *);
+
+uint8_t subfx_assParser_parseLine(AssParser *,
+                                  const char *,
+                                  uint8_t *,
+                                  char *);
+
+subfx_exitstate subfx_assParser_parseDialogs(AssParser *,
+                                             char *);
+
+#ifdef __cplusplus
+}
+#endif
+
+/*
 #include <string>
 #include <vector>
 #include <map>
@@ -94,19 +165,7 @@ private:
 
     void parseLine(std::string &, uint8_t *flags) THROW;
 
-    std::shared_ptr<AssMeta> metaData;
-
-    std::map<std::string, std::shared_ptr<AssStyle>> styleData;
-
     bool dialogParsed;
-
-    std::vector<std::shared_ptr<AssDialog>> dialogData;
-
-    bool sylReady;
-
-    bool wordReady;
-
-    bool charReady;
 
     void parseDialogs() THROW;
 
@@ -126,3 +185,4 @@ private:
 } // end namespace Yutils
 
 } // end namespace PROJ_NAMESPACE
+*/

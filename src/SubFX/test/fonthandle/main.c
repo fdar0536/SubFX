@@ -56,6 +56,7 @@ int main()
     if (!handle)
     {
         puts("Fail in initializing.");
+        SubFX_fin(&subfx);
         return 1;
     }
 
@@ -121,5 +122,6 @@ error:
         ret = 1;
     }
 
+    SubFX_fin(&subfx);
     return ret;
 }

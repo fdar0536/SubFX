@@ -26,25 +26,23 @@
 #include "SubFX.h"
 
 #define StringToColorAlpha(x, y) \
-    x = ass->stringToColorAlpha(y, errMsg); \
-    if (!x) \
+    if (ass->stringToColorAlpha(y, x, &size, errMsg) == subfx_failed) \
     { \
         puts("Failed in testing stringToColorAlpha"); \
+        SubFX_fin(&api); \
         return 1; \
     } \
     printf("r: %d, g: %d, b: %d, a: %d\n", \
-           x[0], x[1], x[2], x[3]); \
-    free(x);
+           x[0], x[1], x[2], x[3]);
 
 #define ColorAlphaToString(x, y, z) \
-    x = ass->colorAlphaToString(y, z, errMsg); \
-    if (!x) \
+    if (ass->colorAlphaToString(y, z, x, errMsg) == subfx_failed) \
     { \
         puts("Failed in testing colorAlphaToString"); \
+        SubFX_fin(&api); \
         return 1; \
     } \
-    puts(x); \
-    free(x);
+    puts(x);
 
 int main()
 {
@@ -68,6 +66,7 @@ int main()
     if (ass->stringToMs(tmpString, &ms, errMsg) == subfx_failed)
     {
         puts("Failed in testing stringToMs");
+        SubFX_fin(&api);
         return 1;
     }
 
@@ -79,46 +78,42 @@ int main()
     printf("case 1's result is: %ld\n", ms);
 #endif
 
-    char *resString = ass->msToString(ms);
-    if (!resString)
+    uint8_t outBuf[128];
+
+    if (ass->msToString(ms, (char *)outBuf) == subfx_failed)
     {
         puts("Failed in testing msToString");
+        SubFX_fin(&api);
         return 1;
     }
 
-    printf("case 2's result is: %s\n", resString);
-    free(resString);
+    printf("case 2's result is: %s\n", outBuf);
 
-    uint8_t *res;
+    uint8_t size;
     sprintf(tmpString, "&H22&");
-    StringToColorAlpha(res, tmpString);
+    StringToColorAlpha(outBuf, tmpString);
     sprintf(tmpString, "&Ha9b8c7&");
-    StringToColorAlpha(res, tmpString);
+    StringToColorAlpha(outBuf, tmpString);
     sprintf(tmpString, "&HDA3255E6");
-    StringToColorAlpha(res, tmpString);
+    StringToColorAlpha(outBuf, tmpString);
 
-    res = calloc(4, sizeof(uint8_t));
-    if (!res)
-    {
-        puts("Fail to allocate memory");
-        return 1;
-    }
+    uint8_t res[4];
 
     res[0] = 49;
-    ColorAlphaToString(resString, res, 1);
+    ColorAlphaToString((char *)outBuf, res, 1);
 
     res[0] = 88;
     res[1] = 254;
     res[2] = 215;
-    ColorAlphaToString(resString, res, 3);
+    ColorAlphaToString((char *)outBuf, res, 3);
 
     res[0] = 143;
     res[1] = 35;
     res[2] = 78;
     res[3] = 236;
-    ColorAlphaToString(resString, res, 4);
+    ColorAlphaToString((char *)outBuf, res, 4);
 
+    SubFX_fin(&api);
     puts("All done!");
-    free(res);
     return 0;
 }

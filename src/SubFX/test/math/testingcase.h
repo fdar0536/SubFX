@@ -30,6 +30,8 @@ extern TestFunc testFunc[TESTING_CASES + 1];
 
 int testInit();
 
+void testFin();
+
 int testRotate2d();
 
 int testRadAndDeg();

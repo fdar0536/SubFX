@@ -28,16 +28,23 @@ extern "C"
 
 subfx_exitstate subfx_ass_init(subfx_ass_api *);
 
+void subfx_ass_fin();
+
 subfx_exitstate subfx_ass_stringToMs(const char *ass_ms,
-                                     uint64_t *dst,
+                                     uint64_t *output,
                                      char *errMsg);
 
-char *subfx_ass_msToString(uint64_t ms_ass);
+subfx_exitstate subfx_ass_msToString(uint64_t ms_ass, char *output);
 
-uint8_t *subfx_ass_stringToColorAlpha(const char *input, char *errMsg);
+subfx_exitstate subfx_ass_stringToColorAlpha(const char *input,
+                                             uint8_t *output,
+                                             uint8_t *outLen,
+                                             char *errMsg);
 
-char *subfx_ass_colorAlphaToString(uint8_t *input, size_t inputSize,
-                                   char *errMsg);
+subfx_exitstate subfx_ass_colorAlphaToString(uint8_t *input,
+                                             size_t inputSize,
+                                             char *output,
+                                             char *errMsg);
 
 #ifdef __cplusplus
 }

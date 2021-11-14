@@ -10,14 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GNUInstallDirs)
 
-find_package(Boost 1.69.0 REQUIRED COMPONENTS regex)
-if (UNIX)
-    find_package(ICU 64.2 REQUIRED COMPONENTS uc i18n)
-else () # windows
-    find_package(ICU 64.2 REQUIRED COMPONENTS uc in)
-endif (UNIX)
-
 find_package(fDSA 0.0.1 REQUIRED)
+find_package(PCRE2 REQUIRED)
 
 option(SUBFX_ENABLE_SIMD "Enable X86 SIMD, include SSE" ON)
 if(SUBFX_ENABLE_SIMD)

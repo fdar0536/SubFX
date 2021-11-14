@@ -1,6 +1,6 @@
 /*
 *    This file is part of SubFX,
-*    Copyright(C) 2019-2021 fdar0536.
+*    Copyright(C) 2019-2020 fdar0536.
 *
 *    SubFX is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU Lesser General Public License as
@@ -19,17 +19,37 @@
 
 #pragma once
 
-#include "include/internal/ass/data.h"
-#include "include/internal/defines.h"
+#include "defines.h"
+#include "ass/data.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-subfx_exitstate subfx_ass_meta_init(subfx_ass_meta *);
+typedef struct subfx_assParser
+{
+    subfx_ass_meta meta;
 
-subfx_exitstate subfx_ass_style_init(subfx_ass_style *);
+    fdsa_ptrMap *styles;
+
+    fdsa_ptrVector *dialogs;
+} subfx_assParser;
+
+typedef struct subfx_assParser_api
+{
+    subfx_assParser *(*create)(const char *fileName,
+                               const char *warningOut,
+                               char *errMsg);
+
+    subfx_exitstate (*destory)(subfx_assParser *parser);
+
+    subfx_exitstate (*extendDialogs)(subfx_assParser *parser,
+                                     char *errMsg);
+
+    subfx_exitstate (*dialogIsExtended)(subfx_assParser *parser, bool *out);
+
+} subfx_assParser_api;
 
 #ifdef __cplusplus
 }

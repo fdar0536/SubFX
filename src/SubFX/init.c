@@ -18,9 +18,11 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "include/SubFX.h"
 
+#include "ass.h"
 #include "global.h"
 #include "logger.h"
 #include "misc.h"
@@ -76,4 +78,12 @@ SUBFX_API subfx_exitstate SubFX_init(SubFX *ret)
     ret->fdsa = getFDSA();
     ret->version = subfx_version;
     return subfx_success;
+}
+
+SUBFX_API void SubFX_fin(SubFX *in)
+{
+    if (!in) return;
+
+    memset(in, 0, sizeof(SubFX));
+    subfx_ass_fin();
 }

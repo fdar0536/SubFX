@@ -24,8 +24,6 @@
 
 #include "fdsa/fdsa.h"
 
-#include "../defines.h"
-
 // reference: https://github.com/weizhenye/ASS/wiki/ASS-%E5%AD%97%E5%B9%95%E6%A0%BC%E5%BC%8F%E8%A7%84%E8%8C%83
 
 #ifdef __cplusplus
@@ -109,7 +107,7 @@ typedef struct subfx_ass_chunked
 
 typedef struct subfx_ass_syl
 {
-    subfx_ass_symbol;
+    subfx_ass_symbol
     char tags[SUBFX_ASS_CHUNKED_TEXT_SIZE];
     uint32_t prespace;
     uint32_t postspace;
@@ -117,22 +115,22 @@ typedef struct subfx_ass_syl
 
 typedef struct subfx_ass_word
 {
-    subfx_ass_symbol;
+    subfx_ass_symbol
     uint32_t prespace;
     uint32_t postspace;
 } subfx_ass_word;
 
 typedef struct subfx_ass_char
 {
-    subfx_ass_symbol;
+    subfx_ass_symbol
     int syl_i;
     int word_i;
 } subfx_ass_char;
 
 typedef struct subfx_ass_dialog
 {
-    subfx_ass_symbol;
-    subfx_ass_style styleref;
+    subfx_ass_symbol
+    subfx_ass_style *styleref;
     char text_stripped[SUBFX_ASS_CHUNKED_TEXT_SIZE];
     bool comment;
     uint32_t layer;

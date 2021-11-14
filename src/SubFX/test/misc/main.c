@@ -43,6 +43,7 @@ int main()
     if (!string)
     {
         fputs("Fail due to \"doubleToString\"", stderr);
+        SubFX_fin(&api);
         return 1;
     }
 
@@ -56,6 +57,7 @@ int main()
     {
         fputs("Fail to open file", stderr);
         free(string);
+        SubFX_fin(&api);
         return 1;
     }
 
@@ -83,6 +85,7 @@ int main()
             fputs(errMsg, stderr);
             fclose(ass);
             free(string);
+            SubFX_fin(&api);
             return 1;
         }
         default:
@@ -90,6 +93,7 @@ int main()
             fputs("You should NEVER see this line", stderr);
             fclose(ass);
             free(string);
+            SubFX_fin(&api);
             return 1;
         }
         }
@@ -100,6 +104,7 @@ int main()
     // clean up
     fclose(ass);
     free(string);
+    SubFX_fin(&api);
 
     return 0;
 }

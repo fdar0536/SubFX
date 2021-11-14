@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "include/internal/defines.h"
 #include "include/internal/logger.h"
 
 #ifdef __cplusplus

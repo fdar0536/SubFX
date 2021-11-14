@@ -64,6 +64,11 @@ int testInit()
     return 0;
 }
 
+void testFin()
+{
+    SubFX_fin(&subfx);
+}
+
 int testRotate2d()
 {
     puts("Testing rotate2d");
