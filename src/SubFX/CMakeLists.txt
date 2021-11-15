@@ -38,13 +38,14 @@ set(subfx_headers
 
     include/internal/ass.h
     include/internal/ass/data.h
-    # include/internal/assparser.h
+    include/internal/assparser.h
     include/internal/fonthandle.h
 )
 
 set(subfx_priv_headers
     SubFX/common.h
     SubFX/global.h
+    SubFX/mutex.h
     SubFX/regex.h
     SubFX/subfx.h
     SubFX/logger.h
@@ -53,8 +54,10 @@ set(subfx_priv_headers
     SubFX/utf8.h
 
     SubFX/ass.h
+    SubFX/assregex.h
     SubFX/ass/data.h
-    # SubFX/assparser.h
+    SubFX/assparser.h
+    SubFX/assparserregex.h
     SubFX/fonthandle.h
 
     ${CMAKE_BINARY_DIR}/config.h
@@ -67,13 +70,14 @@ set(subfx_src
     SubFX/logger.c
     SubFX/init.c
     SubFX/misc.c
+    SubFX/mutex.c
     SubFX/regex.c
     SubFX/smath.c
     SubFX/utf8.c
 
     SubFX/ass.c
     SubFX/ass/data.c
-    # SubFX/assparser.cpp
+    SubFX/assparser.c
     SubFX/fonthandle.c
 )
 

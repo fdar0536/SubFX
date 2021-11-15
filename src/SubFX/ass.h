@@ -30,6 +30,8 @@ subfx_exitstate subfx_ass_init(subfx_ass_api *);
 
 void subfx_ass_fin();
 
+uint8_t subfx_ass_regexInit();
+
 subfx_exitstate subfx_ass_stringToMs(const char *ass_ms,
                                      uint64_t *output,
                                      char *errMsg);

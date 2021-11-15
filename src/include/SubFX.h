@@ -19,7 +19,7 @@
 
 #pragma once
 
-// #include "internal/assparser.h"
+#include "internal/assparser.h"
 #include "internal/defines.h"
 #include "internal/logger.h"
 #include "internal/misc.h"

@@ -17,33 +17,31 @@
 *    <http://www.gnu.org/licenses/>.
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#include "boost/lexical_cast.hpp"
-#include "boost/regex.hpp"
-#include "boost/regex/icu.hpp"
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "ass/data.h"
 #include "ass.h"
 #include "assparser.h"
+#include "assparserregex.h"
 #include "common.h"
 #include "global.h"
 #include "misc.h"
+#include "regex.h"
 
-extern "C"
-{
+#define SUBSTRING_LEN 8192
+static PCRE2_UCHAR subStr[SUBSTRING_LEN];
+static PCRE2_SIZE subStrLen = SUBSTRING_LEN;
+
+static Regex subfx_assParser_regex[REGEX_COUNT] = {0};
 
 static void destoryDialogs(void *in)
 {
     if (!in) return;
 
     fDSA *fdsa = getFDSA();
-    subfx_ass_dialog *dialog = reinterpret_cast<subfx_ass_dialog *>(in);
+    subfx_ass_dialog *dialog = (subfx_ass_dialog *)in;
 
     if (dialog->textChunked) fdsa->ptrVector.destory(dialog->textChunked);
     if (dialog->syls) fdsa->ptrVector.destory(dialog->syls);
@@ -64,8 +62,93 @@ static int myStrcmp(const void *lhs, const void *rhs)
     else if (lhs && !rhs) return 1;
     else if (!lhs && rhs) return -1;
 
-    return strcmp(reinterpret_cast<const char *>(lhs),
-                  reinterpret_cast<const char *>(rhs));
+    return strcmp((const char *)lhs,
+                  (const char *)rhs);
+}
+
+subfx_exitstate subfx_assParser_init(subfx_assParser_api *ret)
+{
+    if (!ret) return subfx_failed;
+
+    subfx_assParser_fin();
+
+    if (subfx_assParser_parseLineRegexInit())
+    {
+        subfx_assParser_fin();
+        return subfx_failed;
+    }
+
+    ret->create = subfx_assParser_create;
+    ret->destory = subfx_assParser_destory;
+    ret->dialogIsExtended = subfx_assParser_dialogIsExtended;
+    ret->extendDialogs = subfx_assParser_extendDialogs;
+
+    return subfx_success;
+}
+
+void subfx_assParser_fin()
+{
+    int index;
+    for (index = 0; index < REGEX_COUNT; ++index)
+    {
+        RegexData_fin(&subfx_assParser_regex[index]);
+    }
+
+    memset(subfx_assParser_regex, 0, REGEX_COUNT * sizeof(Regex));
+}
+
+uint8_t subfx_assParser_parseLineRegexInit()
+{
+    subfx_assParser_fin();
+    if (RegexData_init(&subfx_assParser_regex[REGEX_ASS_SECION_MARK],
+                       REGEX_STR_ASS_SECION_MARK))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_WRAP_STYLE],
+                       REGEX_STR_WRAP_STYLE))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_SCALED_BORDER_AND_SHADOW],
+                       REGEX_STR_SCALED_BORDER_AND_SHADOW))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_PLAY_RES_X],
+                       REGEX_STR_PLAY_RES_X))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_PLAY_RES_Y],
+                       REGEX_STR_PLAY_RES_Y))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_YCBCR_MATRIX],
+                       REGEX_STR_YCBCR_MATRIX))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_V4_STYLES],
+                       REGEX_STR_V4_STYLES))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_assParser_regex[REGEX_EVENTS],
+                       REGEX_STR_EVENTS))
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 subfx_assParser *subfx_assParser_create(const char *fileName,
@@ -80,7 +163,7 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
         return NULL;
     }
 
-    AssParser *ret(reinterpret_cast<AssParser*>(calloc(1, sizeof(AssParser))));
+    AssParser *ret = calloc(1, sizeof(AssParser));
     if (!ret)
     {
         fclose(assFile);
@@ -99,7 +182,7 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
     if (!ret->logger)
     {
         fclose(assFile);
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
@@ -108,14 +191,14 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
     if (!ret->dialogs)
     {
         fclose(assFile);
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
     if (fdsa->ptrVector.reserve(ret->dialogs, 1000) == fdsa_failed)
     {
         fclose(assFile);
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
@@ -123,13 +206,13 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
     if (!ret->styles)
     {
         fclose(assFile);
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
     subfx_ass_meta_init(&ret->meta);
     char tmpString[65536];
-    uint8_t flag(1);
+    uint8_t flag = 1;
     uint8_t flags[] = {0, 0, 0, 0};
     subfx_exitstate exitstate;
     while(1)
@@ -139,7 +222,7 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
         else if (exitstate == subfx_failed)
         {
             fclose(assFile);
-            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            subfx_assParser_destory((subfx_assParser *)ret);
             return NULL;
         }
 
@@ -152,20 +235,20 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
                 subfx_pError(errMsg, "assParser_create: Is input "
                                      "an empty file?");
                 fclose(assFile);
-                subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+                subfx_assParser_destory((subfx_assParser *)ret);
                 return NULL;
             }
 
             flag = 0;
             subfx_assParser_checkBom(ret,
-                                     reinterpret_cast<uint8_t *>(tmpString),
+                                     (uint8_t *)tmpString,
                                      &len);
         }
 
         if (subfx_assParser_parseLine(ret, tmpString, flags, errMsg))
         {
             fclose(assFile);
-            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            subfx_assParser_destory((subfx_assParser *)ret);
             return NULL;
         }
     }
@@ -177,13 +260,13 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
     if (fdsa->ptrVector.size(ret->dialogs, &size) == fdsa_failed)
     {
         subfx_pError(errMsg, "AssParser::create: You should never see this line.");
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
     if (!size) // size == 0
     {
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         subfx_pError(errMsg, "AssParser::create: This ass file has no "
                                     "dialog data.");
         return NULL;
@@ -202,7 +285,7 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
     if (fdsa->ptrMap.isEmpty(ret->styles, &res) == fdsa_failed)
     {
         subfx_pError(errMsg, "AssParser::create: You should never see this line.");
-        subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+        subfx_assParser_destory((subfx_assParser *)ret);
         return NULL;
     }
 
@@ -215,23 +298,21 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
         subfx_logger_writeErr(ret->logger,
                               "Warning: Create default style.\n");
 
-        subfx_ass_style *style = reinterpret_cast<subfx_ass_style *>
-                (calloc(1, sizeof(subfx_ass_style)));
+        subfx_ass_style *style = calloc(1, sizeof(subfx_ass_style));
         if (!style)
         {
             subfx_pError(errMsg, "AssParser::create: Fail to create default style.");
-            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            subfx_assParser_destory((subfx_assParser *)ret);
             return NULL;
         }
 
-        char *key = reinterpret_cast<char *>
-                (calloc(8, sizeof(char)));
+        char *key = calloc(8, sizeof(char));
 
         if (!key)
         {
             free(style);
             subfx_pError(errMsg, "AssParser::create: Fail to create default style.");
-            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            subfx_assParser_destory((subfx_assParser *)ret);
             return NULL;
         }
 
@@ -241,13 +322,13 @@ subfx_assParser *subfx_assParser_create(const char *fileName,
         if (fdsa->ptrMap.insertNode(ret->styles, key, style) == fdsa_failed)
         {
             subfx_pError(errMsg, "AssParser::create: You should never see this line.");
-            subfx_assParser_destory(reinterpret_cast<subfx_assParser *>(ret));
+            subfx_assParser_destory((subfx_assParser *)ret);
             return NULL;
         }
     }
 
     ret->section = Idle;
-    return reinterpret_cast<subfx_assParser *>(ret);
+    return (subfx_assParser *)ret;
 }
 
 subfx_exitstate subfx_assParser_destory(subfx_assParser *in)
@@ -255,7 +336,7 @@ subfx_exitstate subfx_assParser_destory(subfx_assParser *in)
     if (!in) return subfx_failed;
 
     fDSA *fdsa = getFDSA();
-    AssParser *parser = reinterpret_cast<AssParser *>(in);
+    AssParser *parser = (AssParser *)in;
 
     if (parser->dialogs) fdsa->ptrVector.destory(parser->dialogs);
     if (parser->logger) subfx_logger_destroy(parser->logger);
@@ -268,7 +349,7 @@ subfx_exitstate subfx_assParser_destory(subfx_assParser *in)
 subfx_exitstate subfx_assParser_extendDialogs(subfx_assParser *in, char *errMsg)
 {
     if (!in) return subfx_failed;
-    AssParser *parser = reinterpret_cast<AssParser *>(in);
+    AssParser *parser = (AssParser *)in;
     if (parser->dialogParsed) return subfx_success;
 
     return subfx_assParser_parseDialogs(parser, errMsg);
@@ -278,7 +359,7 @@ subfx_exitstate subfx_assParser_dialogIsExtended(subfx_assParser *in,
                                                  bool *res)
 {
     if (!in || !res) return subfx_failed;
-    AssParser *parser = reinterpret_cast<AssParser *>(in);
+    AssParser *parser = (AssParser *)in;
     *res = parser->dialogParsed;
     return subfx_success;
 }
@@ -306,7 +387,10 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
                                   char *errMsg)
 {
     fDSA *fdsa = getFDSA();
-    if (regex_match(line, boost::regex("^\\[.*\\]$")))
+    int pcreRet;
+    if (!RegexData_match(&subfx_assParser_regex[REGEX_ASS_SECION_MARK],
+                         line,
+                         &pcreRet))
     {
         // ass section mark
         // [XXX]
@@ -355,13 +439,11 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
     {
     case Script_Info:
     {
-        if (regex_match(line, boost::regex("^WrapStyle: \\d$")))
+        if (RegexData_match(&subfx_assParser_regex[REGEX_WRAP_STYLE],
+                            line,
+                            &pcreRet))
         {
-            try
-            {
-                parser->meta.wrap_style = lexical_cast<uint8_t>(line + 11);
-            }
-            catch (const bad_lexical_cast &)
+            if (sscanf(line, "WrapStyle: %s", &parser->meta.wrap_style) != 1)
             {
                 subfx_pError(errMsg,
                              "parseLine: Syntax error in\n "
@@ -369,20 +451,22 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
                 return 1;
             }
         }
-        else if (regex_match(line, boost::regex("^ScaledBorderAndShadow:"
-                                                " ([Yy]es|[Nn]o)$")))
+        else if (RegexData_match(
+                     &subfx_assParser_regex[REGEX_SCALED_BORDER_AND_SHADOW],
+                     line,
+                     &pcreRet))
         {
-            std::string res(line+ 23);
-            parser->meta.scaled_border_and_shadow = (res == "Yes" ||
-                                                     res == "yes");
+            // std::string res(line+ 23);
+            parser->meta.scaled_border_and_shadow =
+                    (!strcmp(line + 23, "Yes") ||
+                     !strcmp(line + 23, "yes"));
         }
-        else if (regex_match(line, boost::regex("^PlayResX: \\d+$")))
+        else if (RegexData_match(
+                     &subfx_assParser_regex[REGEX_PLAY_RES_X],
+                     line,
+                     &pcreRet))
         {
-            try
-            {
-                parser->meta.play_res_x = lexical_cast<uint16_t>(line + 10);
-            }
-            catch (const bad_lexical_cast &)
+            if (sscanf(line, "PlayResX: %hd", &parser->meta.play_res_x) != 1)
             {
                 subfx_pError(errMsg,
                              "parseLine: Syntax error in\n"
@@ -390,13 +474,12 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
                 return 1;
             }
         }
-        else if (regex_match(line, boost::regex("^PlayResY: \\d+$")))
+        else if (RegexData_match(
+                     &subfx_assParser_regex[REGEX_PLAY_RES_Y],
+                     line,
+                     &pcreRet))
         {
-            try
-            {
-                parser->meta.play_res_y = lexical_cast<uint16_t>(line + 10);
-            }
-            catch (const bad_lexical_cast &)
+            if (sscanf(line, "PlayResY: %hd", &parser->meta.play_res_y) != 1)
             {
                 subfx_pError(errMsg,
                              "parseLine: Syntax error in\n"
@@ -404,7 +487,10 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
                 return 1;
             }
         }
-        else if (regex_match(line, boost::regex("^YCbCr Matrix: (.*)")))
+        else if (RegexData_match(
+                     &subfx_assParser_regex[REGEX_YCBCR_MATRIX],
+                     line,
+                     &pcreRet))
         {
             memcpy(parser->meta.colorMatrix, line + 14, lineLen - 14);
             parser->meta.colorMatrix[lineLen - 14] = '\0';
@@ -413,6 +499,7 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
     }
     case V4_Styles:
     {
+        /*
         boost::u32regex reg(boost::make_u32regex(
             "^Style: (.*),(.*),(\\d+),(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),"
             "(&H[0-9A-F]{8}),(&H[0-9A-F]{8}),(-?[01]),(-?[01]),(-?[01]),"
@@ -420,17 +507,31 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
             "(-?\\d+\\.?\\d*),([13]),(\\d+\\.?\\d*),(\\d+\\.?\\d*),([1-9]),"
             "(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+\\.?\\d*),(\\d+)$"));
         boost::smatch match;
+        */
+
+        if (!RegexData_match(
+                &subfx_assParser_regex[REGEX_V4_STYLES],
+                line,
+                &pcreRet))
+        {
+            break;
+        }
+
+        subfx_ass_style *style = calloc(1, sizeof(subfx_ass_style));
+        if (!style)
+        {
+            return 1;
+        }
+
+        subfx_ass_style_init(style);
+
+
+        break;
+
+        /*
+
         if(boost::u32regex_search(line, match, reg))
         {
-            subfx_ass_style *style = reinterpret_cast
-                    <subfx_ass_style *>
-                    (calloc(1, sizeof(subfx_ass_style)));
-            if (!style)
-            {
-                return 1;
-            }
-
-            subfx_ass_style_init(style);
             try
             {
                 style->encoding =
@@ -679,6 +780,7 @@ uint8_t subfx_assParser_parseLine(AssParser *parser,
             }
         }
         break;
+        */
     }
     case Events:
     {
@@ -1466,8 +1568,6 @@ word_reference_found:
     dialogParsed = true;
     return subfx_success;
 }
-
-}; // end extern "C"
 
 /*
 

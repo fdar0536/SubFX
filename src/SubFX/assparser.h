@@ -61,7 +61,11 @@ typedef struct AssParser
 
 } AssParser;
 
-subfx_exitstate subfx_assParser_init(subfx_assParser *);
+subfx_exitstate subfx_assParser_init(subfx_assParser_api *);
+
+void subfx_assParser_fin();
+
+uint8_t subfx_assParser_parseLineRegexInit();
 
 subfx_assParser *subfx_assParser_create(const char *fileName,
                                         const char *warningOut,

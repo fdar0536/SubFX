@@ -1,10 +1,29 @@
+/*
+*    This file is part of SubFX,
+*    Copyright(C) 2019-2021 fdar0536.
+*
+*    SubFX is free software: you can redistribute it and/or modify
+*    it under the terms of the GNU Lesser General Public License as
+*    published by the Free Software Foundation, either version 2.1
+*    of the License, or (at your option) any later version.
+*
+*    SubFX is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*    GNU Lesser General Public License for more details.
+*
+*    You should have received a copy of the GNU Lesser General
+*    Public License along with SubFX. If not, see
+*    <http://www.gnu.org/licenses/>.
+*/
+
 #include <stdio.h>
 #include <string.h>
 
 #include "regex.h"
 #include "common.h"
 
-uint8_t RegexData_init(RegexData *in, const char *pattern)
+uint8_t RegexData_init(Regex *in, const char *pattern)
 {
     if (!in || !pattern) return 1;
 
@@ -70,7 +89,7 @@ uint8_t RegexData_init(RegexData *in, const char *pattern)
     return 0;
 }
 
-void RegexData_fin(RegexData *in)
+void RegexData_fin(Regex *in)
 {
     if (!in) return;
     if (in->regex) pcre2_code_free(in->regex);
@@ -79,13 +98,13 @@ void RegexData_fin(RegexData *in)
     if (in->jitStack) pcre2_jit_stack_free(in->jitStack);
 }
 
-uint8_t RegexData_match(RegexData *data,
-                        const char *in,
-                        int *ret)
+bool RegexData_match(Regex *data,
+                     const char *in,
+                     int *ret)
 {
     if (!data || !in || !ret)
     {
-        return 1;
+        return false;
     }
 
     *ret = pcre2_jit_match(data->regex,
@@ -99,20 +118,20 @@ uint8_t RegexData_match(RegexData *data,
     PCRE2_UCHAR errBuf[256];
     if (*ret < 0 && *ret == PCRE2_ERROR_NOMATCH)
     {
-        return 1;
+        return false;
     }
     else if (*ret == 0)
     {
         puts("RegexData_match: No enough match data buffer");
-        return 1;
+        return false;
     }
     else if (*ret < 0 && *ret != PCRE2_ERROR_NOMATCH)
     {
         pcre2_get_error_message(*ret, errBuf, sizeof(errBuf));
         puts((char *)errBuf);
-        return 1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 

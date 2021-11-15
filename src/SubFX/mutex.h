@@ -19,29 +19,35 @@
 
 #pragma once
 
-#include <stdbool.h>
+#include <inttypes.h>
 
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include "pcre2.h"
+#ifdef _WIN32
+#include "windows.h"
+#else
+#include "pthread.h"
+#endif
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct Regex
+typedef struct Mutex
 {
-    pcre2_code *regex;
-    pcre2_match_data *matchData;
-    pcre2_match_context *matchContext;
-    pcre2_jit_stack *jitStack;
-} Regex;
+#ifdef _WIN32
+    HANDLE handle;
+#else
+    pthread_mutex_t handle;
+#endif
+} Mutex;
 
-uint8_t RegexData_init(Regex *, const char *);
+uint8_t Mutex_init(Mutex *);
 
-void RegexData_fin(Regex *);
+void Mutex_fin(Mutex *);
 
-bool RegexData_match(Regex *, const char *, int *);
+uint8_t Mutex_lock(Mutex *);
+
+uint8_t Mutex_unlock(Mutex *);
 
 #ifdef __cplusplus
 }

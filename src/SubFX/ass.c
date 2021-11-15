@@ -23,17 +23,14 @@
 #include <string.h>
 
 #include "common.h"
+#include "mutex.h"
 #include "regex.h"
 #include "ass.h"
+#include "assregex.h"
 
-// static data for regex
-#define REGEX_COUNT           4
-#define REGEX_STRING_TO_MS    0
-#define REGEX_APLHA_ONLY      1
-#define REGEX_ASS_COLOR       2
-#define REGEX_ASS_ALPHA_COLOR 3
+static Regex subfx_ass_regex[REGEX_COUNT] = {0};
 
-static RegexData subfx_ass_regex[REGEX_COUNT] = {0};
+static Mutex subfx_ass_mutex;
 
 subfx_exitstate subfx_ass_init(subfx_ass_api *ret)
 {
@@ -42,32 +39,14 @@ subfx_exitstate subfx_ass_init(subfx_ass_api *ret)
         return subfx_failed;
     }
 
-    // fill static arrays
-    subfx_ass_fin();
-
-    if (RegexData_init(&subfx_ass_regex[REGEX_STRING_TO_MS],
-                       "^\\d:\\d\\d:\\d\\d\\.\\d\\d$"))
+    memset(&subfx_ass_mutex, 0, sizeof(Mutex));
+    if (subfx_ass_regexInit())
     {
         subfx_ass_fin();
         return subfx_failed;
     }
 
-    if (RegexData_init(&subfx_ass_regex[REGEX_APLHA_ONLY],
-                       "^&[Hh]{1}[0-9a-fA-F]{2}&$"))
-    {
-        subfx_ass_fin();
-        return subfx_failed;
-    }
-
-    if (RegexData_init(&subfx_ass_regex[REGEX_ASS_COLOR],
-                       "^&[Hh]{1}[0-9a-fA-F]{6}&$"))
-    {
-        subfx_ass_fin();
-        return subfx_failed;
-    }
-
-    if (RegexData_init(&subfx_ass_regex[REGEX_ASS_ALPHA_COLOR],
-                       "^&[Hh]{1}[0-9a-fA-F]{8}$"))
+    if (Mutex_init(&subfx_ass_mutex))
     {
         subfx_ass_fin();
         return subfx_failed;
@@ -89,7 +68,39 @@ void subfx_ass_fin()
         RegexData_fin(&subfx_ass_regex[index]);
     }
 
-    memset(subfx_ass_regex, 0, REGEX_COUNT * sizeof(RegexData));
+    memset(subfx_ass_regex, 0, REGEX_COUNT * sizeof(Regex));
+    Mutex_fin(&subfx_ass_mutex);
+}
+
+uint8_t subfx_ass_regexInit()
+{
+    subfx_ass_fin();
+
+    if (RegexData_init(&subfx_ass_regex[REGEX_STRING_TO_MS],
+                       REGEX_STR_STRING_TO_MS))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_ass_regex[REGEX_APLHA_ONLY],
+                       REGEX_STR_APLHA_ONLY))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_ass_regex[REGEX_ASS_COLOR],
+                       REGEX_STR_ASS_COLOR))
+    {
+        return 1;
+    }
+
+    if (RegexData_init(&subfx_ass_regex[REGEX_ASS_ALPHA_COLOR],
+                       REGEX_STR_ASS_ALPHA_COLOR))
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 subfx_exitstate subfx_ass_stringToMs(const char *in,
@@ -102,11 +113,17 @@ subfx_exitstate subfx_ass_stringToMs(const char *in,
         return subfx_failed;
     }
 
-    int pcre2Ret;
-    if (RegexData_match(&subfx_ass_regex[REGEX_STRING_TO_MS],
-                        in,
-                        &pcre2Ret))
+    if (Mutex_lock(&subfx_ass_mutex))
     {
+        return subfx_failed;
+    }
+
+    int pcre2Ret;
+    if (!RegexData_match(&subfx_ass_regex[REGEX_STRING_TO_MS],
+                         in,
+                         &pcre2Ret))
+    {
+        Mutex_unlock(&subfx_ass_mutex);
         subfx_pError(errMsg, "stringToMs: ASS timestamp expected");
         return subfx_failed;
     }
@@ -114,6 +131,7 @@ subfx_exitstate subfx_ass_stringToMs(const char *in,
     uint64_t hr, min, sec, centisec;
     if (sscanf(in, "%llu:%llu:%llu.%llu", &hr, &min, &sec, &centisec) != 4)
     {
+        Mutex_unlock(&subfx_ass_mutex);
         subfx_pError(errMsg, "stringToMs: Cannot convert!");
         return subfx_failed;
     }
@@ -124,6 +142,7 @@ subfx_exitstate subfx_ass_stringToMs(const char *in,
     *dst += sec * 1000;
     *dst += centisec * 10;
 
+    Mutex_unlock(&subfx_ass_mutex);
     return subfx_success;
 }
 
@@ -153,13 +172,18 @@ subfx_exitstate subfx_ass_stringToColorAlpha(const char *in,
         return subfx_failed;
     }
 
+    if (Mutex_lock(&subfx_ass_mutex))
+    {
+        return subfx_failed;
+    }
+
     uint8_t r = 0, g = 0, b = 0, a = 0;
     int pcre2Ret;
     char hexString[8] = {0};
     memcpy(hexString, "0x", 2);
-    if (!RegexData_match(&subfx_ass_regex[REGEX_APLHA_ONLY],
-                         in,
-                         &pcre2Ret))
+    if (RegexData_match(&subfx_ass_regex[REGEX_APLHA_ONLY],
+                        in,
+                        &pcre2Ret))
     {
         // alpha only &HAA&
         memcpy(hexString + 2, in + 2, 2);
@@ -167,9 +191,9 @@ subfx_exitstate subfx_ass_stringToColorAlpha(const char *in,
 
         *retLen = 1;
     }
-    else if (!RegexData_match(&subfx_ass_regex[REGEX_ASS_COLOR],
-                              in,
-                              &pcre2Ret))
+    else if (RegexData_match(&subfx_ass_regex[REGEX_ASS_COLOR],
+                             in,
+                             &pcre2Ret))
     {
         // ass color &HBBGGRR&
         memcpy(hexString + 2, in + 2, 2);
@@ -183,9 +207,9 @@ subfx_exitstate subfx_ass_stringToColorAlpha(const char *in,
 
         *retLen = 3;
     }
-    else if (!RegexData_match(&subfx_ass_regex[REGEX_ASS_ALPHA_COLOR],
-                              in,
-                              &pcre2Ret))
+    else if (RegexData_match(&subfx_ass_regex[REGEX_ASS_ALPHA_COLOR],
+                             in,
+                             &pcre2Ret))
     {
         // both &HAABBGGRR
         memcpy(hexString + 2, in + 2, 2);
@@ -204,6 +228,7 @@ subfx_exitstate subfx_ass_stringToColorAlpha(const char *in,
     }
     else
     {
+        Mutex_unlock(&subfx_ass_mutex);
         subfx_pError(errMsg, "stringToColorAlpha: Invalid input");
         *retLen = 0;
         return subfx_failed;
@@ -214,6 +239,7 @@ subfx_exitstate subfx_ass_stringToColorAlpha(const char *in,
     ret[2] = b;
     ret[3] = a;
 
+    Mutex_unlock(&subfx_ass_mutex);
     return subfx_success;
 }
 
